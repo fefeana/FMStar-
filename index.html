@@ -3,89 +3,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMStar - Secure App</title>
+    <title>FMSTAR - AI Creative Studio</title>
 
-    <!-- 0. سكريبت إعادة التوجيه الإجباري إلى HTTPS -->
+    <!-- 0. إعادة التوجيه الإجباري لـ HTTPS -->
     <script>
         if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
             window.location.href = window.location.href.replace('http:', 'https:');
         }
     </script>
 
-    <!-- 1 & 2. سياسة أمان المحتوى (CSP) مع ترقية الطلبات لـ HTTPS ومنع التجسس -->
-    <meta http-equiv="Content-Security-Policy" 
-          content="upgrade-insecure-requests; default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:;">
-
-    <!-- 3. حماية الموقع من التضمين داخل إطارات وهمية (Anti-Clickjacking) -->
+    <!-- 1. سياسات الأمان والحماية (CSP / Frame Options / Referrer) -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; default-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;">
     <meta http-equiv="X-Frame-Options" content="DENY">
-
-    <!-- 4. حماية البيانات المرجعية لمنع تسريب الروابط والمعلومات (Referrer Policy) -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
-
-    <!-- 5. منع المتصفح من تخمين نوع الملفات لحماية الموقع من الثغرات (X-Content-Type-Options) -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-
-    <!-- 6. تعطيل وصول الموقع للكاميرا والميكروفون والموقع الجغرافي لحماية الخصوصية -->
     <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 
+    <!-- خطوط خارجية وعرض الأيقونات -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
+
     <style>
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
+        :root {
+            --bg-color: #050816;
+            --neon-purple: #A855F7;
+            --electric-blue: #00D4FF;
+            --pink-neon: #FF4FD8;
+            --gold-accent: #FFD700;
+            --card-bg: rgba(22, 27, 34, 0.75);
+            --border-glow: rgba(168, 85, 247, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffffff;
+            font-family: 'Tajawal', sans-serif;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
+            overflow-x: hidden;
+            position: relative;
         }
-        .card {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 500px;
+
+        /* خلفية السحاب الضوئي الفضائي */
+        .space-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.35;
+            animation: pulseGlow 8s infinite alternate ease-in-out;
+        }
+
+        .glow-purple {
+            width: 350px;
+            height: 350px;
+            background: var(--neon-purple);
+            top: 15%;
+            left: 20%;
+        }
+
+        .glow-blue {
+            width: 400px;
+            height: 400px;
+            background: var(--electric-blue);
+            bottom: 10%;
+            right: 15%;
+            animation-delay: -3s;
+        }
+
+        .glow-pink {
+            width: 300px;
+            height: 300px;
+            background: var(--pink-neon);
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -5s;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.25; }
+            100% { transform: scale(1.2) translate(20px, -20px); opacity: 0.45; }
+        }
+
+        /* حاوية الشاشة والأنيميشن التفاعلي */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 550px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 1. الشاشة التمهيدية التفاعلية (Intro Animation) */
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-color);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeOutIntro 0.8s forwards 3.2s;
+        }
+
+        .intro-star {
+            font-size: 60px;
+            color: var(--gold-accent);
+            text-shadow: 0 0 20px var(--gold-accent);
+            animation: starZoom 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+        }
+
+        .intro-flash {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 100px #ffffff, 0 0 150px var(--electric-blue);
+            opacity: 0;
+            animation: flashBurst 0.8s forwards 1.2s;
+        }
+
+        @keyframes starZoom {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            80% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+
+        @keyframes flashBurst {
+            0% { opacity: 0; transform: scale(0.1); }
+            50% { opacity: 1; transform: scale(2.5); }
+            100% { opacity: 0; transform: scale(5); }
+        }
+
+        @keyframes fadeOutIntro {
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        /* 2. شريط الأدوات العلوي (Header Bar) */
+        .top-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            backdrop-filter: blur(12px);
+            padding: 12px 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            opacity: 0;
+            animation: fadeInElement 0.8s forwards 2.5s;
+        }
+
+        .brand-mini {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 18px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .brand-mini span { color: var(--electric-blue); }
+
+        .top-icons {
+            display: flex;
+            gap: 15px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* 3. الشعار المركزي الإبداعي (Hero Banner) */
+        .hero-section {
             text-align: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: heroReveal 1s forwards 2s;
         }
-        .status-badge {
-            display: inline-block;
-            background-color: #238636;
-            color: #ffffff;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 15px;
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 44px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--neon-purple), var(--pink-neon), var(--electric-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        h1 {
-            color: #58a6ff;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-        p {
-            line-height: 1.6;
+
+        .hero-subtitle {
             font-size: 15px;
             color: #8b949e;
+            margin-top: 6px;
+            letter-spacing: 1px;
+        }
+
+        .btn-enter {
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 32px;
+            border-radius: 30px;
+            background: linear-gradient(90deg, var(--neon-purple), var(--electric-blue));
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-enter:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 30px rgba(255, 79, 216, 0.6);
+        }
+
+        /* 4. شبكة الخدمات والبطاقات (Services Grid) */
+        .services-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardAppear 0.6s forwards;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--electric-blue);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+            background: rgba(30, 38, 50, 0.85);
+        }
+
+        .card-icon { font-size: 28px; }
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: #c9d1d9;
+            letter-spacing: 1px;
+        }
+
+        /* تأخير ظهور البطاقات متتالياً */
+        .card:nth-child(1) { animation-delay: 2.8s; }
+        .card:nth-child(2) { animation-delay: 2.9s; }
+        .card:nth-child(3) { animation-delay: 3.0s; }
+        .card:nth-child(4) { animation-delay: 3.1s; }
+        .card:nth-child(5) { animation-delay: 3.2s; }
+        .card:nth-child(6) { animation-delay: 3.3s; }
+
+        /* 5. شريط الأمان والشعار السفلي (Footer) */
+        .footer-badge {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: rgba(13, 17, 23, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 10px;
+            font-size: 13px;
+            color: #8b949e;
+            opacity: 0;
+            animation: fadeInElement 0.8s forwards 3.4s;
+        }
+
+        .footer-tag { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Keyframe Animations */
+        @keyframes heroReveal {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeInElement {
+            to { opacity: 1; }
+        }
+
+        @keyframes cardAppear {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title { font-size: 32px; }
+            .services-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <span class="status-badge">🔒 اتصال مشفّر ومؤمن</span>
-        <h1>مرحباً بك في FMStar</h1>
-        <p>تم تفعيل طبقات الحماية وتثبيت سياسات الأمان لمنع التجسس واعتراض البيانات.</p>
+    <!-- الخلفية الفضائية المضيئة -->
+    <div class="space-bg">
+        <div class="glow-orb glow-purple"></div>
+        <div class="glow-orb glow-blue"></div>
+        <div class="glow-orb glow-pink"></div>
+    </div>
+
+    <!-- انيميشن الدخول السحري (النجمة ثم الوميض) -->
+    <div class="intro-overlay">
+        <div class="intro-star">★</div>
+        <div class="intro-flash"></div>
+    </div>
+
+    <!-- محتوى التطبيق -->
+    <div class="app-container">
+
+        <!-- الشريط العلوي -->
+        <div class="top-bar">
+            <div class="brand-mini">⚡ FM<span>STAR</span></div>
+            <div class="top-icons">
+                <span>🔔</span>
+                <span>⚙️</span>
+                <span>👤</span>
+            </div>
+        </div>
+
+        <!-- الجزء الرئيسي للشعار والعنوان -->
+        <div class="hero-section">
+            <h1 class="hero-title">✨ FMSTAR ⚡</h1>
+            <p class="hero-subtitle">Create Beyond Imagination</p>
+            <button class="btn-enter" onclick="alert('مرحباً بك في استوديو FMSTAR الإبداعي!')">
+                🚀 ENTER STUDIO
+            </button>
+        </div>
+
+        <!-- شبكة الخدمات والأقسام -->
+        <div class="services-grid">
+            <div class="card">
+                <div class="card-icon">🎬</div>
+                <div class="card-title">VIDEO</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🤖</div>
+                <div class="card-title">AI LAB</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🎨</div>
+                <div class="card-title">DESIGN</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🎵</div>
+                <div class="card-title">MUSIC</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🌍</div>
+                <div class="card-title">PUBLISH</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">📱</div>
+                <div class="card-title">APPS</div>
+            </div>
+        </div>
+
+        <!-- الترويسة السفليّة (الهوية والأمان) -->
+        <div class="footer-badge">
+            <div class="footer-tag"><span class="dot" style="background:var(--neon-purple)"></span> Neon</div>
+            <div class="footer-tag"><span class="dot" style="background:var(--electric-blue)"></span> Creative</div>
+            <div class="footer-tag"><span class="dot" style="background:var(--gold-accent)"></span> AI</div>
+            <div class="footer-tag"><span class="dot" style="background:var(--pink-neon)"></span> Future</div>
+        </div>
+
     </div>
 
     <script>
-        // كود حماية إضافي لمنع فتح الصفحة داخل Iframe
+        // كود حماية إضافي لمنع تضمين الصفحة داخل Iframe
         if (window.top !== window.self) {
             window.top.location = window.self.location;
         }
     </script>
 </body>
-</html>
+    </html>
