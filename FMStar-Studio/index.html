@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMSTAR - AI Creative Studio</title>
+    <title>FMSTAR - AI Creative Studio & Gamification</title>
     <script>
         if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
             window.location.href = window.location.href.replace('http:', 'https:');
         }
     </script>
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; default-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; default-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' https://d3js.org; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+    
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
     <style>
         :root {
             --bg-color: #050816;
@@ -22,452 +25,170 @@
             --electric-blue: #00D4FF;
             --pink-neon: #FF4FD8;
             --gold-accent: #FFD700;
-            --card-bg: rgba(22, 27, 34, 0.75);
+            --alert-red: #FF3366;
+            --card-bg: rgba(22, 27, 34, 0.85);
             --border-glow: rgba(168, 85, 247, 0.3);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { background-color: var(--bg-color); color: #ffffff; font-family: 'Tajawal', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow-x: hidden; position: relative; }
-        .space-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden; }
-        .glow-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.35; animation: pulseGlow 8s infinite alternate ease-in-out; }
-        .glow-purple { width: 350px; height: 350px; background: var(--neon-purple); top: 15%; left: 20%; }
-        .glow-blue { width: 400px; height: 400px; background: var(--electric-blue); bottom: 10%; right: 15%; animation-delay: -3s; }
-        .glow-pink { width: 300px; height: 300px; background: var(--pink-neon); top: 45%; left: 50%; transform: translate(-50%, -50%); animation-delay: -5s; }
-        @keyframes pulseGlow { 0% { transform: scale(1) translate(0, 0); opacity: 0.25; } 100% { transform: scale(1.2) translate(20px, -20px); opacity: 0.45; } }
-        .app-container { position: relative; z-index: 10; width: 100%; max-width: 550px; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .intro-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 100; display: flex; justify-content: center; align-items: center; animation: fadeOutIntro 0.8s forwards 3.2s; }
-        .intro-star { font-size: 60px; color: var(--gold-accent); text-shadow: 0 0 20px var(--gold-accent); animation: starZoom 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
-        .intro-flash { position: absolute; width: 100px; height: 100px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 100px #ffffff, 0 0 150px var(--electric-blue); opacity: 0; animation: flashBurst 0.8s forwards 1.2s; }
-        @keyframes starZoom { 0% { transform: scale(0) rotate(0deg); opacity: 0; } 80% { transform: scale(1.5) rotate(180deg); opacity: 1; } 100% { transform: scale(1) rotate(360deg); opacity: 1; } }
-        @keyframes flashBurst { 0% { opacity: 0; transform: scale(0.1); } 50% { opacity: 1; transform: scale(2.5); } 100% { opacity: 0; transform: scale(5); } }
-        @keyframes fadeOutIntro { to { opacity: 0; visibility: hidden; } }
-        .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border: 1px solid var(--border-glow); backdrop-filter: blur(12px); padding: 12px 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); opacity: 0; animation: fadeInElement 0.8s forwards 2.5s; }
-        .brand-mini { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 18px; color: #fff; display: flex; align-items: center; gap: 6px; }
+        body { background-color: var(--bg-color); color: #ffffff; font-family: 'Tajawal', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow-x: hidden; position: relative; padding: 20px 0; }
+        
+        .space-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .glow-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: pulseGlow 8s infinite alternate ease-in-out; }
+        .glow-purple { width: 350px; height: 350px; background: var(--neon-purple); top: 10%; left: 10%; }
+        .glow-blue { width: 400px; height: 400px; background: var(--electric-blue); bottom: 10%; right: 10%; }
+        
+        .app-container { position: relative; z-index: 10; width: 100%; max-width: 850px; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* Navigation & Header */
+        .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border: 1px solid var(--border-glow); backdrop-filter: blur(12px); padding: 12px 20px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+        .brand-mini { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 20px; color: #fff; }
         .brand-mini span { color: var(--electric-blue); }
-        .top-icons { display: flex; gap: 15px; font-size: 18px; cursor: pointer; }
-        .hero-section { text-align: center; margin-bottom: 30px; opacity: 0; animation: heroReveal 1s forwards 2s; }
-        .hero-title { font-family: 'Orbitron', sans-serif; font-size: 44px; font-weight: 900; letter-spacing: 2px; background: linear-gradient(135deg, var(--neon-purple), var(--pink-neon), var(--electric-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 30px rgba(168, 85, 247, 0.6); display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .hero-subtitle { font-size: 15px; color: #8b949e; margin-top: 6px; letter-spacing: 1px; }
-        .btn-enter { margin-top: 20px; display: inline-flex; align-items: center; gap: 10px; padding: 12px 32px; border-radius: 30px; background: linear-gradient(90deg, var(--neon-purple), var(--electric-blue)); color: #fff; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); transition: all 0.3s ease; }
-        .btn-enter:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 0 30px rgba(255, 79, 216, 0.6); }
-        .services-grid { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
-        .card { background: var(--card-bg); border: 1px solid var(--border-glow); border-radius: 16px; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0; transform: translateY(20px); animation: cardAppear 0.6s forwards; }
-        .card:hover { transform: translateY(-8px); border-color: var(--electric-blue); box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3); background: rgba(30, 38, 50, 0.85); }
-        .card-icon { font-size: 28px; }
-        .card-title { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #c9d1d9; letter-spacing: 1px; }
-        .card:nth-child(1) { animation-delay: 2.8s; }
-        .card:nth-child(2) { animation-delay: 2.9s; }
-        .card:nth-child(3) { animation-delay: 3.0s; }
-        .card:nth-child(4) { animation-delay: 3.1s; }
-        .card:nth-child(5) { animation-delay: 3.2s; }
-        .card:nth-child(6) { animation-delay: 3.3s; }
-        .footer-badge { width: 100%; display: flex; justify-content: space-around; align-items: center; background: rgba(13, 17, 23, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 10px; font-size: 13px; color: #8b949e; opacity: 0; animation: fadeInElement 0.8s forwards 3.4s; }
-        .footer-tag { display: flex; align-items: center; gap: 5px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
-        @keyframes heroReveal { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        @keyframes fadeInElement { to { opacity: 1; } }
-        @keyframes cardAppear { to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 480px) { .hero-title { font-size: 32px; } .services-grid { grid-template-columns: repeat(2, 1fr); } }
+        .user-stats { display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.4); padding: 6px 16px; border-radius: 20px; border: 1px solid var(--gold-accent); }
+        .pts-badge { color: var(--gold-accent); font-weight: bold; font-family: 'Orbitron', sans-serif; }
 
-        /* Real-Time Cloud Backend Status Dashboard */
-        .status-dashboard {
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--border-glow);
-            border-radius: 18px;
-            padding: 16px;
-            margin-bottom: 22px;
-            backdrop-filter: blur(14px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            opacity: 0;
-            animation: fadeInElement 0.8s forwards 2.6s;
-        }
-        .status-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(168, 85, 247, 0.25);
-        }
-        .status-title-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .status-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .status-badge-overall {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            background: rgba(16, 185, 129, 0.15);
-            color: #10B981;
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
-        }
-        .pulse-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10B981;
-            box-shadow: 0 0 8px #10B981;
-            animation: pingPulse 1.8s infinite ease-in-out;
-        }
-        .pulse-indicator.cyan {
-            background: var(--electric-blue);
-            box-shadow: 0 0 8px var(--electric-blue);
-        }
-        @keyframes pingPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.35); opacity: 0.6; }
-        }
-        .nodes-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .node-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(13, 17, 23, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 10px 14px;
-            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .node-item:hover {
-            border-color: var(--electric-blue);
-            background: rgba(22, 27, 34, 0.95);
-            transform: translateX(-3px);
-            box-shadow: 0 4px 16px rgba(0, 212, 255, 0.15);
-        }
-        .node-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .node-icon-box {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            background: rgba(168, 85, 247, 0.15);
-            border: 1px solid rgba(168, 85, 247, 0.3);
-        }
-        .node-info {
-            text-align: right;
-        }
-        .node-name {
-            font-size: 13px;
-            font-weight: 700;
-            color: #e6edf3;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .node-endpoint {
-            font-size: 10px;
-            color: #8b949e;
-            font-family: 'Orbitron', monospace;
-        }
-        .node-right {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 3px;
-        }
-        .node-status-tag {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 11px;
-            font-weight: 700;
-            font-family: 'Orbitron', sans-serif;
-            color: #10B981;
-        }
-        .node-latency {
-            font-size: 10px;
-            color: var(--electric-blue);
-            font-family: 'Orbitron', monospace;
-        }
-        .status-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .btn-ping-test {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            background: rgba(0, 212, 255, 0.12);
-            border: 1px solid var(--electric-blue);
-            color: var(--electric-blue);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: all 0.2s ease;
-        }
-        .btn-ping-test:hover {
-            background: var(--electric-blue);
-            color: #050816;
-            box-shadow: 0 0 16px var(--electric-blue);
-        }
-        .btn-ping-test:active {
-            transform: scale(0.96);
-        }
-        .telemetry-meta {
-            font-size: 10px;
-            color: #8b949e;
-            font-family: 'Orbitron', monospace;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .telemetry-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--gold-accent);
-            display: inline-block;
-        }
+        /* Grid Services */
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+        .service-card { background: var(--card-bg); border: 1px solid var(--border-glow); border-radius: 14px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .service-card:hover { border-color: var(--electric-blue); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,212,255,0.2); }
+        .service-icon { font-size: 26px; margin-bottom: 6px; }
+        .service-title { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: bold; }
+
+        /* Dashboard & Gamification Cards */
+        .dashboard-card { background: var(--card-bg); border: 1px solid var(--border-glow); border-radius: 16px; padding: 20px; backdrop-filter: blur(12px); }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .dash-title { font-family: 'Orbitron', sans-serif; font-size: 16px; color: var(--electric-blue); display: flex; align-items: center; gap: 8px; }
+
+        /* Leaderboard & Challenges */
+        .challenges-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .challenge-box { background: rgba(13, 17, 23, 0.7); border: 1px solid var(--border-glow); border-radius: 12px; padding: 12px; }
+        .ch-title { font-weight: bold; color: var(--gold-accent); margin-bottom: 5px; font-size: 14px; }
+        .ch-desc { font-size: 12px; color: #8b949e; margin-bottom: 10px; }
+        .btn-action { background: linear-gradient(90deg, var(--neon-purple), var(--electric-blue)); border: none; color: white; padding: 6px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; width: 100%; }
+
+        .leaderboard-list { list-style: none; }
+        .lb-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); font-size: 13px; }
+        .lb-rank { color: var(--pink-neon); font-family: 'Orbitron', sans-serif; font-weight: bold; }
+
+        /* Dynamic Telemetry */
+        .nodes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+        .node-box { background: rgba(13, 17, 23, 0.7); border: 1px solid var(--border-glow); border-radius: 10px; padding: 10px; cursor: pointer; }
+        .node-box.warning { border-color: var(--alert-red) !important; animation: warningPulse 1s infinite alternate; }
+        @keyframes warningPulse { 0% { box-shadow: 0 0 5px var(--alert-red); } 100% { box-shadow: 0 0 20px var(--alert-red); } }
+
+        #chart-container { width: 100%; height: 150px; margin-top: 10px; }
+        .line-cpu { fill: none; stroke: var(--electric-blue); stroke-width: 2px; }
+        .line-mem { fill: none; stroke: var(--pink-neon); stroke-width: 2px; }
     </style>
 </head>
 <body>
     <div class="space-bg">
         <div class="glow-orb glow-purple"></div>
         <div class="glow-orb glow-blue"></div>
-        <div class="glow-orb glow-pink"></div>
     </div>
-    <div class="intro-overlay">
-        <div class="intro-star">★</div>
-        <div class="intro-flash"></div>
-    </div>
+
     <div class="app-container">
+        <!-- Header -->
         <div class="top-bar">
             <div class="brand-mini">⚡ FM<span>STAR</span></div>
-            <div class="top-icons">
-                <span>🔔</span>
-                <span>⚙️</span>
-                <span>👤</span>
+            <div class="user-stats">
+                <span>🏆 النقاط:</span>
+                <span class="pts-badge" id="user-points">1,250</span>
             </div>
         </div>
-        <div class="hero-section">
-            <h1 class="hero-title">✨ FMSTAR ⚡</h1>
-            <p class="hero-subtitle">Create Beyond Imagination</p>
-            <button class="btn-enter" onclick="alert('مرحباً بك في استوديو FMSTAR الإبداعي!')">
-                🚀 ENTER STUDIO
-            </button>
-        </div>
+
+        <!-- Services -->
         <div class="services-grid">
-            <div class="card"><div class="card-icon">🎬</div><div class="card-title">VIDEO</div></div>
-            <div class="card"><div class="card-icon">🤖</div><div class="card-title">AI LAB</div></div>
-            <div class="card"><div class="card-icon">🎨</div><div class="card-title">DESIGN</div></div>
-            <div class="card"><div class="card-icon">🎵</div><div class="card-title">MUSIC</div></div>
-            <div class="card"><div class="card-icon">🌍</div><div class="card-title">PUBLISH</div></div>
-            <div class="card"><div class="card-icon">📱</div><div class="card-title">APPS</div></div>
+            <div class="service-card" onclick="triggerService('VIDEO')"><div class="service-icon">🎬</div><div class="service-title">VIDEO</div></div>
+            <div class="service-card" onclick="triggerService('AI LAB')"><div class="service-icon">🤖</div><div class="service-title">AI LAB</div></div>
+            <div class="service-card" onclick="triggerService('DESIGN')"><div class="service-icon">🎨</div><div class="service-title">DESIGN</div></div>
+            <div class="service-card" onclick="triggerService('MUSIC')"><div class="service-icon">🎵</div><div class="service-title">MUSIC</div></div>
+            <div class="service-card" onclick="triggerService('PUBLISH')"><div class="service-icon">🌍</div><div class="service-title">PUBLISH</div></div>
+            <div class="service-card" onclick="triggerService('APPS')"><div class="service-icon">📱</div><div class="service-title">APPS</div></div>
         </div>
 
-        <!-- Real-Time Cloud Backend Status Dashboard -->
-        <div class="status-dashboard" id="statusDashboard">
-            <div class="status-header">
-                <div class="status-title-group">
-                    <span class="status-title">📡 CLOUD NODES TELEMETRY</span>
-                </div>
-                <div class="status-badge-overall" id="overallStatusBadge">
-                    <span class="pulse-indicator" id="masterPulse"></span>
-                    <span id="overallStatusText">ALL NODES ONLINE</span>
-                </div>
+        <!-- Gamification Section -->
+        <div class="dashboard-card">
+            <div class="dash-header">
+                <div class="dash-title">🎯 التحديات والجوائز اليومية</div>
             </div>
-
-            <div class="nodes-list">
-                <!-- Audio Service Node -->
-                <div class="node-item" id="node-audio">
-                    <div class="node-left">
-                        <div class="node-icon-box">🎙️</div>
-                        <div class="node-info">
-                            <div class="node-name">Audio DSP Master Node</div>
-                            <div class="node-endpoint">go-audio-dsp:8080 · 320kbps</div>
-                        </div>
-                    </div>
-                    <div class="node-right">
-                        <div class="node-status-tag">
-                            <span class="pulse-indicator"></span>
-                            <span class="node-status-label" id="status-audio">STREAMING</span>
-                        </div>
-                        <div class="node-latency" id="latency-audio">24ms</div>
-                    </div>
+            <div class="challenges-container">
+                <div class="challenge-box">
+                    <div class="ch-title">🔥 تحدي هندسة الصوت</div>
+                    <div class="ch-desc">قم بتوليد مقطع موسيقي باستخدام محرك Go واحصل على +100 نقطة.</div>
+                    <button class="btn-action" onclick="claimReward(100)">بدء التحدي 🚀</button>
                 </div>
-
-                <!-- Video Service Node -->
-                <div class="node-item" id="node-video">
-                    <div class="node-left">
-                        <div class="node-icon-box" style="background:rgba(0, 212, 255, 0.15); border-color:rgba(0, 212, 255, 0.3);">🎬</div>
-                        <div class="node-info">
-                            <div class="node-name">Video Rendering Node</div>
-                            <div class="node-endpoint">ffmpeg-cuda:8081 · 60fps</div>
-                        </div>
-                    </div>
-                    <div class="node-right">
-                        <div class="node-status-tag" style="color:#00D4FF;">
-                            <span class="pulse-indicator cyan"></span>
-                            <span class="node-status-label" id="status-video">ACTIVE</span>
-                        </div>
-                        <div class="node-latency" id="latency-video">38ms</div>
-                    </div>
-                </div>
-
-                <!-- Cloud SQL Database Node -->
-                <div class="node-item" id="node-db">
-                    <div class="node-left">
-                        <div class="node-icon-box" style="background:rgba(255, 215, 0, 0.15); border-color:rgba(255, 215, 0, 0.3);">🗄️</div>
-                        <div class="node-info">
-                            <div class="node-name">Cloud SQL Cluster</div>
-                            <div class="node-endpoint">PostgreSQL 15 · 7d PITR</div>
-                        </div>
-                    </div>
-                    <div class="node-right">
-                        <div class="node-status-tag">
-                            <span class="pulse-indicator"></span>
-                            <span class="node-status-label" id="status-db">HEALTHY</span>
-                        </div>
-                        <div class="node-latency" id="latency-db">14ms</div>
-                    </div>
-                </div>
-
-                <!-- Cloud Storage Bucket Node -->
-                <div class="node-item" id="node-storage">
-                    <div class="node-left">
-                        <div class="node-icon-box" style="background:rgba(255, 79, 216, 0.15); border-color:rgba(255, 79, 216, 0.3);">☁️</div>
-                        <div class="node-info">
-                            <div class="node-name">Cloud Media Bucket</div>
-                            <div class="node-endpoint">jimi-mira-bucket-087817</div>
-                        </div>
-                    </div>
-                    <div class="node-right">
-                        <div class="node-status-tag">
-                            <span class="pulse-indicator"></span>
-                            <span class="node-status-label" id="status-storage">MOUNTED</span>
-                        </div>
-                        <div class="node-latency" id="latency-storage">19ms</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="status-actions">
-                <button class="btn-ping-test" id="btnPingTest" onclick="runTelemetryPing()">
-                    <span>⚡ PING NODES</span>
-                </button>
-                <div class="telemetry-meta">
-                    <span class="telemetry-dot"></span>
-                    <span id="telemetryPackets">TX/RX: 1,420 kb/s</span>
-                    <span>|</span>
-                    <span id="telemetryUptime">Uptime: 99.99%</span>
+                <div class="challenge-box">
+                    <div class="ch-title">🥇 لوحة الصدارة</div>
+                    <ul class="leaderboard-list">
+                        <li class="lb-item"><span>1. فيفيانا ✨</span><span class="lb-rank">2,450 PTS</span></li>
+                        <li class="lb-item"><span>2. Jimi Audio Bot</span><span class="lb-rank">1,890 PTS</span></li>
+                        <li class="lb-item"><span>3. Mira AI</span><span class="lb-rank">1,250 PTS</span></li>
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <div class="footer-badge">
-            <div class="footer-tag"><span class="dot" style="background:var(--neon-purple)"></span> Neon</div>
-            <div class="footer-tag"><span class="dot" style="background:var(--electric-blue)"></span> Creative</div>
-            <div class="footer-tag"><span class="dot" style="background:var(--gold-accent)"></span> AI</div>
-            <div class="footer-tag"><span class="dot" style="background:var(--pink-neon)"></span> Future</div>
+        <!-- Telemetry & Chart -->
+        <div class="dashboard-card">
+            <div class="dash-header">
+                <div class="dash-title">⚡ FMSTAR CLOUD TELEMETRY</div>
+            </div>
+            <div class="nodes-grid" id="nodes-container"></div>
+            <div id="chart-container"></div>
         </div>
     </div>
-    <script>
-        if (window.top !== window.self) {
-            window.top.location = window.self.location;
-        }
 
-        // Real-time dynamic status indicators simulation
-        const nodesData = [
-            { id: 'audio', baseLatency: 24, variance: 6 },
-            { id: 'video', baseLatency: 38, variance: 8 },
-            { id: 'db', baseLatency: 14, variance: 3 },
-            { id: 'storage', baseLatency: 19, variance: 4 }
+    <script>
+        let points = 1250;
+        const nodes = [
+            { id: 'go-audio-dsp', name: 'go-audio-dsp:8080', latency: 24 },
+            { id: 'ffmpeg-cuda', name: 'ffmpeg-cuda:8081', latency: 38 },
+            { id: 'postgresql-db', name: 'postgresql-db', latency: 14 }
         ];
 
-        function updateRealtimeTelemetry() {
-            nodesData.forEach(node => {
-                const latencyElem = document.getElementById(`latency-${node.id}`);
-                if (latencyElem) {
-                    const jitter = Math.floor(Math.random() * (node.variance * 2 + 1)) - node.variance;
-                    const currentLatency = Math.max(8, node.baseLatency + jitter);
-                    latencyElem.textContent = `${currentLatency}ms`;
-                }
-            });
-
-            const packetElem = document.getElementById('telemetryPackets');
-            if (packetElem) {
-                const rate = (1.3 + Math.random() * 0.4).toFixed(2);
-                packetElem.textContent = `TX/RX: ${rate} MB/s`;
-            }
+        function triggerService(serviceName) {
+            alert(`جاري الاتصال بمحرك السحابة لتشغيل خدمة: ${serviceName}`);
         }
 
-        setInterval(updateRealtimeTelemetry, 2500);
-
-        function runTelemetryPing() {
-            const btn = document.getElementById('btnPingTest');
-            const overallBadge = document.getElementById('overallStatusBadge');
-            const overallText = document.getElementById('overallStatusText');
-            if (!btn) return;
-
-            btn.disabled = true;
-            btn.innerHTML = '<span>⏳ PINGING...</span>';
-            if (overallText) overallText.textContent = 'CHECKING NODES...';
-
-            nodesData.forEach(node => {
-                const latencyElem = document.getElementById(`latency-${node.id}`);
-                if (latencyElem) {
-                    latencyElem.textContent = '...';
-                }
-            });
-
-            setTimeout(() => {
-                nodesData.forEach(node => {
-                    const latencyElem = document.getElementById(`latency-${node.id}`);
-                    if (latencyElem) {
-                        const fastLatency = Math.floor(node.baseLatency * 0.85 + Math.random() * 5);
-                        latencyElem.textContent = `${fastLatency}ms`;
-                    }
-                });
-
-                if (overallText) overallText.textContent = 'ALL NODES OPTIMAL';
-                btn.innerHTML = '<span>✓ NODES SYNCED</span>';
-                btn.style.borderColor = '#10B981';
-                btn.style.color = '#10B981';
-
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = '<span>⚡ PING NODES</span>';
-                    btn.style.borderColor = 'var(--electric-blue)';
-                    btn.style.color = 'var(--electric-blue)';
-                    if (overallText) overallText.textContent = 'ALL NODES ONLINE';
-                }, 2000);
-            }, 600);
+        function claimReward(pts) {
+            points += pts;
+            document.getElementById('user-points').innerText = points.toLocaleString();
+            alert(`مبروك! حصلت على +${pts} نقطة. مجموع نقاطك الآن: ${points}`);
         }
+
+        function renderNodes() {
+            const container = document.getElementById('nodes-container');
+            container.innerHTML = '';
+            nodes.forEach(n => {
+                const isWarn = n.latency > 100;
+                const div = document.createElement('div');
+                div.className = `node-box ${isWarn ? 'warning' : ''}`;
+                div.innerHTML = `<div style="font-weight:bold; font-size:12px;">${n.name}</div><div style="font-size:11px; color:#8b949e;">${n.latency} ms</div>`;
+                container.appendChild(div);
+            });
+        }
+
+        // D3 Chart setup
+        const chartData = [];
+        function initChart() {
+            const container = d3.select("#chart-container");
+            const svg = container.append("svg").attr("width", "100%").attr("height", "150");
+            svg.append("path").attr("class", "line-cpu");
+            svg.append("path").attr("class", "line-mem");
+        }
+
+        function updateTelemetry() {
+            nodes.forEach(n => { n.latency = Math.floor(Math.random() * 40) + 10 + (Math.random() < 0.1 ? 100 : 0); });
+            if (chartData.length > 15) chartData.shift();
+            chartData.push({ time: new Date(), cpu: Math.random() * 40 + 30, mem: Math.random() * 30 + 50 });
+            renderNodes();
+        }
+
+        window.onload = () => {
+            renderNodes();
+            initChart();
+            setInterval(updateTelemetry, 2000);
+        };
     </script>
 </body>
 </html>
