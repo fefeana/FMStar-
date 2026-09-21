@@ -40,16 +40,115 @@
         .app-container { position: relative; z-index: 10; width: 100%; max-width: 850px; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
         
         /* Navigation & Header */
-        .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border: 1px solid var(--border-glow); backdrop-filter: blur(12px); padding: 12px 20px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+        .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border: 1px solid var(--border-glow); backdrop-filter: blur(12px); padding: 12px 20px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); flex-wrap: wrap; gap: 10px; }
         .brand-mini { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 20px; color: #fff; }
         .brand-mini span { color: var(--electric-blue); }
-        .user-stats { display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.4); padding: 6px 16px; border-radius: 20px; border: 1px solid var(--gold-accent); }
-        .pts-badge { color: var(--gold-accent); font-weight: bold; font-family: 'Orbitron', sans-serif; }
+        .user-stats-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        
+        .user-stats { display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.45); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--gold-accent); }
+        .pts-badge { color: var(--gold-accent); font-weight: bold; font-family: 'Orbitron', sans-serif; transition: all 0.3s ease; }
+        
+        /* Streak Counter Badge */
+        .streak-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 107, 0, 0.15);
+            border: 1px solid rgba(255, 107, 0, 0.5);
+            color: #ff9800;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 0 10px rgba(255, 107, 0, 0.2);
+            animation: streakGlow 2.5s infinite alternate;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .streak-badge:hover {
+            transform: scale(1.05);
+        }
+        .streak-fire {
+            font-size: 16px;
+            animation: flameFlicker 1.2s infinite alternate;
+        }
+        @keyframes flameFlicker {
+            0% { transform: scale(1) rotate(-4deg); }
+            100% { transform: scale(1.25) rotate(4deg); }
+        }
+        @keyframes streakGlow {
+            from { box-shadow: 0 0 6px rgba(255, 107, 0, 0.2); }
+            to { box-shadow: 0 0 18px rgba(255, 107, 0, 0.6); }
+        }
+
+        /* Points Pulse Animation */
+        .points-pulse {
+            animation: ptsScale 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes ptsScale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.35); color: #fff; text-shadow: 0 0 20px var(--gold-accent), 0 0 30px var(--pink-neon); }
+            100% { transform: scale(1); }
+        }
+
+        /* Floating Confetti & Star Particles */
+        .reward-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            animation: floatUpFade 1.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        @keyframes floatUpFade {
+            0% { opacity: 1; transform: translate(0, 0) scale(0.6) rotate(0deg); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.4) rotate(var(--rot)); }
+        }
+
+        /* Reward Toast Notification */
+        .reward-toast {
+            position: fixed;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(13, 17, 23, 0.95);
+            border: 2px solid var(--gold-accent);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4), 0 8px 32px rgba(0,0,0,0.7);
+            border-radius: 20px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            color: #fff;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 15px;
+            opacity: 0;
+            transition: all 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            backdrop-filter: blur(10px);
+        }
+        .reward-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast-badge {
+            background: var(--gold-accent);
+            color: #000;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
 
         /* Grid Services */
         .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
-        .service-card { background: var(--card-bg); border: 1px solid var(--border-glow); border-radius: 14px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .service-card:hover { border-color: var(--electric-blue); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,212,255,0.2); }
+        .service-card { background: var(--card-bg); border: 1px solid var(--border-glow); border-radius: 14px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
+        .service-card::after { content: 'إعدادات'; position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0, 212, 255, 0.85); color: #050816; font-size: 9px; font-weight: bold; padding: 2px 0; transform: translateY(100%); transition: 0.25s ease; }
+        .service-card:hover::after { transform: translateY(0); }
+        .service-card:hover { border-color: var(--electric-blue); transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,212,255,0.3); }
         .service-icon { font-size: 26px; margin-bottom: 6px; }
         .service-title { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: bold; }
 
@@ -60,24 +159,209 @@
 
         /* Leaderboard & Challenges */
         .challenges-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .challenge-box { background: rgba(13, 17, 23, 0.7); border: 1px solid var(--border-glow); border-radius: 12px; padding: 12px; }
-        .ch-title { font-weight: bold; color: var(--gold-accent); margin-bottom: 5px; font-size: 14px; }
-        .ch-desc { font-size: 12px; color: #8b949e; margin-bottom: 10px; }
-        .btn-action { background: linear-gradient(90deg, var(--neon-purple), var(--electric-blue)); border: none; color: white; padding: 6px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; width: 100%; }
+        @media (max-width: 650px) { .challenges-container { grid-template-columns: 1fr; } }
+        .challenge-box { background: rgba(13, 17, 23, 0.7); border: 1px solid var(--border-glow); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+        .ch-title { font-weight: bold; color: var(--gold-accent); margin-bottom: 5px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .ch-desc { font-size: 12px; color: #8b949e; margin-bottom: 12px; line-height: 1.5; }
+        .btn-action { background: linear-gradient(90deg, var(--neon-purple), var(--electric-blue)); border: none; color: white; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; width: 100%; transition: all 0.25s ease; box-shadow: 0 0 15px rgba(0, 212, 255, 0.3); }
+        .btn-action:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(255, 79, 216, 0.5); }
+        .btn-action:active { transform: scale(0.98); }
 
         .leaderboard-list { list-style: none; }
-        .lb-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); font-size: 13px; }
+        .lb-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); font-size: 13px; }
         .lb-rank { color: var(--pink-neon); font-family: 'Orbitron', sans-serif; font-weight: bold; }
 
         /* Dynamic Telemetry */
         .nodes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
-        .node-box { background: rgba(13, 17, 23, 0.7); border: 1px solid var(--border-glow); border-radius: 10px; padding: 10px; cursor: pointer; }
+        .node-box { background: rgba(13, 17, 23, 0.7); border: 1px solid var(--border-glow); border-radius: 10px; padding: 10px; cursor: pointer; transition: 0.2s; }
+        .node-box:hover { border-color: var(--electric-blue); }
         .node-box.warning { border-color: var(--alert-red) !important; animation: warningPulse 1s infinite alternate; }
         @keyframes warningPulse { 0% { box-shadow: 0 0 5px var(--alert-red); } 100% { box-shadow: 0 0 20px var(--alert-red); } }
 
         #chart-container { width: 100%; height: 150px; margin-top: 10px; }
         .line-cpu { fill: none; stroke: var(--electric-blue); stroke-width: 2px; }
         .line-mem { fill: none; stroke: var(--pink-neon); stroke-width: 2px; }
+
+        /* Service Configuration Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 8, 22, 0.82);
+            backdrop-filter: blur(12px);
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .service-modal {
+            background: var(--card-bg);
+            border: 1px solid var(--electric-blue);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.35), 0 20px 50px rgba(0,0,0,0.8);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            padding: 24px;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .service-modal {
+            transform: scale(1) translateY(0);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .modal-close-btn:hover {
+            background: var(--alert-red);
+            border-color: var(--alert-red);
+            transform: rotate(90deg);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .modal-icon {
+            font-size: 34px;
+            background: rgba(168, 85, 247, 0.15);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glow);
+        }
+        .modal-title-wrap h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            font-size: 17px;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .modal-node-tag {
+            font-size: 11px;
+            color: var(--electric-blue);
+            font-family: 'Orbitron', monospace;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .modal-node-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .setting-label {
+            font-size: 13px;
+            color: #c9d1d9;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .setting-val-display {
+            color: var(--electric-blue);
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+        }
+        .setting-select, .setting-input {
+            background: rgba(13, 17, 23, 0.85);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .setting-select:focus, .setting-input:focus {
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        .setting-slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .setting-slider {
+            flex: 1;
+            accent-color: var(--neon-purple);
+            cursor: pointer;
+        }
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .btn-save-service {
+            background: linear-gradient(90deg, var(--neon-purple), var(--electric-blue));
+            border: none;
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+            transition: 0.2s;
+        }
+        .btn-save-service:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
+        }
+        .btn-cancel-service {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #8b949e;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .btn-cancel-service:hover {
+            color: #fff;
+            border-color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -86,24 +370,67 @@
         <div class="glow-orb glow-blue"></div>
     </div>
 
+    <!-- Celebration Toast -->
+    <div class="reward-toast" id="rewardToast">
+        <span style="font-size:24px;">🎉</span>
+        <div>
+            <div style="font-weight:bold; color:var(--gold-accent);" id="toastTitle">مكافأة تم تحصيلها بنجاح!</div>
+            <div style="font-size:12px; color:#c9d1d9;" id="toastDesc">تم إضافة النقاط إلى رصيدك.</div>
+        </div>
+        <span class="toast-badge" id="toastBadge">+100 PTS</span>
+    </div>
+
+    <!-- Service Details & Configuration Modal -->
+    <div class="modal-overlay" id="serviceModalOverlay" onclick="closeServiceModal(event)">
+        <div class="service-modal" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeServiceModal()">✕</button>
+            <div class="modal-header">
+                <div class="modal-icon" id="modalServiceIcon">🎬</div>
+                <div class="modal-title-wrap">
+                    <h3 id="modalServiceName">VIDEO PIPELINE CONFIG</h3>
+                    <div class="modal-node-tag">
+                        <span class="modal-node-dot"></span>
+                        <span id="modalNodeEndpoint">Node: ffmpeg-cuda:8081</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" id="modalConfigBody">
+                <!-- Dynamically populated config fields -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel-service" onclick="closeServiceModal()">إلغاء</button>
+                <button class="btn-save-service" id="btnSaveConfig" onclick="applyServiceConfig()">حفظ وتوصيل الخدمة ⚡</button>
+            </div>
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- Header -->
         <div class="top-bar">
             <div class="brand-mini">⚡ FM<span>STAR</span></div>
-            <div class="user-stats">
-                <span>🏆 النقاط:</span>
-                <span class="pts-badge" id="user-points">1,250</span>
+            <div class="user-stats-bar">
+                <!-- Daily Login Streak Counter -->
+                <div class="streak-badge" id="streakBadge" onclick="checkDailyStreak(true)" title="سلسلة الحضور اليومي: اضغط لتسجيل الحضور">
+                    <span class="streak-fire">🔥</span>
+                    <span>سلسلة: <strong id="streakCount">5</strong> أيام</span>
+                    <span style="color:var(--gold-accent); font-size:11px;" id="streakBonusLabel">(+25% مكافأة)</span>
+                </div>
+                <!-- Points Counter -->
+                <div class="user-stats">
+                    <span>🏆 النقاط:</span>
+                    <span class="pts-badge" id="user-points">1,250</span>
+                </div>
             </div>
         </div>
 
         <!-- Services -->
         <div class="services-grid">
-            <div class="service-card" onclick="triggerService('VIDEO')"><div class="service-icon">🎬</div><div class="service-title">VIDEO</div></div>
-            <div class="service-card" onclick="triggerService('AI LAB')"><div class="service-icon">🤖</div><div class="service-title">AI LAB</div></div>
-            <div class="service-card" onclick="triggerService('DESIGN')"><div class="service-icon">🎨</div><div class="service-title">DESIGN</div></div>
-            <div class="service-card" onclick="triggerService('MUSIC')"><div class="service-icon">🎵</div><div class="service-title">MUSIC</div></div>
-            <div class="service-card" onclick="triggerService('PUBLISH')"><div class="service-icon">🌍</div><div class="service-title">PUBLISH</div></div>
-            <div class="service-card" onclick="triggerService('APPS')"><div class="service-icon">📱</div><div class="service-title">APPS</div></div>
+            <div class="service-card" onclick="openServiceModal('VIDEO')"><div class="service-icon">🎬</div><div class="service-title">VIDEO</div></div>
+            <div class="service-card" onclick="openServiceModal('AI LAB')"><div class="service-icon">🤖</div><div class="service-title">AI LAB</div></div>
+            <div class="service-card" onclick="openServiceModal('DESIGN')"><div class="service-icon">🎨</div><div class="service-title">DESIGN</div></div>
+            <div class="service-card" onclick="openServiceModal('MUSIC')"><div class="service-icon">🎵</div><div class="service-title">MUSIC</div></div>
+            <div class="service-card" onclick="openServiceModal('PUBLISH')"><div class="service-icon">🌍</div><div class="service-title">PUBLISH</div></div>
+            <div class="service-card" onclick="openServiceModal('APPS')"><div class="service-icon">📱</div><div class="service-title">APPS</div></div>
         </div>
 
         <!-- Gamification Section -->
@@ -113,17 +440,27 @@
             </div>
             <div class="challenges-container">
                 <div class="challenge-box">
-                    <div class="ch-title">🔥 تحدي هندسة الصوت</div>
-                    <div class="ch-desc">قم بتوليد مقطع موسيقي باستخدام محرك Go واحصل على +100 نقطة.</div>
-                    <button class="btn-action" onclick="claimReward(100)">بدء التحدي 🚀</button>
+                    <div>
+                        <div class="ch-title">
+                            <span>🔥 تحدي هندسة الصوت السحابية</span>
+                            <span style="color:var(--electric-blue); font-size:11px; font-family:'Orbitron',sans-serif;">+100 PTS</span>
+                        </div>
+                        <div class="ch-desc">قم بتوليد مقطع صوتي باستخدام خادم Go DSP واستفد من مضاعف السلسلة اليومية.</div>
+                    </div>
+                    <button class="btn-action" id="btnClaimChallenge" onclick="claimReward(100, event)">تحصيل المكافأة 🚀</button>
                 </div>
                 <div class="challenge-box">
-                    <div class="ch-title">🥇 لوحة الصدارة</div>
-                    <ul class="leaderboard-list">
-                        <li class="lb-item"><span>1. فيفيانا ✨</span><span class="lb-rank">2,450 PTS</span></li>
-                        <li class="lb-item"><span>2. Jimi Audio Bot</span><span class="lb-rank">1,890 PTS</span></li>
-                        <li class="lb-item"><span>3. Mira AI</span><span class="lb-rank">1,250 PTS</span></li>
-                    </ul>
+                    <div>
+                        <div class="ch-title">
+                            <span>🥇 لوحة الصدارة المباشرة</span>
+                            <span style="color:var(--gold-accent); font-size:11px;">مباشر ⚡</span>
+                        </div>
+                        <ul class="leaderboard-list">
+                            <li class="lb-item"><span>1. فيفيانا ✨</span><span class="lb-rank">2,450 PTS</span></li>
+                            <li class="lb-item"><span>2. Jimi Audio Bot</span><span class="lb-rank">1,890 PTS</span></li>
+                            <li class="lb-item"><span>3. Mira AI</span><span class="lb-rank">1,250 PTS</span></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -140,24 +477,322 @@
 
     <script>
         let points = 1250;
+        let streakDays = 5;
+        let activeServiceKey = null;
+
         const nodes = [
             { id: 'go-audio-dsp', name: 'go-audio-dsp:8080', latency: 24 },
             { id: 'ffmpeg-cuda', name: 'ffmpeg-cuda:8081', latency: 38 },
             { id: 'postgresql-db', name: 'postgresql-db', latency: 14 }
         ];
 
-        function triggerService(serviceName) {
-            alert(`جاري الاتصال بمحرك السحابة لتشغيل خدمة: ${serviceName}`);
+        // Service Configurations Data
+        const serviceConfigs = {
+            'VIDEO': {
+                icon: '🎬',
+                title: 'إعدادات معالجة الفيديو (Video GPU Node)',
+                node: 'ffmpeg-cuda:8081 (NVIDIA NVENC)',
+                fields: [
+                    { id: 'res', label: 'دقة الفيديو (Resolution)', type: 'select', options: ['4K UHD (3840x2160) @ 60fps', '1080p FHD (1920x1080) @ 60fps', '720p HD (1280x720) @ 30fps'] },
+                    { id: 'codec', label: 'المرمز البرمجي (Video Codec)', type: 'select', options: ['H.265 / HEVC (تسريع عتادي)', 'AV1 Next-Gen (أعلى جودة)', 'ProRes 422HQ (استوديو احترافي)'] },
+                    { id: 'bitrate', label: 'معدل البت (Bitrate)', type: 'slider', min: 10, max: 60, val: 28, unit: 'Mbps' }
+                ]
+            },
+            'AI LAB': {
+                icon: '🤖',
+                title: 'إعدادات مختبر الذكاء الاصطناعي (AI Lab)',
+                node: 'vertex-ai-gemini:europe-west2',
+                fields: [
+                    { id: 'model', label: 'النموذج اللغوي / الإبداعي', type: 'select', options: ['Gemini 1.5 Pro (Multimodal 2M Context)', 'FMStar Studio Neural Engine', 'AudioCraft MusicGen Pro'] },
+                    { id: 'temp', label: 'مستوى الإبداع (Temperature)', type: 'slider', min: 0.1, max: 1.0, val: 0.7, step: 0.1, unit: '' },
+                    { id: 'quant', label: 'دقة الحوسبة (Precision)', type: 'select', options: ['FP16 Tensor Cores (أعلى سرعة)', 'INT8 Quantized (استهلاك منخفض)', 'BF16 Studio Master'] }
+                ]
+            },
+            'DESIGN': {
+                icon: '🎨',
+                title: 'إعدادات محرك التصميم والرسوميات',
+                node: 'canvas-renderer:v2-metal',
+                fields: [
+                    { id: 'dpi', label: 'كثافة البيكسل (DPI Output)', type: 'select', options: ['300 DPI (طباعة فاخرة)', '150 DPI (شاشات شبكية Retina)', '72 DPI (ويب قياسي)'] },
+                    { id: 'colorSpace', label: 'المساحة اللونية (Color Space)', type: 'select', options: ['DCI-P3 Wide Gamut', 'sRGB Standard Web', 'CMYK Coated Fogra39'] }
+                ]
+            },
+            'MUSIC': {
+                icon: '🎵',
+                title: 'إعدادات محرك الصوت الاحترافي (Go DSP Engine)',
+                node: 'go-audio-dsp:8080 (320kbps Stream)',
+                fields: [
+                    { id: 'sampleRate', label: 'معدل العينات (Sample Rate)', type: 'select', options: ['48,000 Hz (معيار البث السينمائي)', '96,000 Hz (استوديو هاي ريز Master)', '44,100 Hz (CD Audio)'] },
+                    { id: 'bufferSize', label: 'حجم الذاكرة المؤقتة (Latency Buffer)', type: 'select', options: ['64 Samples (1.3ms لاغٍ للتأخير)', '128 Samples (2.6ms مثالي)', '256 Samples (أداء فائق الثبات)'] },
+                    { id: 'gain', label: 'مستوى تعزيز الصوت (Master Gain)', type: 'slider', min: -12, max: 6, val: 0, unit: 'dB' }
+                ]
+            },
+            'PUBLISH': {
+                icon: '🌍',
+                title: 'إعدادات النشر السحابي (Cloud CDN & Edge)',
+                node: 'jimi-mira-bucket-087817:multi-region',
+                fields: [
+                    { id: 'cdn', label: 'شبكة التوزيع السحابي (CDN Network)', type: 'select', options: ['Google Cloud Edge Global', 'Direct Bucket Storage', 'Cloudflare Proxy'] },
+                    { id: 'cache', label: 'مدة التخزين المؤقت (Cache-Control)', type: 'select', options: ['1 Year (Max Immutable)', '30 Days (Standard)', 'No-Cache (Dynamic Live)'] }
+                ]
+            },
+            'APPS': {
+                icon: '📱',
+                title: 'إعدادات حزم التطبيقات (App Compiler)',
+                node: 'android-build-cluster:gradle-v8',
+                fields: [
+                    { id: 'target', label: 'نوع الحزمة المصدرة', type: 'select', options: ['Android AAB (Google Play Bundle)', 'Universal APK (تثبيت مباشر)', 'PWA Web Offline App'] },
+                    { id: 'minify', label: 'ضغط وتحسين الكود (ProGuard / R8)', type: 'select', options: ['تفعيل كامل مع Obfuscation', 'حفظ الرموز للتصحيح (Debug)'] }
+                ]
+            }
+        };
+
+        // --- 1. Audio-Visual Success Celebration Animation ---
+        function playSuccessChime() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (Major celebratory arpeggio)
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+
+                    gain.gain.setValueAtTime(0.18, ctx.currentTime + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(ctx.currentTime + idx * 0.08);
+                    osc.stop(ctx.currentTime + idx * 0.08 + 0.35);
+                });
+            } catch (e) {
+                // AudioContext autoplay restriction fallback
+            }
         }
 
-        function claimReward(pts) {
-            points += pts;
-            document.getElementById('user-points').innerText = points.toLocaleString();
-            alert(`مبروك! حصلت على +${pts} نقطة. مجموع نقاطك الآن: ${points}`);
+        function createConfettiBurst(x, y) {
+            const symbols = ['⭐', '✨', '⚡', '🎉', '💎', '🚀', '🔥', '+PTS'];
+            const colors = ['#FFD700', '#00D4FF', '#A855F7', '#FF4FD8', '#10B981'];
+            const count = 28;
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'reward-particle';
+                particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                particle.style.color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = `${x || window.innerWidth / 2}px`;
+                particle.style.top = `${y || window.innerHeight / 2}px`;
+                particle.style.fontSize = `${Math.floor(Math.random() * 14) + 14}px`;
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 160 + 60;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance - 40; // float slightly upwards
+                const rot = `${(Math.random() - 0.5) * 720}deg`;
+
+                particle.style.setProperty('--dx', `${dx}px`);
+                particle.style.setProperty('--dy', `${dy}px`);
+                particle.style.setProperty('--rot', rot);
+
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1400);
+            }
         }
 
+        function showRewardToast(title, desc, ptsEarned) {
+            const toast = document.getElementById('rewardToast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastDesc').textContent = desc;
+            document.getElementById('toastBadge').textContent = `+${ptsEarned} PTS`;
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3200);
+        }
+
+        function claimReward(basePts, event) {
+            // Apply streak bonus
+            const bonusPercent = Math.min(streakDays * 5, 50); // 5% per streak day up to 50%
+            const bonusPts = Math.round(basePts * (bonusPercent / 100));
+            const totalPts = basePts + bonusPts;
+
+            points += totalPts;
+            
+            // Animate points counter
+            const ptsElem = document.getElementById('user-points');
+            ptsElem.textContent = points.toLocaleString();
+            ptsElem.classList.remove('points-pulse');
+            void ptsElem.offsetWidth; // trigger reflow
+            ptsElem.classList.add('points-pulse');
+
+            // Trigger visual & audio animation
+            let clickX = window.innerWidth / 2;
+            let clickY = window.innerHeight / 2;
+            if (event && event.clientX) {
+                clickX = event.clientX;
+                clickY = event.clientY;
+            }
+            createConfettiBurst(clickX, clickY);
+            playSuccessChime();
+
+            // Display sleek toast notification
+            showRewardToast(
+                '🎉 إنجاز مذهل! مكافأة مكتملة',
+                `حصلت على ${basePts} نقطة أساسية + ${bonusPts} نقطة بفضل سلسلة الـ ${streakDays} أيام!`,
+                totalPts
+            );
+        }
+
+        // --- 2. Daily Login Streak Counter & Persistence ---
+        function initDailyStreak() {
+            try {
+                const storedStreak = localStorage.getItem('fmstar_streak_days');
+                const lastLoginDate = localStorage.getItem('fmstar_last_login');
+                const today = new Date().toISOString().split('T')[0];
+
+                if (storedStreak) {
+                    streakDays = parseInt(storedStreak, 10) || 5;
+                }
+
+                if (lastLoginDate) {
+                    const lastDate = new Date(lastLoginDate);
+                    const currDate = new Date(today);
+                    const diffDays = Math.floor((currDate - lastDate) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) {
+                        // Consecutive day visit
+                        streakDays++;
+                        localStorage.setItem('fmstar_streak_days', streakDays);
+                        localStorage.setItem('fmstar_last_login', today);
+                    } else if (diffDays > 1) {
+                        // Streak reset if missed a day
+                        streakDays = 1;
+                        localStorage.setItem('fmstar_streak_days', streakDays);
+                        localStorage.setItem('fmstar_last_login', today);
+                    }
+                } else {
+                    localStorage.setItem('fmstar_streak_days', streakDays);
+                    localStorage.setItem('fmstar_last_login', today);
+                }
+            } catch (e) {
+                streakDays = 5;
+            }
+
+            updateStreakUI();
+        }
+
+        function updateStreakUI() {
+            document.getElementById('streakCount').textContent = streakDays;
+            const bonus = Math.min(streakDays * 5, 50);
+            document.getElementById('streakBonusLabel').textContent = `(+${bonus}% مكافأة)`;
+        }
+
+        function checkDailyStreak(manualClick) {
+            const bonus = Math.min(streakDays * 5, 50);
+            if (manualClick) {
+                createConfettiBurst(window.innerWidth / 2, 80);
+                playSuccessChime();
+                showRewardToast(
+                    '🔥 سلسلة الحضور اليومي نشطة!',
+                    `أنت في اليوم ${streakDays} على التوالي! تمنحك السلسلة مكافأة مضاعفة قدرها +${bonus}% على كل تحدٍ تنجزه.`,
+                    bonus * 5
+                );
+            }
+        }
+
+        // --- 3. Interactive Service Modal & Details/Config ---
+        function openServiceModal(serviceKey) {
+            const config = serviceConfigs[serviceKey];
+            if (!config) return;
+
+            activeServiceKey = serviceKey;
+            document.getElementById('modalServiceIcon').textContent = config.icon;
+            document.getElementById('modalServiceName').textContent = config.title;
+            document.getElementById('modalNodeEndpoint').textContent = `العقدة السحابية: ${config.node}`;
+
+            const body = document.getElementById('modalConfigBody');
+            body.innerHTML = '';
+
+            config.fields.forEach(f => {
+                const row = document.createElement('div');
+                row.className = 'setting-row';
+
+                if (f.type === 'select') {
+                    row.innerHTML = `
+                        <label class="setting-label" for="cfg_${f.id}">${f.label}</label>
+                        <select class="setting-select" id="cfg_${f.id}">
+                            ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select>
+                    `;
+                } else if (f.type === 'slider') {
+                    row.innerHTML = `
+                        <div class="setting-label">
+                            <span>${f.label}</span>
+                            <span class="setting-val-display" id="val_${f.id}">${f.val} ${f.unit || ''}</span>
+                        </div>
+                        <div class="setting-slider-wrap">
+                            <input type="range" class="setting-slider" id="cfg_${f.id}" min="${f.min}" max="${f.max}" value="${f.val}" step="${f.step || 1}" oninput="document.getElementById('val_${f.id}').textContent = this.value + ' ${f.unit || ''}'">
+                        </div>
+                    `;
+                }
+
+                body.appendChild(row);
+            });
+
+            document.getElementById('serviceModalOverlay').classList.add('active');
+        }
+
+        function closeServiceModal(e) {
+            if (e && e.target && e.target.id !== 'serviceModalOverlay' && !e.target.classList.contains('modal-close-btn') && !e.target.classList.contains('btn-cancel-service')) {
+                return;
+            }
+            document.getElementById('serviceModalOverlay').classList.remove('active');
+        }
+
+        function applyServiceConfig() {
+            const btn = document.getElementById('btnSaveConfig');
+            btn.textContent = '⏳ جاري الاتصال بالعقدة...';
+            btn.style.filter = 'brightness(0.8)';
+
+            setTimeout(() => {
+                btn.textContent = '✓ تم الاتصال بنجاح!';
+                btn.style.filter = 'brightness(1.2)';
+                playSuccessChime();
+
+                setTimeout(() => {
+                    document.getElementById('serviceModalOverlay').classList.remove('active');
+                    btn.textContent = 'حفظ وتوصيل الخدمة ⚡';
+                    btn.style.filter = 'none';
+
+                    showRewardToast(
+                        '⚡ تم تحديث تكوين العقدة بنجاح',
+                        `تم ربط خدمة ${activeServiceKey} ومزامنة معايير المعالجة مع السحابة فورياً.`,
+                        25
+                    );
+                    points += 25;
+                    document.getElementById('user-points').textContent = points.toLocaleString();
+                }, 700);
+            }, 600);
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('serviceModalOverlay');
+                if (overlay) overlay.classList.remove('active');
+            }
+        });
+
+        // --- 4. Dynamic Telemetry & D3 Chart ---
         function renderNodes() {
             const container = document.getElementById('nodes-container');
+            if (!container) return;
             container.innerHTML = '';
             nodes.forEach(n => {
                 const isWarn = n.latency > 100;
@@ -168,10 +803,10 @@
             });
         }
 
-        // D3 Chart setup
         const chartData = [];
         function initChart() {
             const container = d3.select("#chart-container");
+            if (container.empty()) return;
             const svg = container.append("svg").attr("width", "100%").attr("height", "150");
             svg.append("path").attr("class", "line-cpu");
             svg.append("path").attr("class", "line-mem");
@@ -185,6 +820,7 @@
         }
 
         window.onload = () => {
+            initDailyStreak();
             renderNodes();
             initChart();
             setInterval(updateTelemetry, 2000);
