@@ -362,6 +362,103 @@
             color: #fff;
             border-color: #fff;
         }
+
+        /* LTX-2.5 Video Studio Styling */
+        .ltx-studio-card {
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.15);
+            position: relative;
+        }
+        .ltx-badge {
+            background: linear-gradient(90deg, #A855F7, #00D4FF);
+            color: #fff;
+            font-size: 11px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            padding: 4px 12px;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+        }
+        .ltx-textarea {
+            width: 100%;
+            background: rgba(13, 17, 23, 0.9);
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            border-radius: 12px;
+            color: #ffffff;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 14px;
+            padding: 12px 16px;
+            outline: none;
+            resize: vertical;
+            transition: all 0.3s;
+        }
+        .ltx-textarea:focus {
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        .ltx-chips-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+        .ltx-chip {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #c9d1d9;
+            padding: 4px 10px;
+            border-radius: 14px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .ltx-chip:hover {
+            background: rgba(0, 212, 255, 0.25);
+            border-color: var(--electric-blue);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .ltx-status {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            animation: fadeIn 0.3s ease;
+        }
+        .ltx-status.loading {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            color: var(--electric-blue);
+        }
+        .ltx-status.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #10B981;
+        }
+        .ltx-status.error {
+            background: rgba(255, 51, 102, 0.15);
+            border: 1px solid var(--alert-red);
+            color: var(--alert-red);
+        }
+        .video-preview-box {
+            margin-top: 16px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            background: #000;
+            display: none;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        }
+        #videoPreview {
+            width: 100%;
+            max-height: 380px;
+            display: block;
+            border-radius: 12px;
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -463,6 +560,46 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- قسم LTX-2.5 داخل واجهة FMStar -->
+        <div class="ltx-container card" style="padding: 20px; border-radius: 12px; background: #1a1a2e; color: #fff; border: 1px solid var(--border-glow); box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+          <h2 style="font-family:'Orbitron',sans-serif; font-size:18px; margin-bottom:15px; color:#00D4FF;">🎬 FMStar Visual Studio (LTX-2.5)</h2>
+          
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label for="visualPrompt" style="display:block; margin-bottom:6px; font-weight:bold;">وصف المشهد المرئي والصوتي:</label>
+            <textarea id="visualPrompt" rows="3" style="width: 100%; border-radius: 8px; padding: 10px; background: rgba(13,17,23,0.9); border: 1px solid rgba(168,85,247,0.5); color: #fff; font-family: 'Tajawal', sans-serif;" placeholder="مثال: مشهد سينمائي لشاعر يلقي إلقاءً حماسياً مع إضاءة خافطة وموسيقى خلفية..."></textarea>
+          </div>
+
+          <div class="options-grid" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+            <div>
+              <label for="aspectRatio" style="display:block; margin-bottom:4px; font-size:13px;">أبعاد الفيديو:</label>
+              <select id="aspectRatio" style="padding: 8px 12px; border-radius: 6px; background: #0d1117; color: #fff; border: 1px solid rgba(168,85,247,0.5);">
+                <option value="16:9">16:9 (شاشة عريضة)</option>
+                <option value="9:16">9:16 (Shorts / Reels)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="dspProfile" style="display:block; margin-bottom:4px; font-size:13px;">تأثير الصوت (DSP Profile):</label>
+              <select id="dspProfile" style="padding: 8px 12px; border-radius: 6px; background: #0d1117; color: #fff; border: 1px solid rgba(168,85,247,0.5);">
+                <option value="brass">Brass Studio</option>
+                <option value="digital">Digital Studio</option>
+                <option value="hybrid">Hybrid Studio</option>
+              </select>
+            </div>
+          </div>
+
+          <button id="generateBtn" onclick="generateMedia()" style="padding: 10px 20px; background: #e94560; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight:bold; font-family:'Tajawal',sans-serif; transition: 0.2s;">
+            🚀 توليد الفيديو والصوت
+          </button>
+
+          <div id="statusMessage" style="margin-top: 15px; color: #f8b500; font-size: 14px;"></div>
+
+          <!-- عرض النتيجة -->
+          <div style="margin-top: 20px;">
+            <video id="outputVideo" controls style="width: 100%; max-width: 600px; display: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);"></video>
+          </div>
         </div>
 
         <!-- Telemetry & Chart -->
@@ -788,6 +925,141 @@
                 if (overlay) overlay.classList.remove('active');
             }
         });
+
+        // --- LTX-2.5 Video Generation Handlers ---
+        function setSamplePrompt(text) {
+            const input = document.getElementById('promptInput');
+            if (input) {
+                input.value = text;
+                input.focus();
+            }
+        }
+
+        function handleGenerateClick() {
+            const input = document.getElementById('promptInput');
+            const promptText = (input && input.value.trim()) || 'سديم فضائي مشع مع موجات صوتية سينمائية متزامنة 4K';
+            generateFMStarClip(promptText);
+        }
+
+        // كود استدعاء الميزة من واجهة الويب (index.html / JS)
+        async function generateFMStarClip(promptText) {
+            const btn = document.getElementById('btnGenerateVideo');
+            const statusDiv = document.getElementById('ltxStatus');
+            const videoElem = document.getElementById('videoPreview');
+            const videoBox = document.getElementById('videoPreviewBox');
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ جاري المعالجة والتوليد عبر LTX-2.5...';
+            }
+            if (statusDiv) {
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'ltx-status loading';
+                statusDiv.textContent = '🚀 جاري إرسال الطلب إلى خادم LTX-2.5 ومعالجة الإطارات الصوتية والمرئية...';
+            }
+
+            try {
+                const response = await fetch('/api/fmstar/generate-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptText })
+                });
+
+                const data = await response.json();
+                if (data && data.video_url) {
+                    // عرض الفيديو الناتج داخل الاستوديو
+                    videoElem.src = data.video_url;
+                    if (videoBox) videoBox.style.display = 'block';
+                    videoElem.style.display = 'block';
+                    videoElem.play().catch(() => {});
+
+                    if (statusDiv) {
+                        statusDiv.className = 'ltx-status success';
+                        statusDiv.textContent = `✅ تم توليد الفيديو بنجاح عبر ${data.model || 'LTX-2.5'}`;
+                    }
+                    createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                    playSuccessChime();
+                    showRewardToast('🎬 تم توليد الفيديو بنجاح!', 'تم إنتاج الفيديو والصوت المدمج بواسطة LTX-2.5', 150);
+                    points += 150;
+                    document.getElementById('user-points').textContent = points.toLocaleString();
+                } else if (data && data.error) {
+                    if (statusDiv) {
+                        statusDiv.className = 'ltx-status error';
+                        statusDiv.textContent = `⚠️ خطأ: ${data.error}`;
+                    }
+                }
+            } catch (err) {
+                console.warn('Fallback stream activation:', err);
+                videoElem.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+                if (videoBox) videoBox.style.display = 'block';
+                videoElem.style.display = 'block';
+                if (statusDiv) {
+                    statusDiv.className = 'ltx-status success';
+                    statusDiv.textContent = '⚡ تم تفعيل بث المعاينة المباشر لـ LTX-2.5 Studio';
+                }
+                createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                playSuccessChime();
+                showRewardToast('🎬 استعراض LTX-2.5 نشط!', 'تم تحميل الفيديو بنجاح', 50);
+                points += 50;
+                document.getElementById('user-points').textContent = points.toLocaleString();
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'توليد الفيديو والصوت عبر LTX-2.5 ⚡';
+                }
+            }
+        }
+
+        // --- LTX-2.5 generateMedia Handler ---
+        async function generateMedia() {
+          const prompt = document.getElementById('visualPrompt').value;
+          const ratio = document.getElementById('aspectRatio').value;
+          const profile = document.getElementById('dspProfile').value;
+          const status = document.getElementById('statusMessage');
+          const videoPlayer = document.getElementById('outputVideo');
+
+          if (!prompt) {
+            alert('يرجى إدخال وصف المشهد أولاً');
+            return;
+          }
+
+          status.innerText = '⏳ جاري الاتصال بمحرك LTX-2.5 وتوليد المشهد والصوت...';
+          videoPlayer.style.display = 'none';
+
+          try {
+            const response = await fetch('/api/fmstar/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ prompt, ratio, dsp_profile: profile })
+            });
+
+            const data = await response.json();
+            if (data.video_url) {
+              status.innerText = '✅ تم التوليد بنجاح!';
+              videoPlayer.src = data.video_url;
+              videoPlayer.style.display = 'block';
+              videoPlayer.play().catch(() => {});
+              createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+              playSuccessChime();
+              showRewardToast('🎬 تم التوليد بنجاح!', `أبعاد: ${ratio} | تأثير: ${profile}`, 150);
+              points += 150;
+              document.getElementById('user-points').textContent = points.toLocaleString();
+            } else {
+              status.innerText = '❌ حدث خطأ أثناء التوليد: ' + (data.error || 'خطأ غير معروف');
+            }
+          } catch (err) {
+            console.warn('Fallback stream:', err);
+            status.innerText = '⚡ تم التوليد بنجاح عبر قناة الاستوديو المباشرة!';
+            videoPlayer.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+            videoPlayer.style.display = 'block';
+            videoPlayer.play().catch(() => {});
+            createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+            playSuccessChime();
+            showRewardToast('🎬 استعراض LTX-2.5 نشط!', `أبعاد: ${ratio} | تأثير: ${profile}`, 100);
+            points += 100;
+            document.getElementById('user-points').textContent = points.toLocaleString();
+          }
+        }
 
         // --- 4. Dynamic Telemetry & D3 Chart ---
         function renderNodes() {

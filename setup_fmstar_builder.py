@@ -1,4 +1,3 @@
-cat << 'EOF' > setup_fmstar_builder.py
 import os
 import sys
 import subprocess
@@ -59,6 +58,3 @@ def orchestrate_fmstar():
 
 if __name__ == "__main__":
     orchestrate_fmstar()
-EOF
-
-python setup_fmstar_builder.py

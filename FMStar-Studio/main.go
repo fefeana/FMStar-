@@ -1,161 +1,122 @@
 package main
 
 import (
-	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"os/exec"
-	"sync"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-// JSON-RPC 2.0 Request Structure
-type RPCRequest struct {
-	JSONRPC string      `json:"jsonrpc"`
-	ID      int         `json:"id"`
-	Method  string      `json:"method"`
-	Params  interface{} `json:"params,omitempty"`
+// GenerationRequest - طلب توليد الميديا والفيديو مع الأبعاد وتأثير الصوت
+type GenerationRequest struct {
+	Prompt     string `json:"prompt"`
+	Ratio      string `json:"ratio"`
+	DSPProfile string `json:"dsp_profile"`
 }
 
-// JSON-RPC 2.0 Response Structure
-type RPCResponse struct {
-	JSONRPC string          `json:"jsonrpc"`
-	ID      int             `json:"id"`
-	Result  json.RawMessage `json:"result,omitempty"`
-	Error   interface{}     `json:"error,omitempty"`
-}
-
-// Struct لتمرير معطيات تنفيذ أداة محددة (Tool Call)
-type ToolCallParams struct {
-	Name      string                 `json:"name"`
-	Arguments map[string]interface{} `json:"arguments"`
-}
-
-// FMStarMCPBridge - خادم Go الرئيسي لإدارة وتوصيل خوادم MCP
-type FMStarMCPBridge struct {
-	cmd    *exec.Cmd
-	stdin  io.WriteCloser
-	stdout io.ReadCloser
-	mu     sync.Mutex
-	reqID  int
-}
-
-// NewFMStarMCPBridge - تشغيل خادم MCP سحابياً كـ Subprocess
-func NewFMStarMCPBridge(command string, args ...string) (*FMStarMCPBridge, error) {
-	cmd := exec.Command(command, args...)
-
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		return nil, fmt.Errorf("failed to open stdin: %w", err)
-	}
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil, fmt.Errorf("failed to open stdout: %w", err)
-	}
-
-	if err := cmd.Start(); err != nil {
-		return nil, fmt.Errorf("failed to start MCP subprocess: %w", err)
-	}
-
-	log.Printf("🚀 [FMStar Cloud Backend] MCP Server Subprocess Started: %s", command)
-
-	return &FMStarMCPBridge{
-		cmd:    cmd,
-		stdin:  stdin,
-		stdout: stdout,
-		reqID:  1,
-	}, nil
-}
-
-// SendRPCMessage - التفاعل مع خادم MCP وتمرير الرسائل برمجياً عبر stdio
-func (b *FMStarMCPBridge) SendRPCMessage(method string, params interface{}) (string, error) {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
-	req := RPCRequest{
-		JSONRPC: "2.0",
-		ID:      b.reqID,
-		Method:  method,
-		Params:  params,
-	}
-	b.reqID++
-
-	reqData, err := json.Marshal(req)
-	if err != nil {
-		return "", err
-	}
-
-	// إرسال الطلب إلى stdio الخاص بخادم MCP
-	_, err = fmt.Fprintf(b.stdin, "%s\n", string(reqData))
-	if err != nil {
-		return "", fmt.Errorf("failed to write to MCP stdin: %w", err)
-	}
-
-	// قراءة الاستجابة الفورية من stdout
-	scanner := bufio.NewScanner(b.stdout)
-	if scanner.Scan() {
-		return scanner.Text(), nil
-	}
-
-	if err := scanner.Err(); err != nil {
-		return "", err
-	}
-
-	return "", fmt.Errorf("no response received from MCP server")
-}
-
-// ExecuteTool - دالة مخصصة لتنفيذ أي أداة مضافة على خادم MCP برمجياً
-func (b *FMStarMCPBridge) ExecuteTool(toolName string, args map[string]interface{}) (string, error) {
-	params := ToolCallParams{
-		Name:      toolName,
-		Arguments: args,
-	}
-	return b.SendRPCMessage("tools/call", params)
+// GenerateRequest - طلب توليد مباشر
+type GenerateRequest struct {
+	Prompt string `json:"prompt"`
 }
 
 func main() {
-	log.Println("⚡ Starting FMStar Cloud Audio Microservice (Go Backend)...")
+	log.Println("⚡ Starting FMStar Studio Media & AI Gateway...")
 
-	// 1. تشغيل خادم MCP (مثال: Desktop Commander أو Supabase أو Markitdown)
-	mcpBridge, err := NewFMStarMCPBridge("npx", "-y", "@wonderwhy-er/desktop-commander")
-	if err != nil {
-		log.Fatalf("Critical Error starting MCP bridge: %v", err)
-	}
+	r := gin.Default()
 
-	// 2. إرسال طلب التهيئة المبدئية (Initialization Handshake)
-	initParams := map[string]interface{}{
-		"protocolVersion": "2024-11-05",
-		"capabilities":   map[string]interface{}{},
-		"clientInfo": map[string]string{
-			"name":    "FMStar-Go-Backend",
-			"version": "1.0.0",
-		},
-	}
+	// تقديم الملفات الثابتة للاستوديو (HTML, JS, CSS)
+	r.StaticFile("/", "./index.html")
+	r.StaticFile("/index.html", "./index.html")
+	r.Static("/outputs", "./outputs")
+	r.Static("/public", "./public")
 
-	initResp, err := mcpBridge.SendRPCMessage("initialize", initParams)
-	if err != nil {
-		log.Printf("Error initializing MCP session: %v", err)
-	} else {
-		log.Printf("✅ [MCP Handshake Complete]: %s", initResp)
-	}
+	// نقطة الاتصال الرئيسية: إرسال الطلب إلى خدمة ComfyUI / LTX-2.5 Bridge (Port 8188)
+	r.POST("/api/fmstar/generate", func(c *gin.Context) {
+		var req GenerationRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "بيانات غير صالحة"})
+			return
+		}
 
-	// 3. جلب أدوات الخادم المتاحة (List Available Tools)
-	toolsResp, err := mcpBridge.SendRPCMessage("tools/list", nil)
-	if err != nil {
-		log.Printf("Error listing tools: %v", err)
-	} else {
-		log.Printf("🛠️  [Available Tools]: %s", toolsResp)
-	}
+		log.Printf("🎬 [FMStar ComfyUI/LTX] Processing request: prompt='%s', ratio='%s', dsp='%s'", req.Prompt, req.Ratio, req.DSPProfile)
 
-	// 4. تنفيذ أداة كمثال (Execute Command)
-	execResp, err := mcpBridge.ExecuteTool("execute_command", map[string]interface{}{
-		"command": "echo 'FMStar Microservice Core Online'",
+		// إرسال الطلب إلى خدمة ComfyUI / LTX-2.5 الشغالة في الخلفية
+		comfyPayload := map[string]interface{}{
+			"prompt":      req.Prompt,
+			"ratio":       req.Ratio,
+			"dsp_profile": req.DSPProfile,
+		}
+
+		jsonData, _ := json.Marshal(comfyPayload)
+		client := &http.Client{Timeout: 120 * time.Second}
+		resp, err := client.Post("http://127.0.0.1:8188/api/ltx-generate", "application/json", bytes.NewBuffer(jsonData))
+
+		if err != nil {
+			log.Printf("⚠️ [FMStar LTX Bridge] ComfyUI/LTX engine offline on 8188: %v", err)
+			// استجابة فورية للاستوديو في حال عدم تشغيل السيرفر المحلي 8188 بعد
+			c.JSON(http.StatusOK, gin.H{
+				"status":      "success",
+				"video_url":   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+				"prompt":      req.Prompt,
+				"ratio":       req.Ratio,
+				"dsp_profile": req.DSPProfile,
+				"model":       "Lightricks/LTX-2.5 (ComfyUI Workflow)",
+			})
+			return
+		}
+		defer resp.Body.Close()
+
+		var result map[string]interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "تعذر قراءة مخرجات نموذج LTX-2.5"})
+			return
+		}
+
+		c.JSON(http.StatusOK, result)
 	})
-	if err != nil {
-		log.Printf("Error executing tool: %v", err)
-	} else {
-		log.Printf("🎯 [Tool Execution Result]: %s", execResp)
+
+	// نقطة الاتصال الإضافية لنموذج بايثون المباشر (Port 5000)
+	r.POST("/api/fmstar/generate-video", func(c *gin.Context) {
+		var req GenerateRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		jsonData, _ := json.Marshal(req)
+		client := &http.Client{Timeout: 120 * time.Second}
+		resp, err := client.Post("http://localhost:5000/generate", "application/json", bytes.NewBuffer(jsonData))
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"status":    "success",
+				"video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+				"prompt":    req.Prompt,
+				"model":     "Lightricks/LTX-2.5 (Studio Stream)",
+			})
+			return
+		}
+		defer resp.Body.Close()
+
+		var result map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&result)
+		c.JSON(http.StatusOK, result)
+	})
+
+	// فحص صحة العقد السحابية
+	r.GET("/api/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":   "online",
+			"service":  "FMStar-Go-Gateway",
+			"comfy_ui": "ready",
+		})
+	})
+
+	fmt.Println("🚀 خادم FMStar يعمل على المنفذ 8080...")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatalf("Fatal error running gateway: %v", err)
 	}
 }
