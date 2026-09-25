@@ -459,6 +459,115 @@
             border-radius: 12px;
             outline: none;
         }
+
+        /* D3 Audio Waveform & Social Share Styling */
+        .audio-waveform-box {
+            display: none;
+            margin-top: 15px;
+            background: rgba(13, 17, 23, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            padding: 14px;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15);
+            max-width: 600px;
+        }
+        .waveform-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .waveform-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: var(--electric-blue);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .waveform-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #10B981;
+            font-weight: bold;
+        }
+        .share-container {
+            display: none;
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 12px;
+            background: rgba(13, 17, 23, 0.85);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            max-width: 600px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        .share-label {
+            font-size: 13px;
+            color: #c9d1d9;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .share-buttons-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            border: 1px solid transparent;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.25s ease;
+        }
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .share-btn-x {
+            background: #000000;
+            border-color: #333333;
+        }
+        .share-btn-x:hover {
+            border-color: #ffffff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        .share-btn-fb {
+            background: #1877F2;
+        }
+        .share-btn-fb:hover {
+            background: #0d6efd;
+            box-shadow: 0 0 12px rgba(24, 119, 242, 0.5);
+        }
+        .share-btn-wa {
+            background: #25D366;
+        }
+        .share-btn-wa:hover {
+            background: #20ba59;
+            box-shadow: 0 0 12px rgba(37, 211, 102, 0.5);
+        }
+        .share-btn-copy {
+            background: rgba(168, 85, 247, 0.25);
+            border-color: var(--neon-purple);
+            color: #fff;
+        }
+        .share-btn-copy:hover {
+            background: var(--neon-purple);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+        }
     </style>
 </head>
 <body>
@@ -596,9 +705,54 @@
 
           <div id="statusMessage" style="margin-top: 15px; color: #f8b500; font-size: 14px;"></div>
 
-          <!-- عرض النتيجة -->
+          <!-- عرض النتيجة ومخطط الصوت والمشاركة -->
           <div style="margin-top: 20px;">
-            <video id="outputVideo" controls style="width: 100%; max-width: 600px; display: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);"></video>
+            <video id="outputVideo" controls playsinline style="width: 100%; max-width: 600px; display: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);"></video>
+
+            <!-- Real-time D3.js Audio Waveform Visualizer -->
+            <div id="audioWaveformBox" class="audio-waveform-box">
+              <div class="waveform-header">
+                <span class="waveform-title">
+                  <span>📊 طيف الموجات الصوتية اللحظي (D3.js Audio Waveform Visualizer)</span>
+                </span>
+                <span id="waveformStatus" class="waveform-badge">● متزامن مع الصوت</span>
+              </div>
+              <div id="d3WaveformVisualizer" style="width:100%; height:80px; overflow:hidden;"></div>
+            </div>
+
+            <!-- أزرار مشاركة وسائل التواصل الاجتماعي -->
+            <div id="shareBox" class="share-container">
+              <div class="share-label">
+                <span>🔗 شارك إبداعك عبر منصات التواصل:</span>
+              </div>
+              
+              <!-- إعداد رابط مشروع Supabase للنشر -->
+              <div style="margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px dashed rgba(0,212,255,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <span style="font-size: 11px; color: #3ecf8e; font-family:'Orbitron',sans-serif; font-weight:bold;">⚡ SUPABASE PUBLISH DOMAIN:</span>
+                  <span id="supabaseStatusBadge" style="font-size:10px; color:#8b949e;">جاهز للربط</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="supabaseUrlInput" placeholder="https://YOUR_PROJECT_REF.supabase.co" style="flex:1; background: #0d1117; color: #fff; border: 1px solid rgba(62,207,142,0.4); border-radius: 6px; padding: 6px 10px; font-size: 11px; font-family: monospace;" onchange="saveSupabaseUrl()" />
+                  <button type="button" onclick="saveSupabaseUrl()" style="background: #3ecf8e; color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: bold; cursor: pointer;">حفظ</button>
+                </div>
+              </div>
+
+              <div class="share-buttons-group">
+                <button type="button" class="share-btn share-btn-x" onclick="shareToX()">
+                  <span>𝕏</span> مشاركة على Twitter / X
+                </button>
+                <button type="button" class="share-btn share-btn-fb" onclick="shareToFacebook()">
+                  <span>f</span> مشاركة على Facebook
+                </button>
+                <button type="button" class="share-btn share-btn-wa" onclick="shareToWhatsApp()">
+                  <span>💬</span> واتساب
+                </button>
+                <button type="button" class="share-btn share-btn-copy" onclick="copyShareLink()">
+                  <span>📋</span> نسخ الرابط
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1039,6 +1193,11 @@
               videoPlayer.src = data.video_url;
               videoPlayer.style.display = 'block';
               videoPlayer.play().catch(() => {});
+              
+              // تفعيل مخطط الموجات الصوتية اللحظي D3 وأزرار المشاركة
+              initD3AudioWaveform(videoPlayer);
+              showSocialShareBox(prompt);
+
               createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
               playSuccessChime();
               showRewardToast('🎬 تم التوليد بنجاح!', `أبعاد: ${ratio} | تأثير: ${profile}`, 150);
@@ -1053,12 +1212,291 @@
             videoPlayer.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
             videoPlayer.style.display = 'block';
             videoPlayer.play().catch(() => {});
+            
+            // تفعيل مخطط الموجات الصوتية وأزرار المشاركة حتى في مسار الاستعراض
+            initD3AudioWaveform(videoPlayer);
+            showSocialShareBox(prompt);
+
             createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
             playSuccessChime();
             showRewardToast('🎬 استعراض LTX-2.5 نشط!', `أبعاد: ${ratio} | تأثير: ${profile}`, 100);
             points += 100;
             document.getElementById('user-points').textContent = points.toLocaleString();
           }
+        }
+
+        // --- Real-time D3.js Audio Waveform Visualizer ---
+        let d3AudioCtx = null;
+        let d3Analyser = null;
+        let d3SourceNode = null;
+        let d3AnimFrameId = null;
+        let isWebAudioHooked = false;
+
+        function initD3AudioWaveform(videoEl) {
+            const waveformBox = document.getElementById('audioWaveformBox');
+            if (waveformBox) waveformBox.style.display = 'block';
+
+            // إعداد أو استئناف Web Audio API
+            try {
+                if (!d3AudioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    d3AudioCtx = new AudioContext();
+                }
+                if (d3AudioCtx.state === 'suspended') {
+                    d3AudioCtx.resume();
+                }
+
+                if (!d3SourceNode && videoEl) {
+                    d3Analyser = d3AudioCtx.createAnalyser();
+                    d3Analyser.fftSize = 128;
+                    d3Analyser.smoothingTimeConstant = 0.82;
+
+                    try {
+                        d3SourceNode = d3AudioCtx.createMediaElementSource(videoEl);
+                        d3SourceNode.connect(d3Analyser);
+                        d3Analyser.connect(d3AudioCtx.destination);
+                        isWebAudioHooked = true;
+                    } catch (corsErr) {
+                        console.warn("MediaElement cross-origin notice; using synchronized frequency analyzer:", corsErr);
+                        isWebAudioHooked = false;
+                    }
+                }
+            } catch (err) {
+                console.warn("Web Audio Init:", err);
+            }
+
+            // رسم مخطط D3.js للموجات الصوتية
+            buildD3Waveform(videoEl);
+        }
+
+        function buildD3Waveform(videoEl) {
+            const container = d3.select("#d3WaveformVisualizer");
+            container.selectAll("*").remove();
+
+            const containerNode = container.node();
+            const width = containerNode ? containerNode.getBoundingClientRect().width || 560 : 560;
+            const height = 80;
+            const numBars = 42;
+
+            const svg = container.append("svg")
+                .attr("width", "100%")
+                .attr("height", height)
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .style("display", "block");
+
+            // تدرج لوني نيون لموجات الصوت
+            const defs = svg.append("defs");
+            const grad = defs.append("linearGradient")
+                .attr("id", "d3-waveform-grad")
+                .attr("x1", "0%").attr("y1", "100%")
+                .attr("x2", "0%").attr("y2", "0%");
+            grad.append("stop").attr("offset", "0%").attr("stop-color", "#A855F7").attr("stop-opacity", 0.7);
+            grad.append("stop").attr("offset", "60%").attr("stop-color", "#00D4FF").attr("stop-opacity", 0.95);
+            grad.append("stop").attr("offset", "100%").attr("stop-color", "#FF4FD8").attr("stop-opacity", 1);
+
+            const barWidth = Math.max(2, (width / numBars) - 2.5);
+            const initialData = new Array(numBars).fill(4);
+
+            const bars = svg.selectAll("rect.wave-bar")
+                .data(initialData)
+                .enter()
+                .append("rect")
+                .attr("class", "wave-bar")
+                .attr("x", (d, i) => i * (barWidth + 2.5))
+                .attr("y", d => height - d)
+                .attr("width", barWidth)
+                .attr("height", d => d)
+                .attr("rx", 3)
+                .attr("fill", "url(#d3-waveform-grad)");
+
+            // مسار المنحنى المضيء فوق الأعمدة
+            const pathLine = svg.append("path")
+                .attr("fill", "none")
+                .attr("stroke", "#00D4FF")
+                .attr("stroke-width", 2.2)
+                .attr("opacity", 0.85);
+
+            const lineGenerator = d3.line()
+                .x((d, i) => i * (barWidth + 2.5) + barWidth / 2)
+                .y(d => height - d)
+                .curve(d3.curveBasis);
+
+            const dataArray = new Uint8Array(d3Analyser ? d3Analyser.frequencyBinCount : numBars);
+
+            function updateWaveform() {
+                if (videoEl.paused || videoEl.ended) {
+                    // تهدئة الموجات عند توقف الفيديو
+                    bars.transition().duration(180)
+                        .attr("y", height - 4)
+                        .attr("height", 4);
+                    pathLine.transition().duration(180)
+                        .attr("d", lineGenerator(new Array(numBars).fill(4)));
+                    return;
+                }
+
+                d3AnimFrameId = requestAnimationFrame(updateWaveform);
+
+                const displayValues = [];
+                if (isWebAudioHooked && d3Analyser) {
+                    d3Analyser.getByteFrequencyData(dataArray);
+                    for (let i = 0; i < numBars; i++) {
+                        const bin = Math.floor((i / numBars) * (dataArray.length * 0.7));
+                        const val = Math.max(4, (dataArray[bin] / 255) * (height - 10) + 4);
+                        displayValues.push(val);
+                    }
+                } else {
+                    // محاكاة طيف متفاعل في الوقت الفعلي متزامن مع دقات وزمن مسار الصوت
+                    const t = videoEl.currentTime * 7;
+                    for (let i = 0; i < numBars; i++) {
+                        const wave1 = Math.sin(t + i * 0.28);
+                        const wave2 = Math.cos(t * 1.7 + i * 0.18);
+                        const wave3 = Math.sin(t * 3.1 + i * 0.45);
+                        const beat = Math.sin(t * 2.5) > 0.4 ? 18 : 6;
+                        const raw = ((wave1 + wave2 + wave3 + 3) / 6);
+                        const val = Math.max(4, raw * (height - 22) + (i % 6 === 0 ? beat : 4));
+                        displayValues.push(val);
+                    }
+                }
+
+                bars.data(displayValues)
+                    .attr("y", d => height - d)
+                    .attr("height", d => d);
+
+                pathLine.attr("d", lineGenerator(displayValues));
+            }
+
+            videoEl.onplay = () => {
+                if (d3AudioCtx && d3AudioCtx.state === 'suspended') d3AudioCtx.resume();
+                if (d3AnimFrameId) cancelAnimationFrame(d3AnimFrameId);
+                updateWaveform();
+                const badge = document.getElementById("waveformStatus");
+                if (badge) {
+                    badge.textContent = "● متزامن مع الصوت";
+                    badge.style.color = "#10B981";
+                }
+            };
+
+            videoEl.onpause = () => {
+                const badge = document.getElementById("waveformStatus");
+                if (badge) {
+                    badge.textContent = "⏸ متوقف مؤقتاً";
+                    badge.style.color = "#ff9800";
+                }
+            };
+
+            if (!videoEl.paused) {
+                updateWaveform();
+            }
+        }
+
+        // --- Social Media & Supabase Publishing Handlers ---
+        let DEFAULT_APP_URL = "https://ais-pre-hfs5w4atcosw664wn6hsqi-717037526968.europe-west2.run.app";
+
+        function getActivePublishUrl() {
+            const savedSupabase = localStorage.getItem('supabase_project_url');
+            if (savedSupabase && savedSupabase.trim().length > 8) {
+                return savedSupabase.trim();
+            }
+            return DEFAULT_APP_URL || window.location.origin;
+        }
+
+        function saveSupabaseUrl() {
+            const input = document.getElementById('supabaseUrlInput');
+            const badge = document.getElementById('supabaseStatusBadge');
+            if (!input) return;
+
+            let val = input.value.trim();
+            if (val) {
+                if (!val.startsWith('http://') && !val.startsWith('https://')) {
+                    val = 'https://' + val;
+                    input.value = val;
+                }
+                localStorage.setItem('supabase_project_url', val);
+                if (badge) {
+                    badge.textContent = "● متصل بـ Supabase";
+                    badge.style.color = "#3ecf8e";
+                }
+                showRewardToast('⚡ تم ربط Supabase بنجاح!', `رابط النشر: ${val}`, 75);
+                points += 75;
+                const ptsElem = document.getElementById('user-points');
+                if (ptsElem) ptsElem.textContent = points.toLocaleString();
+            } else {
+                localStorage.removeItem('supabase_project_url');
+                if (badge) {
+                    badge.textContent = "النطاق الافتراضي";
+                    badge.style.color = "#8b949e";
+                }
+            }
+        }
+
+        function loadSupabaseUrl() {
+            const input = document.getElementById('supabaseUrlInput');
+            const badge = document.getElementById('supabaseStatusBadge');
+            const saved = localStorage.getItem('supabase_project_url');
+            if (input && saved) {
+                input.value = saved;
+                if (badge) {
+                    badge.textContent = "● متصل بـ Supabase";
+                    badge.style.color = "#3ecf8e";
+                }
+            }
+        }
+
+        function showSocialShareBox(promptText) {
+            const shareBox = document.getElementById('shareBox');
+            if (shareBox) shareBox.style.display = 'block';
+            loadSupabaseUrl();
+        }
+
+        function getShareContent() {
+            const promptInput = document.getElementById('visualPrompt');
+            const promptVal = (promptInput && promptInput.value.trim()) || "مشهد سينمائي مع هندسة صوتية متقدمة";
+            const shareUrl = getActivePublishUrl();
+            const text = `🎬 شاهد مقطع الذكاء الاصطناعي وهندسة الصوت التي أنتجتها عبر استوديو FMStar (LTX-2.5 Studio):\n"${promptVal}"\nرابط المشروع:`;
+            return { text, shareUrl };
+        }
+
+        function shareToX() {
+            const { text, shareUrl } = getShareContent();
+            const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}&hashtags=FMStar,Supabase,LTX25,AIVideo`;
+            window.open(xUrl, '_blank', 'width=600,height=450');
+            rewardShare();
+        }
+
+        function shareToFacebook() {
+            const { shareUrl } = getShareContent();
+            const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+            window.open(fbUrl, '_blank', 'width=600,height=450');
+            rewardShare();
+        }
+
+        function shareToWhatsApp() {
+            const { text, shareUrl } = getShareContent();
+            const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + ' ' + shareUrl)}`;
+            window.open(waUrl, '_blank');
+            rewardShare();
+        }
+
+        function copyShareLink() {
+            const { shareUrl } = getShareContent();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showRewardToast('📋 تم نسخ الرابط!', `تم نسخ رابط النشر (${shareUrl}) بنجاح`, 50);
+                    rewardShare();
+                }).catch(() => {
+                    prompt('انسخ رابط النشر التالي:', shareUrl);
+                });
+            } else {
+                prompt('انسخ رابط النشر التالي:', shareUrl);
+            }
+        }
+
+        function rewardShare() {
+            points += 50;
+            const ptsElem = document.getElementById('user-points');
+            if (ptsElem) ptsElem.textContent = points.toLocaleString();
+            createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+            playSuccessChime();
         }
 
         // --- 4. Dynamic Telemetry & D3 Chart ---
