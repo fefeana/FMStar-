@@ -314,12 +314,16 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
             return
 
-        if self.path == '/api/creations/batch-download' or self.path == '/api/v1/creations/batch-download':
+        if self.path in ('/api/creations/batch-download', '/api/v1/creations/batch-download', '/api/creations/download-zip'):
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
                 post_data = self.rfile.read(content_length)
-                file_list = json.loads(post_data.decode('utf-8'))
-                if not isinstance(file_list, list):
+                req_data = json.loads(post_data.decode('utf-8')) if post_data else []
+                if isinstance(req_data, dict):
+                    file_list = req_data.get('file_paths', [])
+                elif isinstance(req_data, list):
+                    file_list = req_data
+                else:
                     file_list = []
 
                 zip_buffer = io.BytesIO()

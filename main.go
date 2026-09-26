@@ -1,15 +1,35 @@
 package main
 
 import (
+	"archive/zip"
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+type DownloadRequest struct {
+	FilePaths []string `json:"file_paths"`
+}
+
+type Creation struct {
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Type     string `json:"type"` // "poetry" or "song"
+	FilePath string `json:"file_path"`
+}
+
+var sampleCreations = []Creation{
+	{ID: "1", Title: "قصيدة النجم", Type: "poetry", FilePath: "uploads/poetry1.txt"},
+	{ID: "2", Title: "أغنية الأمل", Type: "song", FilePath: "uploads/song1.mp3"},
+}
 
 // Config - إعدادات بيئة تشغيل السيرفر والمفاتيح
 type Config struct {
@@ -92,6 +112,9 @@ func main() {
 	http.HandleFunc("/api/v1/config/status", app.handleConfigStatus)
 	http.HandleFunc("/api/v1/tracks", app.handleSaveTrack)
 	http.HandleFunc("/api/v1/tracks/recent", app.handleGetRecentTracks)
+	http.HandleFunc("/api/creations/download-zip", DownloadBatchZipHandler)
+	http.HandleFunc("/api/creations/batch-download", DownloadBatchZipHandler)
+	http.HandleFunc("/api/creations/search", SearchHandler)
 	http.HandleFunc("/health", app.handleHealth)
 
 	port := getEnvOrDefault("PORT", "8080")
@@ -218,4 +241,77 @@ func (app *Application) handleHealth(w http.ResponseWriter, r *http.Request) {
 		"database":  dbStatus,
 		"framework": "Go bare-metal",
 	})
+}
+
+// 1. Endpoint: Zipping Multiple Creation Files
+func DownloadBatchZipHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req DownloadRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || len(req.FilePaths) == 0 {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", "attachment; filename=\"fmstar_creations.zip\"")
+
+	zipWriter := zip.NewWriter(w)
+	defer zipWriter.Close()
+
+	for _, path := range req.FilePaths {
+		cleanPath := filepath.Clean(path)
+		fileToZip, err := os.Open(cleanPath)
+		if err != nil {
+			continue
+		}
+
+		writer, err := zipWriter.Create(filepath.Base(cleanPath))
+		if err != nil {
+			fileToZip.Close()
+			continue
+		}
+
+		_, err = io.Copy(writer, fileToZip)
+		fileToZip.Close()
+	}
+}
+
+// 2. Function: Search & Filter Creations
+func SearchAndFilterCreations(query string, creationType string) []Creation {
+	var filtered []Creation
+	query = strings.ToLower(strings.TrimSpace(query))
+	creationType = strings.ToLower(strings.TrimSpace(creationType))
+
+	for _, item := range sampleCreations {
+		matchesQuery := query == "" || strings.Contains(strings.ToLower(item.Title), query)
+		matchesType := creationType == "" || creationType == "all" || strings.ToLower(item.Type) == creationType
+
+		if matchesQuery && matchesType {
+			filtered = append(filtered, item)
+		}
+	}
+	return filtered
+}
+
+func SearchHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+
+	query := r.URL.Query().Get("q")
+	cType := r.URL.Query().Get("type")
+
+	results := SearchAndFilterCreations(query, cType)
+	json.NewEncoder(w).Encode(results)
 }
