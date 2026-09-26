@@ -126,6 +126,76 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 pass
             return
 
+        if self.path == '/api/generate':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                req = json.loads(post_data.decode('utf-8'))
+                mode = req.get('mode', 'poetry')
+                text = req.get('text', '')
+                dialect = req.get('dialect', 'fus_ha_modern')
+                gender = req.get('gender', 'male')
+
+                from poetry_engine import generate_poetry_recitation
+                from song_engine import generate_song_music
+
+                if mode == "song":
+                    audio_file = generate_song_music(text=text)
+                    res_data = {
+                        "status": "success",
+                        "mode": "song",
+                        "audio_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                        "audio_file": audio_file
+                    }
+                elif mode == "poetry":
+                    audio_file = generate_poetry_recitation(text=text, dialect=dialect, gender=gender)
+                    res_data = {
+                        "status": "success",
+                        "mode": "poetry",
+                        "dialect": dialect,
+                        "gender": gender,
+                        "audio_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                        "audio_file": audio_file
+                    }
+                else:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"detail": "نوع الخيار غير معروف"}).encode('utf-8'))
+                    return
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
+        if self.path == '/api/evaluate':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                req = json.loads(post_data.decode('utf-8'))
+                content = req.get('content', req.get('text', ''))
+                model = req.get('model', 'respan/span-01-lite')
+
+                from respan_evaluator import evaluate_response_respan
+                eval_result = evaluate_response_respan(content=content, model=model)
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(eval_result, ensure_ascii=False).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
         if self.path == '/api/v1/tracks':
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
@@ -320,6 +390,10 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                     }
                 ]).encode('utf-8'))
                 return
+
+            if path_only in ['/jm-studio', '/jm-studio/', '/jm_studio', '/jm_studio/', '/studio', '/studio/']:
+                self.path = '/jm_studio.html'
+                return super().do_GET()
 
             if self.path == '/' or self.path == '':
                 self.path = '/index.html'
