@@ -568,6 +568,224 @@
             background: var(--neon-purple);
             box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
         }
+
+        /* Download & Metadata Sidecar Styles */
+        .download-box {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.35);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        .btn-download-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #00D4FF 0%, #0088FF 100%);
+            color: #000;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 9px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: 'Tajawal', sans-serif;
+            text-decoration: none;
+        }
+        .btn-download-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.5);
+            color: #000;
+        }
+        .btn-download-sidecar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(168, 85, 247, 0.25);
+            border: 1px solid var(--neon-purple);
+            color: #fff;
+            font-size: 12px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.2s ease;
+        }
+        .btn-download-sidecar:hover {
+            background: var(--neon-purple);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+        }
+
+        /* Recent Creations Section */
+        .recent-creations-container {
+            margin-top: 25px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(10, 14, 26, 0.85);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+        }
+        .recent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+        .recent-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: #00D4FF;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .recent-badge-count {
+            background: rgba(168, 85, 247, 0.3);
+            border: 1px solid var(--neon-purple);
+            color: #FFD700;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .recent-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(22, 27, 34, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 10px 14px;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+        .recent-card:hover {
+            border-color: rgba(0, 212, 255, 0.4);
+            transform: translateX(-3px);
+        }
+        .recent-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .recent-prompt {
+            font-size: 13px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+        .recent-meta-tags {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #8b949e;
+            flex-wrap: wrap;
+        }
+        .recent-tag {
+            background: rgba(0, 212, 255, 0.15);
+            color: #00D4FF;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .recent-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .btn-recent-action {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-recent-action:hover {
+            background: #00D4FF;
+            color: #000;
+            border-color: #00D4FF;
+        }
+
+        /* CSS Animation للمقطع الجديد في Recent Creations */
+        @keyframes highlightNewCreation {
+          0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); /* لون بنفسجي أثيري */
+            border-color: #7c3aed;
+          }
+          50% {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px 5px rgba(124, 58, 237, 0.5);
+          }
+          100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+          }
+        }
+
+        /* الكلاس الذي يُضاف للمقطع المولد حديثاً */
+        .new-creation-card {
+          animation: highlightNewCreation 1.5s ease-out;
+          border: 2px solid #7c3aed !important;
+          border-radius: 12px;
+        }
+
+        /* أزرار وحقول المشاركة السريعة في بطاقة الإبداع */
+        .recent-share-bar {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-top: 8px;
+          padding-top: 6px;
+          border-top: 1px dashed rgba(255, 255, 255, 0.1);
+          flex-wrap: wrap;
+        }
+        .recent-share-input {
+          flex: 1;
+          min-width: 140px;
+          background: rgba(0, 0, 0, 0.4);
+          border: 1px solid rgba(124, 58, 237, 0.4);
+          color: #00D4FF;
+          font-size: 11px;
+          padding: 4px 8px;
+          border-radius: 6px;
+          outline: none;
+          font-family: monospace;
+        }
+        .recent-social-links {
+          display: flex;
+          gap: 4px;
+        }
+        .social-pill {
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-size: 10px;
+          text-decoration: none;
+          color: #fff;
+          font-weight: 500;
+          transition: all 0.2s ease;
+          display: inline-block;
+        }
+        .social-pill.wa { background: #25D366; color: #000; font-weight: bold; }
+        .social-pill.tw { background: #1DA1F2; }
+        .social-pill.tg { background: #0088cc; }
+        .social-pill:hover { opacity: 0.85; transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -752,6 +970,30 @@
                   <span>📋</span> نسخ الرابط
                 </button>
               </div>
+            </div>
+
+            <!-- أزرار تحميل الوسائط وملف البيانات الميتا JSON Sidecar -->
+            <div id="downloadBox" class="download-box" style="display: none;">
+              <button type="button" class="btn-download-main" id="btnDownloadMedia" onclick="downloadCurrentMediaWithSidecar()">
+                <span>💾</span> تحميل المقطع مع ملف البيانات (JSON Sidecar)
+              </button>
+              <button type="button" class="btn-download-sidecar" id="btnDownloadSidecar" onclick="downloadCurrentSidecarOnly()">
+                <span>📄</span> تحميل ملف JSON Sidecar فقط
+              </button>
+            </div>
+          </div>
+
+          <!-- قسم وسجل أحدث الإبداعات (Recent Creations - Last 5) -->
+          <div class="recent-creations-container">
+            <div class="recent-header">
+              <div class="recent-title">
+                <span>📁</span>
+                <span>أحدث الإبداعات (Recent Creations)</span>
+              </div>
+              <span class="recent-badge-count" id="recentCreationsCount">0 / 5</span>
+            </div>
+            <div id="recentCreationsList" class="recent-list">
+              <div style="font-size:12px; color:#8b949e; text-align:center; padding:12px;">لا توجد إبداعات سابقة محفوظة في التخزين المحلي، قم بتوليد مقطعك الأول الآن! 🚀</div>
             </div>
           </div>
         </div>
@@ -1164,7 +1406,9 @@
             }
         }
 
-        // --- LTX-2.5 generateMedia Handler ---
+        // --- LTX-2.5 generateMedia Handler with JSON Sidecar & Recent Creations ---
+        let currentActiveCreation = null;
+
         async function generateMedia() {
           const prompt = document.getElementById('visualPrompt').value;
           const ratio = document.getElementById('aspectRatio').value;
@@ -1194,9 +1438,25 @@
               videoPlayer.style.display = 'block';
               videoPlayer.play().catch(() => {});
               
-              // تفعيل مخطط الموجات الصوتية اللحظي D3 وأزرار المشاركة
+              // تفعيل مخطط الموجات الصوتية اللحظي D3 وأزرار المشاركة والتحميل
               initD3AudioWaveform(videoPlayer);
               showSocialShareBox(prompt);
+
+              // إعداد وتخزين المقطع في الإبداعات الحديثة وتفعيل زر التنزيل
+              const creationObj = {
+                id: 'creation_' + Date.now(),
+                date: new Date().toISOString(),
+                displayDate: new Date().toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                prompt: prompt,
+                dsp_profile: profile,
+                aspect_ratio: ratio,
+                media_url: data.video_url,
+                model: data.model || 'LTX-2.5',
+                share_data: data.share_data
+              };
+              currentActiveCreation = creationObj;
+              saveCreationToRecent(creationObj);
+              showDownloadBox(creationObj);
 
               createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
               playSuccessChime();
@@ -1209,7 +1469,8 @@
           } catch (err) {
             console.warn('Fallback stream:', err);
             status.innerText = '⚡ تم التوليد بنجاح عبر قناة الاستوديو المباشرة!';
-            videoPlayer.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+            const fallbackUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+            videoPlayer.src = fallbackUrl;
             videoPlayer.style.display = 'block';
             videoPlayer.play().catch(() => {});
             
@@ -1217,11 +1478,318 @@
             initD3AudioWaveform(videoPlayer);
             showSocialShareBox(prompt);
 
+            const creationObj = {
+              id: 'creation_' + Date.now(),
+              date: new Date().toISOString(),
+              displayDate: new Date().toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+              prompt: prompt,
+              dsp_profile: profile,
+              aspect_ratio: ratio,
+              media_url: fallbackUrl,
+              model: 'LTX-2.5 Preview Engine'
+            };
+            currentActiveCreation = creationObj;
+            saveCreationToRecent(creationObj);
+            showDownloadBox(creationObj);
+
             createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
             playSuccessChime();
             showRewardToast('🎬 استعراض LTX-2.5 نشط!', `أبعاد: ${ratio} | تأثير: ${profile}`, 100);
             points += 100;
             document.getElementById('user-points').textContent = points.toLocaleString();
+          }
+        }
+
+        // --- Download Handlers with JSON Sidecar Metadata ---
+        function showDownloadBox(creation) {
+          const dlBox = document.getElementById('downloadBox');
+          if (dlBox) {
+            dlBox.style.display = 'flex';
+          }
+        }
+
+        function downloadCurrentMediaWithSidecar() {
+          if (!currentActiveCreation) return;
+          downloadMediaWithSidecar(currentActiveCreation);
+        }
+
+        function downloadCurrentSidecarOnly() {
+          if (!currentActiveCreation) return;
+          downloadSidecarJson(currentActiveCreation);
+        }
+
+        function downloadSidecarJson(creation) {
+          const sidecar = {
+            title: "FMStar Studio Audio/Video Creation",
+            id: creation.id,
+            date: creation.date,
+            prompt: creation.prompt,
+            dsp_profile: creation.dsp_profile,
+            aspect_ratio: creation.aspect_ratio || "16:9",
+            media_url: creation.media_url,
+            engine: "LTX-2.5 Video & Go Audio DSP Core",
+            version: "2.5",
+            metadata: {
+              app: "FMStar Creative Studio",
+              exported_at: new Date().toISOString()
+            }
+          };
+          const blob = new Blob([JSON.stringify(sidecar, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          const safeName = (creation.prompt || "creation").slice(0, 24).replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
+          link.href = url;
+          link.download = `fmstar_${safeName}_metadata.json`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+          showRewardToast('📄 تم حفظ الميتا', 'تم تحميل ملف JSON Sidecar بنجاح', 15);
+        }
+
+        function downloadMediaWithSidecar(creation) {
+          downloadSidecarJson(creation);
+
+          if (creation.media_url) {
+            const link = document.createElement("a");
+            const safeName = (creation.prompt || "creation").slice(0, 24).replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
+            link.href = creation.media_url;
+            link.download = `fmstar_${safeName}.mp4`;
+            link.target = "_blank";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          }
+
+          showRewardToast('💾 تم بدء التحميل!', 'تم تنزيل المقطع الصوتي/المرئي مع ملف JSON Sidecar بنجاح', 30);
+          points += 30;
+          const ptsElem = document.getElementById('user-points');
+          if (ptsElem) ptsElem.textContent = points.toLocaleString();
+        }
+
+        // --- Recent Creations (Local Storage Persistence - Max 5) with Animation & Social Share ---
+        function saveCreationToRecent(creation) {
+          try {
+            // ضمان وجود shareData
+            if (!creation.share_data) {
+              const uniqueId = (creation.id || 'cr_' + Date.now()).replace('creation_', '').slice(0, 8);
+              const shareLink = `https://fmstar.app/s/${uniqueId}`;
+              const shareText = `استمع إلى إبداعي الجديد '${creation.prompt}' عبر صوت الأثير في FMStar! 🎧✨\n${shareLink}`;
+              creation.share_data = {
+                creation_id: uniqueId,
+                share_link: shareLink,
+                social_links: {
+                  whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`,
+                  x_twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
+                  telegram: `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(creation.prompt)}`
+                }
+              };
+            }
+
+            let recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+            recents = recents.filter(item => item.id !== creation.id && item.prompt !== creation.prompt);
+            recents.unshift(creation);
+            recents = recents.slice(0, 5);
+            localStorage.setItem('fmstar_recent_creations', JSON.stringify(recents));
+            
+            // إضافة مع التأثير البصري المباشر
+            addRecentCreation(creation.prompt, creation.media_url, creation.share_data, creation.id);
+          } catch (e) {
+            console.warn('Recent creations storage error', e);
+          }
+        }
+
+        // دالة إضافة المقطع المولد حديثاً إلى الواجهة مع التأثير البصري ورابط المشاركة
+        function addRecentCreation(trackTitle, audioUrl, shareData, creationId) {
+          const recentList = document.getElementById('recentCreationsList');
+          const countBadge = document.getElementById('recentCreationsCount');
+          if (!recentList) return;
+
+          let recents = [];
+          try {
+            recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+          } catch(e) {}
+          if (countBadge) countBadge.textContent = `${recents.length} / 5`;
+
+          // إزالة رسالة القائمة الفارغة إن وجدت
+          if (recentList.children.length === 1 && recentList.firstElementChild.innerText.includes('لا توجد إبداعات')) {
+            recentList.innerHTML = '';
+          }
+
+          // التحقق مما إذا كان العنصر موجوداً بالفعل لتجنب التكرار في القائمة
+          const existingCard = document.getElementById(`card-${creationId}`);
+          if (existingCard) {
+            existingCard.remove();
+          }
+
+          // إنشاء عنصر المقطع الجديد مع كلاس الأنيميشن
+          const card = document.createElement('div');
+          card.id = `card-${creationId}`;
+          card.className = 'recent-card new-creation-card'; // إضافة كلاس التأثير البصري
+
+          const shareLink = shareData && shareData.share_link ? shareData.share_link : `https://fmstar.app/s/${creationId}`;
+          const waLink = shareData && shareData.social_links ? shareData.social_links.whatsapp : `https://api.whatsapp.com/send?text=${encodeURIComponent(trackTitle + ' ' + shareLink)}`;
+          const twLink = shareData && shareData.social_links ? shareData.social_links.x_twitter : `https://twitter.com/intent/tweet?text=${encodeURIComponent(trackTitle + ' ' + shareLink)}`;
+          const tgLink = shareData && shareData.social_links ? shareData.social_links.telegram : `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(trackTitle)}`;
+
+          card.innerHTML = `
+            <div style="width: 100%;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div class="recent-info">
+                  <div class="recent-prompt" title="${trackTitle}">🎬 ${trackTitle}</div>
+                  <div class="recent-meta-tags">
+                    <span class="recent-tag">✨ حديث</span>
+                    <span>🕒 الآن</span>
+                  </div>
+                </div>
+                <div class="recent-actions">
+                  <button type="button" class="btn-recent-action" onclick="loadRecentCreation('${creationId}')" title="معاينة وتشغيل">
+                    ▶️ تشغيل
+                  </button>
+                  <button type="button" class="btn-recent-action" onclick="downloadSpecificCreation('${creationId}')" title="تحميل">
+                    💾 حفظ
+                  </button>
+                </div>
+              </div>
+
+              <!-- قسم النشر التلقائي ومشاركة الرابط الفريد -->
+              <div class="recent-share-bar">
+                <input type="text" readonly value="${shareLink}" id="link-${creationId}" class="recent-share-input">
+                <button type="button" class="btn-recent-action" onclick="navigator.clipboard.writeText('${shareLink}'); showRewardToast('🔗 تم نسخ الرابط', 'تم نسخ الرابط الفريد للحافظة!', 10);" style="padding: 4px 8px; font-size: 10px;">نسخ الرابط 🔗</button>
+                
+                <!-- أزرار النشر السريع -->
+                <div class="recent-social-links">
+                  <a href="${waLink}" target="_blank" class="social-pill wa" title="واتساب">واتساب</a>
+                  <a href="${twLink}" target="_blank" class="social-pill tw" title="إكس">إكس</a>
+                  <a href="${tgLink}" target="_blank" class="social-pill tg" title="تيليجرام">تيليجرام</a>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // إدراج المقطع في أعلى القائمة
+          recentList.insertBefore(card, recentList.firstChild);
+
+          // الحفاظ على سقف 5 عناصر بحد أقصى في القائمة المعروضة
+          while (recentList.children.length > 5) {
+            recentList.removeChild(recentList.lastChild);
+          }
+
+          // إزالة كلاس الأنيميشن بعد انتهاء التأثير (بعد 2 ثانية)
+          setTimeout(() => {
+            card.classList.remove('new-creation-card');
+          }, 2000);
+        }
+
+        function renderRecentCreations() {
+          const listElem = document.getElementById('recentCreationsList');
+          const countBadge = document.getElementById('recentCreationsCount');
+          if (!listElem) return;
+
+          let recents = [];
+          try {
+            recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+          } catch (e) {
+            recents = [];
+          }
+
+          if (countBadge) countBadge.textContent = `${recents.length} / 5`;
+
+          if (recents.length === 0) {
+            listElem.innerHTML = '<div style="font-size:12px; color:#8b949e; text-align:center; padding:12px;">لا توجد إبداعات سابقة محفوظة في التخزين المحلي، قم بتوليد مقطعك الأول الآن! 🚀</div>';
+            return;
+          }
+
+          listElem.innerHTML = recents.map(item => {
+            const shareData = item.share_data || {
+              share_link: `https://fmstar.app/s/${(item.id || '').replace('creation_', '').slice(0, 8)}`,
+              social_links: {
+                whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(item.prompt)}`,
+                x_twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(item.prompt)}`,
+                telegram: `https://t.me/share/url?url=https://fmstar.app/s/${(item.id || '').slice(0,8)}&text=${encodeURIComponent(item.prompt)}`
+              }
+            };
+            return `
+            <div class="recent-card" id="card-${item.id}">
+              <div style="width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                  <div class="recent-info">
+                    <div class="recent-prompt" title="${item.prompt}">🎬 ${item.prompt}</div>
+                    <div class="recent-meta-tags">
+                      <span class="recent-tag">🎛️ ${item.dsp_profile || 'Default'}</span>
+                      <span class="recent-tag">📐 ${item.aspect_ratio || '16:9'}</span>
+                      <span>🕒 ${item.displayDate || (new Date(item.date).toLocaleDateString())}</span>
+                    </div>
+                  </div>
+                  <div class="recent-actions">
+                    <button type="button" class="btn-recent-action" onclick="loadRecentCreation('${item.id}')" title="معاينة وتشغيل">
+                      ▶️ تشغيل
+                    </button>
+                    <button type="button" class="btn-recent-action" onclick="downloadSpecificCreation('${item.id}')" title="تحميل الفيديو و JSON">
+                      💾 حفظ
+                    </button>
+                  </div>
+                </div>
+
+                <!-- شريط المشاركة الاجتماعية والرابط الفريد -->
+                <div class="recent-share-bar">
+                  <input type="text" readonly value="${shareData.share_link}" id="link-${item.id}" class="recent-share-input">
+                  <button type="button" class="btn-recent-action" onclick="navigator.clipboard.writeText('${shareData.share_link}'); showRewardToast('🔗 تم نسخ الرابط', 'تم نسخ رابط المشاركة!', 10);" style="padding: 4px 8px; font-size: 10px;">نسخ 🔗</button>
+                  <div class="recent-social-links">
+                    <a href="${shareData.social_links.whatsapp}" target="_blank" class="social-pill wa">واتساب</a>
+                    <a href="${shareData.social_links.x_twitter}" target="_blank" class="social-pill tw">إكس</a>
+                    <a href="${shareData.social_links.telegram}" target="_blank" class="social-pill tg">تيليجرام</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            `;
+          }).join('');
+        }
+
+        function loadRecentCreation(id) {
+          try {
+            const recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+            const item = recents.find(r => r.id === id);
+            if (!item) return;
+
+            const videoPlayer = document.getElementById('outputVideo');
+            if (videoPlayer) {
+              videoPlayer.src = item.media_url;
+              videoPlayer.style.display = 'block';
+              videoPlayer.play().catch(() => {});
+              initD3AudioWaveform(videoPlayer);
+            }
+
+            const promptInput = document.getElementById('visualPrompt');
+            if (promptInput) promptInput.value = item.prompt;
+
+            const dspSelect = document.getElementById('dspProfile');
+            if (dspSelect && item.dsp_profile) dspSelect.value = item.dsp_profile;
+
+            const ratioSelect = document.getElementById('aspectRatio');
+            if (ratioSelect && item.aspect_ratio) ratioSelect.value = item.aspect_ratio;
+
+            currentActiveCreation = item;
+            showDownloadBox(item);
+            showSocialShareBox(item.prompt);
+
+            const statusMsg = document.getElementById('statusMessage');
+            if (statusMsg) statusMsg.innerText = `▶️ تم استرجاع المقطع: "${item.prompt.substring(0, 35)}..."`;
+            
+            showRewardToast('▶️ تم استرجاع المقطع', 'تم تحميل الإبداع من الذاكرة المحلية بنجاح', 15);
+          } catch (e) {
+            console.warn('Error loading creation', e);
+          }
+        }
+
+        function downloadSpecificCreation(id) {
+          try {
+            const recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+            const item = recents.find(r => r.id === id);
+            if (item) downloadMediaWithSidecar(item);
+          } catch (e) {
+            console.warn(e);
           }
         }
 
@@ -1531,6 +2099,7 @@
 
         window.onload = () => {
             initDailyStreak();
+            renderRecentCreations();
             renderNodes();
             initChart();
             setInterval(updateTelemetry, 2000);

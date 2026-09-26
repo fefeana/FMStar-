@@ -6,6 +6,28 @@ import subprocess
 import time
 import urllib.request
 import urllib.parse
+import uuid
+
+def generate_shareable_creation(track_title: str, audio_url: str) -> dict:
+    """توليد معرف فريد وإنشاء روابط المشاركة للسوشيال ميديا"""
+    unique_id = str(uuid.uuid4())[:8]
+    share_link = f"https://fmstar.app/s/{unique_id}"
+    
+    share_text = f"استمع إلى إبداعي الجديد '{track_title}' عبر صوت الأثير في FMStar! 🎧✨\n{share_link}"
+    encoded_text = urllib.parse.quote(share_text)
+    encoded_url = urllib.parse.quote(share_link)
+
+    social_links = {
+        "whatsapp": f"https://api.whatsapp.com/send?text={encoded_text}",
+        "x_twitter": f"https://twitter.com/intent/tweet?text={encoded_text}",
+        "telegram": f"https://t.me/share/url?url={encoded_url}&text={urllib.parse.quote(track_title)}"
+    }
+
+    return {
+        "creation_id": unique_id,
+        "share_link": share_link,
+        "social_links": social_links
+    }
 
 PORT = 3000
 REMOTE_MODEL_URL = os.getenv("REMOTE_MODEL_URL", "https://api.ltx.io/v1/generate")
@@ -33,6 +55,54 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
             pass
 
     def do_POST(self):
+        if self.path == '/api/v1/audio/architect':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                req_data = json.loads(post_data.decode('utf-8'))
+                
+                from fmstar_audio_architect import FMStarAudioArchitect
+                architect = FMStarAudioArchitect()
+                result = architect.process_song_architecture(
+                    lyrics_raw=req_data.get('lyrics', ''),
+                    genre=req_data.get('genre', 'Euro-Disco / 80s Synth-Pop'),
+                    bpm=int(req_data.get('bpm', 120)),
+                    vocal_tone=req_data.get('vocal_tone', 'Romantic & Energetic')
+                )
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps(result).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
+        if self.path == '/api/v1/ether/chat':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                req_data = json.loads(post_data.decode('utf-8'))
+                
+                from fmstar_ether_voice import fmstar_ether_voice
+                user_id = req_data.get('user_id', 'default_user')
+                user_input = req_data.get('message', '')
+                history = req_data.get('history', [])
+                
+                reply = fmstar_ether_voice(user_id, user_input, history)
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"reply": reply, "user_id": user_id}, ensure_ascii=False).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
         if self.path == '/api/v1/tracks':
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
@@ -78,12 +148,16 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 except Exception:
                     pass
 
+                video_url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                share_data = generate_shareable_creation(prompt, video_url)
+
                 response_data = {
                     "status": "success",
-                    "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                    "video_url": video_url,
                     "dsp_applied": f"{profile.capitalize()} Studio DSP Profile Active",
                     "aspect_ratio": ratio,
-                    "timestamp": int(time.time())
+                    "timestamp": int(time.time()),
+                    "share_data": share_data
                 }
 
                 self.send_response(200)
@@ -96,6 +170,25 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                     self.end_headers()
                 except Exception:
                     pass
+            return
+
+        if self.path == '/api/v1/share':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                req_data = json.loads(post_data.decode('utf-8'))
+                title = req_data.get('title', 'إبداع صوت الأثير الجديد')
+                audio_url = req_data.get('audio_url', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')
+                
+                share_res = generate_shareable_creation(title, audio_url)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps(share_res, ensure_ascii=False).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
             return
 
         try:
