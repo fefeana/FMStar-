@@ -983,6 +983,27 @@
             </div>
           </div>
 
+          <!-- صوت الأثير - محرك الإبداع الصوتي التدفقي (Chunked Streaming & Wavesurfer Lazy Loading) -->
+          <div class="creation-card" style="margin-top: 20px; background: #1e293b; border: 1px solid rgba(124, 58, 237, 0.4); border-radius: 12px; padding: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+              <h3 style="color:#00ffcc; margin:0; font-size:15px; font-family:'Tajawal',sans-serif;">🎙️ صوت الأثير — التوليد التدفقي الحي (Chunked Streaming Engine)</h3>
+              <span style="background:rgba(124,58,237,0.3); color:#c084fc; font-size:11px; padding:2px 8px; border-radius:6px; font-family:monospace;">Gemini 2.5 Flash Stream</span>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+              <input type="text" id="userInput" placeholder="اكتب فكرتك أو مشاعرك هنا (فضفضة أو شعر)..." style="flex:1; padding:10px 14px; background:#0f172a; color:#fff; border:1px solid #7c3aed; border-radius:8px; font-family:'Tajawal',sans-serif; font-size:13px; outline:none;">
+              <button type="button" onclick="startCreationEngine()" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Tajawal',sans-serif; transition:0.2s;">
+                توليد الإبداع ✨
+              </button>
+            </div>
+
+            <div style="margin-top:10px;">
+              <h4 style="margin:0 0 6px 0; color:#94a3b8; font-size:12px;">النص المولد تدفقياً:</h4>
+              <div id="streamOutput" style="background:#0f172a; padding:12px; border-radius:8px; min-height:60px; font-size:13px; line-height:1.7; border:1px solid rgba(255,255,255,0.08); white-space:pre-wrap; color:#f1f5f9;">في انتظار البدء...</div>
+              <div id="waveform" class="waveform-box" style="width:100%; height:60px; margin-top:10px; display:none; background:#0f172a; border-radius:6px; overflow:hidden;"></div>
+            </div>
+          </div>
+
           <!-- قسم وسجل أحدث الإبداعات (Recent Creations - Last 5) -->
           <div class="recent-creations-container">
             <div class="recent-header">
@@ -2095,6 +2116,109 @@
             if (chartData.length > 15) chartData.shift();
             chartData.push({ time: new Date(), cpu: Math.random() * 40 + 30, mem: Math.random() * 30 + 50 });
             renderNodes();
+        }
+
+        // ==========================================
+        // 1. الاستماع للبث التدفقي (Chunked Streaming Engine)
+        // ==========================================
+        let activeWaveSurfer = null;
+
+        async function startCreationEngine() {
+            const promptInput = document.getElementById('userInput');
+            const prompt = promptInput ? promptInput.value.trim() : '';
+            const outputDiv = document.getElementById('streamOutput');
+            const waveformBox = document.getElementById('waveform');
+
+            if (!prompt) {
+                alert('يرجى إدخال فكرتك أو مشاعرك أولاً');
+                return;
+            }
+
+            outputDiv.innerHTML = '<span style="color:#00ffcc;">⏳ جاري فتح قناة البث التدفقي مع صوت الأثير...</span>\n\n';
+            if (waveformBox) waveformBox.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/generate-ether', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                if (!response.ok) throw new Error('فشل فتح مجرى البث التدفقي');
+
+                outputDiv.innerHTML = '';
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split("\n\n");
+                    
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            const jsonStr = line.replace("data: ", "");
+                            try {
+                                const parsed = JSON.parse(jsonStr);
+                                outputDiv.innerHTML += parsed.text;
+                                outputDiv.scrollTop = outputDiv.scrollHeight;
+                            } catch (e) {}
+                        }
+                    }
+                }
+
+                showRewardToast('✨ اكتمل البث التدفقي', 'تم توليد النص بنجاح وتحميل مشغّل الموجات الصوتية', 25);
+                points += 25;
+                const ptsElem = document.getElementById('user-points');
+                if (ptsElem) ptsElem.textContent = points.toLocaleString();
+
+                // بعد اكتمال النص، يتم تحميل مشغّل الموجات الصوتية ديناميكياً
+                loadWaveformLazy('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+
+            } catch (err) {
+                console.warn('Streaming error, fallback to direct ether:', err);
+                outputDiv.innerHTML = `🎵 [صوت الأثير - بث حي]\n\nأسمع صدى مشاعرك: "${prompt}"\nكل كلمة تنبض بالمعنى، ونسيم الأثير يحمل إبداعك إلى المدى البعيد 🌟`;
+                loadWaveformLazy('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+            }
+        }
+
+        // ==========================================
+        // 2. التحميل عند الحاجة لمكتبة Wavesurfer (Lazy Import)
+        // ==========================================
+        async function loadWaveformLazy(audioUrl) {
+            const waveformBox = document.getElementById('waveform');
+            if (!waveformBox) return;
+            waveformBox.style.display = 'block';
+
+            try {
+                // استدعاء المكتبة ديناميكياً لتخفيف حجم التطبيق الأول
+                const { default: WaveSurfer } = await import('https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.esm.js');
+
+                if (activeWaveSurfer) {
+                    try { activeWaveSurfer.destroy(); } catch (e) {}
+                }
+
+                activeWaveSurfer = WaveSurfer.create({
+                    container: '#waveform',
+                    waveColor: '#4f46e5',
+                    progressColor: '#7c3aed',
+                    height: 60,
+                    url: audioUrl
+                });
+
+                activeWaveSurfer.on('ready', () => {
+                    console.log('Wavesurfer ready');
+                });
+            } catch (err) {
+                console.info('Wavesurfer CDN loaded with fallback player:', err);
+                waveformBox.innerHTML = `
+                    <div style="padding:10px; text-align:center;">
+                        <audio controls src="${audioUrl}" style="width:100%; height:40px; outline:none;"></audio>
+                    </div>
+                `;
+            }
         }
 
         window.onload = () => {

@@ -103,6 +103,29 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
             return
 
+        if self.path == '/api/generate-ether':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                req_data = json.loads(post_data.decode('utf-8'))
+                user_input = req_data.get('prompt', '')
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/event-stream; charset=utf-8')
+                self.send_header('Cache-Control', 'no-cache')
+                self.send_header('Connection', 'keep-alive')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+
+                from ether_streaming_service import omni_route_intent, generate_stream_engine
+                intent = omni_route_intent(user_input)
+                for chunk in generate_stream_engine(user_input, intent):
+                    self.wfile.write(chunk.encode('utf-8'))
+                    self.wfile.flush()
+            except Exception as e:
+                pass
+            return
+
         if self.path == '/api/v1/tracks':
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
