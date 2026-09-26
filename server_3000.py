@@ -267,6 +267,53 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                     pass
             return
 
+        if self.path == '/api/creations/export-pdf' or self.path == '/api/v1/creations/export-pdf':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                payload = json.loads(post_data.decode('utf-8')) if post_data else {}
+                
+                title = payload.get('title', 'إبداع فني - Gemini & Mira Studio')
+                creation_type = payload.get('type', 'شعر / موسيقى')
+                dialect = payload.get('dialect', 'فصيح حديث')
+                text_content = payload.get('text', 'نص الإبداع الشعري والفني')
+                timestamp = payload.get('created_at', time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()))
+                author = payload.get('author', 'Mira Studio AI Architect')
+                
+                pdf_content = (
+                    f"%PDF-1.4\n"
+                    f"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
+                    f"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
+                    f"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n"
+                    f"4 0 obj\n<< /Length 380 >>\nstream\n"
+                    f"BT\n"
+                    f"/F1 20 Tf\n50 780 Td\n(GEMINI & MIRA STUDIO - CREATION METADATA) Tj\n"
+                    f"/F1 12 Tf\n0 -30 Td\n(Title: {title.encode('ascii', 'replace').decode('ascii')}) Tj\n"
+                    f"0 -20 Td\n(Type: {creation_type.encode('ascii', 'replace').decode('ascii')}) Tj\n"
+                    f"0 -20 Td\n(Dialect / Style: {dialect.encode('ascii', 'replace').decode('ascii')}) Tj\n"
+                    f"0 -20 Td\n(Author / Engine: {author.encode('ascii', 'replace').decode('ascii')}) Tj\n"
+                    f"0 -20 Td\n(Date: {timestamp.encode('ascii', 'replace').decode('ascii')}) Tj\n"
+                    f"0 -35 Td\n(Content Summary:) Tj\n"
+                    f"/F1 10 Tf\n0 -20 Td\n({text_content[:200].encode('ascii', 'replace').decode('ascii')}) Tj\n"
+                    f"ET\n"
+                    f"endstream\nendobj\n"
+                    f"5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n"
+                    f"xref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000244 00000 n \n0000000676 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n755\n%%EOF"
+                )
+                
+                pdf_bytes = pdf_content.encode('latin1')
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/pdf')
+                self.send_header('Content-Disposition', 'attachment; filename="creation_metadata.pdf"')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(pdf_bytes)
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
         if self.path == '/api/creations/batch-download' or self.path == '/api/v1/creations/batch-download':
             try:
                 content_length = int(self.headers.get('Content-Length', 0))

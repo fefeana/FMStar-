@@ -21,6 +21,7 @@
     <style>
         :root {
             --bg-color: #050816;
+            --text-color: #ffffff;
             --neon-purple: #A855F7;
             --electric-blue: #00D4FF;
             --pink-neon: #FF4FD8;
@@ -29,8 +30,15 @@
             --card-bg: rgba(22, 27, 34, 0.85);
             --border-glow: rgba(168, 85, 247, 0.3);
         }
+        body.light-theme {
+            --bg-color: #f0f4f9;
+            --text-color: #1e293b;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --border-glow: rgba(99, 102, 241, 0.3);
+            color: #1e293b;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { background-color: var(--bg-color); color: #ffffff; font-family: 'Tajawal', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow-x: hidden; position: relative; padding: 20px 0; }
+        body { background-color: var(--bg-color); color: var(--text-color, #ffffff); font-family: 'Tajawal', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow-x: hidden; position: relative; padding: 20px 0; transition: background-color 0.4s ease, color 0.4s ease; }
         
         .space-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         .glow-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: pulseGlow 8s infinite alternate ease-in-out; }
@@ -2262,7 +2270,66 @@
             }
         }
 
+        // ==========================================
+        // ثيم تلقائي حسب توقيت جهاز المستخدم (Auto Theme Based on System Time)
+        // ==========================================
+        function initAutoTheme() {
+            function updateThemeByHour() {
+                const currentHour = new Date().getHours();
+                // النهاري: من 6:00 صباحاً حتى 18:00 مساءً، وإلا فالليلي
+                const isDayTime = currentHour >= 6 && currentHour < 18;
+                if (isDayTime) {
+                    document.body.classList.add('light-theme');
+                    document.body.classList.remove('dark-theme');
+                } else {
+                    document.body.classList.remove('light-theme');
+                    document.body.classList.add('dark-theme');
+                }
+            }
+            updateThemeByHour();
+            // فحص دوري كل دقيقة للتغيير الفوري والسلس
+            setInterval(updateThemeByHour, 60000);
+        }
+
+        // ==========================================
+        // تصدير الإبداع كملف PDF مع البيانات الوصفية (Export Creation to PDF)
+        // ==========================================
+        async function exportCreationToPDF(creationData) {
+            try {
+                const payload = {
+                    title: (creationData && creationData.title) || document.getElementById('promptInput')?.value || 'إبداع Gemini & Mira Studio',
+                    type: (creationData && creationData.type) || document.querySelector('input[name="engineType"]:checked')?.value || 'شعر / موسيقى',
+                    dialect: (creationData && creationData.dialect) || 'فصيح ومولد ذكياً',
+                    text: (creationData && creationData.text) || document.getElementById('promptInput')?.value || 'نص الإبداع الشعري والموسيقي',
+                    created_at: new Date().toISOString(),
+                    author: 'Mira Studio Architect'
+                };
+
+                const response = await fetch('/api/creations/export-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('فشل إنشاء ملف الـ PDF');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Creation_${Date.now()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('خطأ في تصدير PDF:', err);
+                alert('حدث خطأ أثناء تصدير ملف PDF، يرجى المحاولة لاحقاً.');
+            }
+        }
+
         window.onload = () => {
+            initAutoTheme();
             initDailyStreak();
             renderRecentCreations();
             renderNodes();
