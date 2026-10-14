@@ -35,7 +35,6 @@ jobs:
         node-version: '20'
 
     - name: Install and Build Frontend
-      working-directory: ./FMStar-Studio
       run: |
         npm install
         npm run build
