@@ -1,7 +1,17 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { jsPDF } from 'jspdf';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
+} from 'recharts';
 
 interface Creation {
   id: string;
@@ -131,17 +141,50 @@ export default function DashboardPage() {
   };
 
   // التصفية بحسب البحث والنوع والنطاق الزمني
-  const filteredCreations = creations.filter((item) => {
-    const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase()) ||
-                          item.content.toLowerCase().includes(search.toLowerCase());
-    const matchesType = filterType === 'all' || item.type === filterType;
+  const filteredCreations = useMemo(() => {
+    return creations.filter((item) => {
+      const matchesSearch =
+        item.title.toLowerCase().includes(search.toLowerCase()) ||
+        item.content.toLowerCase().includes(search.toLowerCase());
+      const matchesType = filterType === 'all' || item.type === filterType;
 
-    const itemDate = new Date(item.created_at);
-    const matchesStart = !startDate || itemDate >= new Date(startDate);
-    const matchesEnd = !endDate || itemDate <= new Date(`${endDate}T23:59:59`);
+      const itemDate = new Date(item.created_at);
+      const matchesStart = !startDate || itemDate >= new Date(startDate);
+      const matchesEnd = !endDate || itemDate <= new Date(`${endDate}T23:59:59`);
 
-    return matchesSearch && matchesType && matchesStart && matchesEnd;
-  });
+      return matchesSearch && matchesType && matchesStart && matchesEnd;
+    });
+  }, [creations, search, filterType, startDate, endDate]);
+
+  // إعداد بيانات الرسم البياني حسب التواريخ باستخدام Recharts
+  const chartData = useMemo(() => {
+    const map = new Map<string, { date: string; poetry: number; song: number; total: number }>();
+
+    // ترتيب الإنتاجات تصاعدياً حسب التاريخ
+    const sorted = [...filteredCreations].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    sorted.forEach((item) => {
+      const dateKey = new Date(item.created_at).toLocaleDateString('ar-SA', {
+        month: 'short',
+        day: 'numeric',
+      });
+
+      if (!map.has(dateKey)) {
+        map.set(dateKey, { date: dateKey, poetry: 0, song: 0, total: 0 });
+      }
+      const entry = map.get(dateKey)!;
+      if (item.type === 'poetry') {
+        entry.poetry += 1;
+      } else {
+        entry.song += 1;
+      }
+      entry.total += 1;
+    });
+
+    return Array.from(map.values());
+  }, [filteredCreations]);
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white p-6 md:p-12">
@@ -154,7 +197,7 @@ export default function DashboardPage() {
               🎛️ لوحة تحكم إف إم ستار
             </h1>
             <p className="text-neutral-400 mt-1">
-              إدارة واستعراض وحفظ وتصدير كافة إبداعاتك الشعريّة والموسيقيّة
+              إدارة واستعراض وحفظ وتحليل كافة إبداعاتك الشعريّة والموسيقيّة
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-4">
@@ -168,17 +211,73 @@ export default function DashboardPage() {
             <div className="bg-neutral-900 border border-neutral-800 px-4 py-2 rounded-xl text-center">
               <span className="block text-xs text-neutral-500">إجمالي الأغاني</span>
               <span className="text-xl font-bold text-amber-400">
-                {creations.filter(c => c.type === 'song').length}
+                {creations.filter((c) => c.type === 'song').length}
               </span>
             </div>
             <div className="bg-neutral-900 border border-neutral-800 px-4 py-2 rounded-xl text-center">
               <span className="block text-xs text-neutral-500">إجمالي القصائد</span>
               <span className="text-xl font-bold text-amber-400">
-                {creations.filter(c => c.type === 'poetry').length}
+                {creations.filter((c) => c.type === 'poetry').length}
               </span>
             </div>
           </div>
         </div>
+
+        {/* رسم بياني تحليلي باستخدام Recharts */}
+        {chartData.length > 0 && (
+          <div className="bg-neutral-900/80 border border-neutral-800 p-6 rounded-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-neutral-200 flex items-center gap-2">
+                📈 تحليل معدل الإنتاج الزمني (Recharts Analytics)
+              </h2>
+              <span className="text-xs text-neutral-400">توزيع القصائد والأغاني حسب التاريخ</span>
+            </div>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="amberGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                  <XAxis dataKey="date" stroke="#737373" fontSize={12} />
+                  <YAxis stroke="#737373" fontSize={12} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#171717',
+                      borderColor: '#404040',
+                      borderRadius: '0.75rem',
+                      color: '#ffffff',
+                    }}
+                  />
+                  <Legend />
+                  <Area
+                    type="monotone"
+                    dataKey="poetry"
+                    name="الشعر والأدب 🖋️"
+                    stroke="#f59e0b"
+                    fillOpacity={1}
+                    fill="url(#amberGradient)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="song"
+                    name="الأغاني والموسيقى 🎙️"
+                    stroke="#3b82f6"
+                    fillOpacity={1}
+                    fill="url(#blueGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         {/* أدوات البحث والفلترة والنطاق الزمني */}
         <div className="space-y-4">
@@ -226,7 +325,10 @@ export default function DashboardPage() {
             </div>
             {(startDate || endDate) && (
               <button
-                onClick={() => { setStartDate(''); setEndDate(''); }}
+                onClick={() => {
+                  setStartDate('');
+                  setEndDate('');
+                }}
                 className="text-xs text-neutral-400 hover:text-amber-400 underline transition ml-auto"
               >
                 إعادة ضبط التاريخ
@@ -251,9 +353,13 @@ export default function DashboardPage() {
               >
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      item.type === 'poetry' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                    }`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        item.type === 'poetry'
+                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                          : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                      }`}
+                    >
                       {item.type === 'poetry' ? '🖋️ شعر' : '🎙️ أغنية'}
                     </span>
                     <span className="text-xs text-neutral-500">
