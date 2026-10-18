@@ -1,0 +1,27 @@
+# Step 1: التجميع والبناء باستخدام Go
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+
+# نسخ التبعيات
+COPY go.mod go.sum* ./
+RUN go mod download || true
+
+# نسخ باقي الأكواد وبناء البوابة
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /app/gateway ./services/gateway/main.go
+
+# Step 2: الحاوية النهائية الرشيقة للإنتاج
+FROM alpine:3.19
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+COPY --from=builder /app/gateway .
+
+# المنفذ القياسي المعتمد في Cloud Run
+EXPOSE 8080
+
+ENV PORT=8080
+
+CMD ["./gateway"]

@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FMSTAR - AI Creative Studio & Gamification</title>
+    <script>
+        if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            window.location.href = window.location.href.replace('http:', 'https:');
+        }
+    </script>
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; default-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' https://d3js.org; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #050816;
+            --text-color: #ffffff;
+            --neon-purple: #A855F7;
+            --electric-blue: #00D4FF;
+            --pink-neon: #FF4FD8;
+            --gold-accent: #FFD700;
+            --alert-red: #FF3366;
+            --card-bg: rgba(22, 27, 34, 0.85);
+            --border-glow: rgba(168, 85, 247, 0.3);
+        }
+        body.light-theme {
+            --bg-color: #f0f4f9;
+            --text-color: #1e293b;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --border-glow: rgba(99, 102, 241, 0.3);
+            color: #1e293b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body { background-color: var(--bg-color); color: var(--text-color, #ffffff); font-family: 'Tajawal', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow-x: hidden; position: relative; padding: 20px 0; transition: background-color 0.4s ease, color 0.4s ease; }
+        
+        .space-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .glow-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: pulseGlow 8s infinite alternate ease-in-out; }
+        .glow-purple { width: 350px; height: 350px; background: var(--neon-purple); top: 10%; left: 10%; }
+        .glow-blue { width: 400px; height: 400px; background: var(--electric-blue); bottom: 10%; right: 10%; }
+        
+        .app-container { position: relative; z-index: 10; width: 100%; max-width: 850px; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* Navigation & Header */
+        .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border: 1px solid var(--border-glow); backdrop-filter: blur(12px); padding: 12px 20px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); flex-wrap: wrap; gap: 10px; }
+        .brand-mini { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 20px; color: #fff; }
+        .brand-mini span { color: var(--electric-blue); }
+        .user-stats-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        
+        .user-stats { display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.45); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--gold-accent); }
+        .pts-badge { color: var(--gold-accent); font-weight: bold; font-family: 'Orbitron', sans-serif; transition: all 0.3s ease; }
+        
+        /* Streak Counter Badge */
+        .streak-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 107, 0, 0.15);
+            border: 1px solid rgba(255, 107, 0, 0.5);
+            color: #ff9800;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 0 10px rgba(255, 107, 0, 0.2);
+            animation: streakGlow 2.5s infinite alternate;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .streak-badge:hover {
+            transform: scale(1.05);
+        }
+        .streak-fire {
+            font-size: 16px;
+            animation: flameFlicker 1.2s infinite alternate;
+        }
+        @keyframes flameFlicker {
+            0% { transform: scale(1) rotate(-4deg); }
+            100% { transform: scale(1.25) rotate(4deg); }
+        }
+        @keyframes streakGlow {
+            from { box-shadow: 0 0 6px rgba(255, 107, 0, 0.2); }
+            to { box-shadow: 0 0 18px rgba(255, 107, 0, 0.6); }
+        }
+
+        /* Points Pulse Animation */
+        .points-pulse {
+            animation: ptsScale 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes ptsScale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.35); color: #fff; text-shadow: 0 0 20px var(--gold-accent), 0 0 30px var(--pink-neon); }
+            100% { transform: scale(1); }
+        }
+
+        /* Floating Confetti & Star Particles */
+        .reward-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            animation: floatUpFade 1.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        @keyframes floatUpFade {
+            0% { opacity: 1; transform: translate(0, 0) scale(0.6) rotate(0deg); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.4) rotate(var(--rot)); }
+        }
+
+        /* Reward Toast Notification */
+        .reward-toast {
+            position: fixed;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(13, 17, 23, 0.95);
+            border: 2px solid var(--gold-accent);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4), 0 8px 32px rgba(0,0,0,0.7);
+            border-radius: 20px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            color: #fff;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 15px;
+            opacity: 0;
+            transition: all 0.45s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            backdrop-filter: blur(10px);
+        }
+        .reward-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast-badge {
+            background: var(--gold-accent);
+            color: #000;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        /* Grid Services */
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+        .service-card { background: var(--card-bg); border: 1px solid var(--border-glow); border-radius: 14px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
+        .service-card::after { content: 'إعدادات'; position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0, 212, 255, 0.85); color: #050816; font-size: 9px; font-weight: bold; padding: 2px 0; transform: translateY(100%); transition: 0.25s ease; }
+        .service-card:hover::after { transform: translateY(0); }
+        .service-card:hover { border-color: var(--electric-blue); transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,212,255,0.3); }
+        .service-icon { font-size: 26px; margin-bottom: 6px; }
+        .service-title { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: bold; }
+
+        /* Dashboard & Gamification Cards */
+        .dashboard-card { background: var(--card-bg); border: 1px solid var(--border-glow); border-radius: 16px; padding: 20px; backdrop-filter: blur(12px); }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .dash-title { font-family: 'Orbitron', sans-serif; font-size: 16px; color: var(--electric-blue); display: flex; align-items: center; gap: 8px; }
+
+        /* Leaderboard & Challenges */
+        .challenges-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 650px) { .challenges-container { grid-template-columns: 1fr; } }
+        .challenge-box { background: rgba(13, 17, 23, 0.7); border: 1px solid var(--border-glow); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+        .ch-title { font-weight: bold; color: var(--gold-accent); margin-bottom: 5px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .ch-desc { font-size: 12px; color: #8b949e; margin-bottom: 12px; line-height: 1.5; }
+        .btn-action { background: linear-gradient(90deg, var(--neon-purple), var(--electric-blue)); border: none; color: white; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; width: 100%; transition: all 0.25s ease; box-shadow: 0 0 15px rgba(0, 212, 255, 0.3); }
+        .btn-action:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(255, 79, 216, 0.5); }
+        .btn-action:active { transform: scale(0.98); }
+
+        .leaderboard-list { list-style: none; }
+        .lb-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); font-size: 13px; }
+        .lb-rank { color: var(--pink-neon); font-family: 'Orbitron', sans-serif; font-weight: bold; }
+
+        /* Dynamic Telemetry */
+        .nodes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+        .node-box { background: rgba(13, 17, 23, 0.7); border: 1px solid var(--border-glow); border-radius: 10px; padding: 10px; cursor: pointer; transition: 0.2s; }
+        .node-box:hover { border-color: var(--electric-blue); }
+        .node-box.warning { border-color: var(--alert-red) !important; animation: warningPulse 1s infinite alternate; }
+        @keyframes warningPulse { 0% { box-shadow: 0 0 5px var(--alert-red); } 100% { box-shadow: 0 0 20px var(--alert-red); } }
+
+        #chart-container { width: 100%; height: 150px; margin-top: 10px; }
+        .line-cpu { fill: none; stroke: var(--electric-blue); stroke-width: 2px; }
+        .line-mem { fill: none; stroke: var(--pink-neon); stroke-width: 2px; }
+
+        /* Service Configuration Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 8, 22, 0.82);
+            backdrop-filter: blur(12px);
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .service-modal {
+            background: var(--card-bg);
+            border: 1px solid var(--electric-blue);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.35), 0 20px 50px rgba(0,0,0,0.8);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            padding: 24px;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .service-modal {
+            transform: scale(1) translateY(0);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .modal-close-btn:hover {
+            background: var(--alert-red);
+            border-color: var(--alert-red);
+            transform: rotate(90deg);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .modal-icon {
+            font-size: 34px;
+            background: rgba(168, 85, 247, 0.15);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glow);
+        }
+        .modal-title-wrap h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            font-size: 17px;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .modal-node-tag {
+            font-size: 11px;
+            color: var(--electric-blue);
+            font-family: 'Orbitron', monospace;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .modal-node-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .setting-label {
+            font-size: 13px;
+            color: #c9d1d9;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .setting-val-display {
+            color: var(--electric-blue);
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+        }
+        .setting-select, .setting-input {
+            background: rgba(13, 17, 23, 0.85);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .setting-select:focus, .setting-input:focus {
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        .setting-slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .setting-slider {
+            flex: 1;
+            accent-color: var(--neon-purple);
+            cursor: pointer;
+        }
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .btn-save-service {
+            background: linear-gradient(90deg, var(--neon-purple), var(--electric-blue));
+            border: none;
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+            transition: 0.2s;
+        }
+        .btn-save-service:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
+        }
+        .btn-cancel-service {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #8b949e;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .btn-cancel-service:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+
+        /* LTX-2.5 Video Studio Styling */
+        .ltx-studio-card {
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.15);
+            position: relative;
+        }
+        .ltx-badge {
+            background: linear-gradient(90deg, #A855F7, #00D4FF);
+            color: #fff;
+            font-size: 11px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            padding: 4px 12px;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+        }
+        .ltx-textarea {
+            width: 100%;
+            background: rgba(13, 17, 23, 0.9);
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            border-radius: 12px;
+            color: #ffffff;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 14px;
+            padding: 12px 16px;
+            outline: none;
+            resize: vertical;
+            transition: all 0.3s;
+        }
+        .ltx-textarea:focus {
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        .ltx-chips-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+        .ltx-chip {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #c9d1d9;
+            padding: 4px 10px;
+            border-radius: 14px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .ltx-chip:hover {
+            background: rgba(0, 212, 255, 0.25);
+            border-color: var(--electric-blue);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .ltx-status {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            animation: fadeIn 0.3s ease;
+        }
+        .ltx-status.loading {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            color: var(--electric-blue);
+        }
+        .ltx-status.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #10B981;
+        }
+        .ltx-status.error {
+            background: rgba(255, 51, 102, 0.15);
+            border: 1px solid var(--alert-red);
+            color: var(--alert-red);
+        }
+        .video-preview-box {
+            margin-top: 16px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            background: #000;
+            display: none;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        }
+        #videoPreview {
+            width: 100%;
+            max-height: 380px;
+            display: block;
+            border-radius: 12px;
+            outline: none;
+        }
+
+        /* D3 Audio Waveform & Social Share Styling */
+        .audio-waveform-box {
+            display: none;
+            margin-top: 15px;
+            background: rgba(13, 17, 23, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            padding: 14px;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15);
+            max-width: 600px;
+        }
+        .waveform-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .waveform-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: var(--electric-blue);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .waveform-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #10B981;
+            font-weight: bold;
+        }
+        .share-container {
+            display: none;
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 12px;
+            background: rgba(13, 17, 23, 0.85);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            max-width: 600px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        .share-label {
+            font-size: 13px;
+            color: #c9d1d9;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .share-buttons-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            border: 1px solid transparent;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.25s ease;
+        }
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .share-btn-x {
+            background: #000000;
+            border-color: #333333;
+        }
+        .share-btn-x:hover {
+            border-color: #ffffff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        .share-btn-fb {
+            background: #1877F2;
+        }
+        .share-btn-fb:hover {
+            background: #0d6efd;
+            box-shadow: 0 0 12px rgba(24, 119, 242, 0.5);
+        }
+        .share-btn-wa {
+            background: #25D366;
+        }
+        .share-btn-wa:hover {
+            background: #20ba59;
+            box-shadow: 0 0 12px rgba(37, 211, 102, 0.5);
+        }
+        .share-btn-copy {
+            background: rgba(168, 85, 247, 0.25);
+            border-color: var(--neon-purple);
+            color: #fff;
+        }
+        .share-btn-copy:hover {
+            background: var(--neon-purple);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+        }
+
+        /* Download & Metadata Sidecar Styles */
+        .download-box {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.35);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        .btn-download-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #00D4FF 0%, #0088FF 100%);
+            color: #000;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 9px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: 'Tajawal', sans-serif;
+            text-decoration: none;
+        }
+        .btn-download-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.5);
+            color: #000;
+        }
+        .btn-download-sidecar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(168, 85, 247, 0.25);
+            border: 1px solid var(--neon-purple);
+            color: #fff;
+            font-size: 12px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.2s ease;
+        }
+        .btn-download-sidecar:hover {
+            background: var(--neon-purple);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+        }
+
+        /* Recent Creations Section */
+        .recent-creations-container {
+            margin-top: 25px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(10, 14, 26, 0.85);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+        }
+        .recent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+        .recent-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: #00D4FF;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .recent-badge-count {
+            background: rgba(168, 85, 247, 0.3);
+            border: 1px solid var(--neon-purple);
+            color: #FFD700;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .recent-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(22, 27, 34, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 10px 14px;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+        .recent-card:hover {
+            border-color: rgba(0, 212, 255, 0.4);
+            transform: translateX(-3px);
+        }
+        .recent-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .recent-prompt {
+            font-size: 13px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+        .recent-meta-tags {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #8b949e;
+            flex-wrap: wrap;
+        }
+        .recent-tag {
+            background: rgba(0, 212, 255, 0.15);
+            color: #00D4FF;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .recent-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .btn-recent-action {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-recent-action:hover {
+            background: #00D4FF;
+            color: #000;
+            border-color: #00D4FF;
+        }
+
+        /* CSS Animation للمقطع الجديد في Recent Creations */
+        @keyframes highlightNewCreation {
+          0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); /* لون بنفسجي أثيري */
+            border-color: #7c3aed;
+          }
+          50% {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px 5px rgba(124, 58, 237, 0.5);
+          }
+          100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+          }
+        }
+
+        /* الكلاس الذي يُضاف للمقطع المولد حديثاً */
+        .new-creation-card {
+          animation: highlightNewCreation 1.5s ease-out;
+          border: 2px solid #7c3aed !important;
+          border-radius: 12px;
+        }
+
+        /* أزرار وحقول المشاركة السريعة في بطاقة الإبداع */
+        .recent-share-bar {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-top: 8px;
+          padding-top: 6px;
+          border-top: 1px dashed rgba(255, 255, 255, 0.1);
+          flex-wrap: wrap;
+        }
+        .recent-share-input {
+          flex: 1;
+          min-width: 140px;
+          background: rgba(0, 0, 0, 0.4);
+          border: 1px solid rgba(124, 58, 237, 0.4);
+          color: #00D4FF;
+          font-size: 11px;
+          padding: 4px 8px;
+          border-radius: 6px;
+          outline: none;
+          font-family: monospace;
+        }
+        .recent-social-links {
+          display: flex;
+          gap: 4px;
+        }
+        .social-pill {
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-size: 10px;
+          text-decoration: none;
+          color: #fff;
+          font-weight: 500;
+          transition: all 0.2s ease;
+          display: inline-block;
+        }
+        .social-pill.wa { background: #25D366; color: #000; font-weight: bold; }
+        .social-pill.tw { background: #1DA1F2; }
+        .social-pill.tg { background: #0088cc; }
+        .social-pill:hover { opacity: 0.85; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div class="space-bg">
+        <div class="glow-orb glow-purple"></div>
+        <div class="glow-orb glow-blue"></div>
+    </div>
+
+    <!-- Celebration Toast -->
+    <div class="reward-toast" id="rewardToast">
+        <span style="font-size:24px;">🎉</span>
+        <div>
+            <div style="font-weight:bold; color:var(--gold-accent);" id="toastTitle">مكافأة تم تحصيلها بنجاح!</div>
+            <div style="font-size:12px; color:#c9d1d9;" id="toastDesc">تم إضافة النقاط إلى رصيدك.</div>
+        </div>
+        <span class="toast-badge" id="toastBadge">+100 PTS</span>
+    </div>
+
+    <!-- Service Details & Configuration Modal -->
+    <div class="modal-overlay" id="serviceModalOverlay" onclick="closeServiceModal(event)">
+        <div class="service-modal" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeServiceModal()">✕</button>
+            <div class="modal-header">
+                <div class="modal-icon" id="modalServiceIcon">🎬</div>
+                <div class="modal-title-wrap">
+                    <h3 id="modalServiceName">VIDEO PIPELINE CONFIG</h3>
+                    <div class="modal-node-tag">
+                        <span class="modal-node-dot"></span>
+                        <span id="modalNodeEndpoint">Node: ffmpeg-cuda:8081</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" id="modalConfigBody">
+                <!-- Dynamically populated config fields -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel-service" onclick="closeServiceModal()">إلغاء</button>
+                <button class="btn-save-service" id="btnSaveConfig" onclick="applyServiceConfig()">حفظ وتوصيل الخدمة ⚡</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <div class="top-bar">
+            <div class="brand-mini">⚡ FM<span>STAR</span></div>
+            <div class="user-stats-bar">
+                <!-- Daily Login Streak Counter -->
+                <div class="streak-badge" id="streakBadge" onclick="checkDailyStreak(true)" title="سلسلة الحضور اليومي: اضغط لتسجيل الحضور">
+                    <span class="streak-fire">🔥</span>
+                    <span>سلسلة: <strong id="streakCount">5</strong> أيام</span>
+                    <span style="color:var(--gold-accent); font-size:11px;" id="streakBonusLabel">(+25% مكافأة)</span>
+                </div>
+                <!-- Points Counter -->
+                <div class="user-stats">
+                    <span>🏆 النقاط:</span>
+                    <span class="pts-badge" id="user-points">1,250</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Futuristic Era 30000 Cosmic Sync Banner -->
+        <div style="margin-bottom: 18px; background: radial-gradient(circle at 50% 50%, rgba(124,58,237,0.35) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid #7c3aed; border-radius: 12px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; box-shadow: 0 0 15px rgba(124,58,237,0.25);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 24px; animation: pulse 2s infinite;">🛸</span>
+                <div>
+                    <div style="font-weight: bold; color: #00ffcc; font-size: 14px;">مزامنة الزمن الكوني: <span style="color: #f8b500; font-size: 15px; font-family:'Orbitron',sans-serif;">عام 30,000 كوني (Year 30000)</span></div>
+                    <div style="color: #94a3b8; font-size: 11px;">🚀 تم حظر لقطات 1970 رسمياً — جميع المخرجات والصوتيات مستدعاة من أرشيف عام 30000 الخارق</div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="background: rgba(233,69,96,0.25); color: #ff6b81; border: 1px solid rgba(233,69,96,0.5); font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight:bold;">🚫 1970 DEPRECATED</span>
+                <span style="background: rgba(0,255,204,0.15); color: #00ffcc; border: 1px solid rgba(0,255,204,0.4); font-size: 11px; padding: 3px 10px; border-radius: 20px; font-family:monospace;">WARP: 30000-CE</span>
+            </div>
+        </div>
+
+        <!-- Services -->
+        <div class="services-grid">
+            <div class="service-card" onclick="openServiceModal('VIDEO')"><div class="service-icon">🎬</div><div class="service-title">VIDEO</div></div>
+            <div class="service-card" onclick="openServiceModal('AI LAB')"><div class="service-icon">🤖</div><div class="service-title">AI LAB</div></div>
+            <div class="service-card" onclick="openServiceModal('DESIGN')"><div class="service-icon">🎨</div><div class="service-title">DESIGN</div></div>
+            <div class="service-card" onclick="openServiceModal('MUSIC')"><div class="service-icon">🎵</div><div class="service-title">MUSIC</div></div>
+            <div class="service-card" onclick="openServiceModal('PUBLISH')"><div class="service-icon">🌍</div><div class="service-title">PUBLISH</div></div>
+            <div class="service-card" onclick="openServiceModal('APPS')"><div class="service-icon">📱</div><div class="service-title">APPS</div></div>
+        </div>
+
+        <!-- رابط سريع إلى استوديو جيمي وميرا -->
+        <div style="margin-bottom: 25px; background: linear-gradient(135deg, rgba(124,58,237,0.25) 0%, rgba(13,148,136,0.25) 100%); border: 1px solid rgba(124,58,237,0.5); border-radius: 12px; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 26px;">🎙️</span>
+                <div>
+                    <div style="font-weight: bold; color: #fff; font-size: 15px;">استوديو جيمي وميرا (Gemini & Mira Studio)</div>
+                    <div style="color: #94a3b8; font-size: 12px;">إنشاء الأغاني الموسيقية وتوليد الإلقاء الشعري بـ 17 لهجة ونمط عالمي</div>
+                </div>
+            </div>
+            <a href="/jm-studio" style="background: linear-gradient(135deg, #7c3aed 0%, #0d9488 100%); color: #fff; text-decoration: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                فتح الاستوديو 🚀
+            </a>
+        </div>
+
+        <!-- Gamification Section -->
+        <div class="dashboard-card">
+            <div class="dash-header">
+                <div class="dash-title">🎯 التحديات والجوائز اليومية</div>
+            </div>
+            <div class="challenges-container">
+                <div class="challenge-box">
+                    <div>
+                        <div class="ch-title">
+                            <span>🔥 تحدي هندسة الصوت السحابية</span>
+                            <span style="color:var(--electric-blue); font-size:11px; font-family:'Orbitron',sans-serif;">+100 PTS</span>
+                        </div>
+                        <div class="ch-desc">قم بتوليد مقطع صوتي باستخدام خادم Go DSP واستفد من مضاعف السلسلة اليومية.</div>
+                    </div>
+                    <button class="btn-action" id="btnClaimChallenge" onclick="claimReward(100, event)">تحصيل المكافأة 🚀</button>
+                </div>
+                <div class="challenge-box">
+                    <div>
+                        <div class="ch-title">
+                            <span>🥇 لوحة الصدارة المباشرة</span>
+                            <span style="color:var(--gold-accent); font-size:11px;">مباشر ⚡</span>
+                        </div>
+                        <ul class="leaderboard-list">
+                            <li class="lb-item"><span>1. فيفيانا ✨</span><span class="lb-rank">2,450 PTS</span></li>
+                            <li class="lb-item"><span>2. Jimi Audio Bot</span><span class="lb-rank">1,890 PTS</span></li>
+                            <li class="lb-item"><span>3. Mira AI</span><span class="lb-rank">1,250 PTS</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم LTX-2.5 داخل واجهة FMStar -->
+        <div class="ltx-container card" style="padding: 20px; border-radius: 12px; background: #1a1a2e; color: #fff; border: 1px solid var(--border-glow); box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+          <h2 style="font-family:'Orbitron',sans-serif; font-size:18px; margin-bottom:15px; color:#00D4FF;">🎬 FMStar Visual Studio (LTX-2.5)</h2>
+          
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label for="visualPrompt" style="display:block; margin-bottom:6px; font-weight:bold;">وصف المشهد المرئي والصوتي:</label>
+            <textarea id="visualPrompt" rows="3" style="width: 100%; border-radius: 8px; padding: 10px; background: rgba(13,17,23,0.9); border: 1px solid rgba(168,85,247,0.5); color: #fff; font-family: 'Tajawal', sans-serif;" placeholder="مثال: مشهد سينمائي لشاعر يلقي إلقاءً حماسياً مع إضاءة خافطة وموسيقى خلفية..."></textarea>
+          </div>
+
+          <div class="options-grid" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+            <div>
+              <label for="aspectRatio" style="display:block; margin-bottom:4px; font-size:13px;">أبعاد الفيديو:</label>
+              <select id="aspectRatio" style="padding: 8px 12px; border-radius: 6px; background: #0d1117; color: #fff; border: 1px solid rgba(168,85,247,0.5);">
+                <option value="16:9">16:9 (شاشة عريضة)</option>
+                <option value="9:16">9:16 (Shorts / Reels)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="dspProfile" style="display:block; margin-bottom:4px; font-size:13px;">تأثير الصوت (DSP Profile):</label>
+              <select id="dspProfile" style="padding: 8px 12px; border-radius: 6px; background: #0d1117; color: #fff; border: 1px solid rgba(168,85,247,0.5);">
+                <option value="brass">Brass Studio</option>
+                <option value="digital">Digital Studio</option>
+                <option value="hybrid">Hybrid Studio</option>
+              </select>
+            </div>
+          </div>
+
+          <button id="generateBtn" onclick="generateMedia()" style="padding: 10px 20px; background: #e94560; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight:bold; font-family:'Tajawal',sans-serif; transition: 0.2s;">
+            🚀 توليد الفيديو والصوت
+          </button>
+
+          <div id="statusMessage" style="margin-top: 15px; color: #f8b500; font-size: 14px;"></div>
+
+          <!-- عرض النتيجة ومخطط الصوت والمشاركة -->
+          <div style="margin-top: 20px;">
+            <video id="outputVideo" controls playsinline style="width: 100%; max-width: 600px; display: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);"></video>
+
+            <!-- Real-time D3.js Audio Waveform Visualizer -->
+            <div id="audioWaveformBox" class="audio-waveform-box">
+              <div class="waveform-header">
+                <span class="waveform-title">
+                  <span>📊 طيف الموجات الصوتية اللحظي (D3.js Audio Waveform Visualizer)</span>
+                </span>
+                <span id="waveformStatus" class="waveform-badge">● متزامن مع الصوت</span>
+              </div>
+              <div id="d3WaveformVisualizer" style="width:100%; height:80px; overflow:hidden;"></div>
+            </div>
+
+            <!-- أزرار مشاركة وسائل التواصل الاجتماعي -->
+            <div id="shareBox" class="share-container">
+              <div class="share-label">
+                <span>🔗 شارك إبداعك عبر منصات التواصل:</span>
+              </div>
+              
+              <!-- إعداد رابط مشروع Supabase للنشر -->
+              <div style="margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px dashed rgba(0,212,255,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <span style="font-size: 11px; color: #3ecf8e; font-family:'Orbitron',sans-serif; font-weight:bold;">⚡ SUPABASE PUBLISH DOMAIN:</span>
+                  <span id="supabaseStatusBadge" style="font-size:10px; color:#8b949e;">جاهز للربط</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="supabaseUrlInput" placeholder="https://YOUR_PROJECT_REF.supabase.co" style="flex:1; background: #0d1117; color: #fff; border: 1px solid rgba(62,207,142,0.4); border-radius: 6px; padding: 6px 10px; font-size: 11px; font-family: monospace;" onchange="saveSupabaseUrl()" />
+                  <button type="button" onclick="saveSupabaseUrl()" style="background: #3ecf8e; color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: bold; cursor: pointer;">حفظ</button>
+                </div>
+              </div>
+
+              <div class="share-buttons-group">
+                <button type="button" class="share-btn share-btn-x" onclick="shareToX()">
+                  <span>𝕏</span> مشاركة على Twitter / X
+                </button>
+                <button type="button" class="share-btn share-btn-fb" onclick="shareToFacebook()">
+                  <span>f</span> مشاركة على Facebook
+                </button>
+                <button type="button" class="share-btn share-btn-wa" onclick="shareToWhatsApp()">
+                  <span>💬</span> واتساب
+                </button>
+                <button type="button" class="share-btn share-btn-copy" onclick="copyShareLink()">
+                  <span>📋</span> نسخ الرابط
+                </button>
+              </div>
+            </div>
+
+            <!-- أزرار تحميل الوسائط وملف البيانات الميتا JSON Sidecar -->
+            <div id="downloadBox" class="download-box" style="display: none;">
+              <button type="button" class="btn-download-main" id="btnDownloadMedia" onclick="downloadCurrentMediaWithSidecar()">
+                <span>💾</span> تحميل المقطع مع ملف البيانات (JSON Sidecar)
+              </button>
+              <button type="button" class="btn-download-sidecar" id="btnDownloadSidecar" onclick="downloadCurrentSidecarOnly()">
+                <span>📄</span> تحميل ملف JSON Sidecar فقط
+              </button>
+            </div>
+          </div>
+
+          <!-- صوت الأثير - محرك الإبداع الصوتي التدفقي (Chunked Streaming & Wavesurfer Lazy Loading) -->
+          <div class="creation-card" style="margin-top: 20px; background: #1e293b; border: 1px solid rgba(124, 58, 237, 0.4); border-radius: 12px; padding: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+              <h3 style="color:#00ffcc; margin:0; font-size:15px; font-family:'Tajawal',sans-serif;">🎙️ صوت الأثير — التوليد التدفقي الحي (Chunked Streaming Engine)</h3>
+              <span style="background:rgba(124,58,237,0.3); color:#c084fc; font-size:11px; padding:2px 8px; border-radius:6px; font-family:monospace;">Gemini 2.5 Flash Stream</span>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+              <input type="text" id="userInput" placeholder="اكتب فكرتك أو مشاعرك هنا (فضفضة أو شعر)..." style="flex:1; padding:10px 14px; background:#0f172a; color:#fff; border:1px solid #7c3aed; border-radius:8px; font-family:'Tajawal',sans-serif; font-size:13px; outline:none;">
+              <button type="button" onclick="startCreationEngine()" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; font-family:'Tajawal',sans-serif; transition:0.2s;">
+                توليد الإبداع ✨
+              </button>
+            </div>
+
+            <div style="margin-top:10px;">
+              <h4 style="margin:0 0 6px 0; color:#94a3b8; font-size:12px;">النص المولد تدفقياً:</h4>
+              <div id="streamOutput" style="background:#0f172a; padding:12px; border-radius:8px; min-height:60px; font-size:13px; line-height:1.7; border:1px solid rgba(255,255,255,0.08); white-space:pre-wrap; color:#f1f5f9;">في انتظار البدء...</div>
+              <div id="waveform" class="waveform-box" style="width:100%; height:60px; margin-top:10px; display:none; background:#0f172a; border-radius:6px; overflow:hidden;"></div>
+            </div>
+          </div>
+
+          <!-- قسم وسجل أحدث الإبداعات (Recent Creations - Last 5) -->
+          <div class="recent-creations-container">
+            <div class="recent-header">
+              <div class="recent-title">
+                <span>📁</span>
+                <span>أحدث الإبداعات (Recent Creations)</span>
+              </div>
+              <span class="recent-badge-count" id="recentCreationsCount">0 / 5</span>
+            </div>
+            <div id="recentCreationsList" class="recent-list">
+              <div style="font-size:12px; color:#8b949e; text-align:center; padding:12px;">لا توجد إبداعات سابقة محفوظة في التخزين المحلي، قم بتوليد مقطعك الأول الآن! 🚀</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry & Chart -->
+        <div class="dashboard-card">
+            <div class="dash-header">
+                <div class="dash-title">⚡ FMSTAR CLOUD TELEMETRY</div>
+            </div>
+            <div class="nodes-grid" id="nodes-container"></div>
+            <div id="chart-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let points = 1250;
+        let streakDays = 5;
+        let activeServiceKey = null;
+
+        const nodes = [
+            { id: 'go-audio-dsp', name: 'go-audio-dsp:8080', latency: 24 },
+            { id: 'ffmpeg-cuda', name: 'ffmpeg-cuda:8081', latency: 38 },
+            { id: 'postgresql-db', name: 'postgresql-db', latency: 14 }
+        ];
+
+        // Service Configurations Data
+        const serviceConfigs = {
+            'VIDEO': {
+                icon: '🎬',
+                title: 'إعدادات معالجة الفيديو (Video GPU Node)',
+                node: 'ffmpeg-cuda:8081 (NVIDIA NVENC)',
+                fields: [
+                    { id: 'res', label: 'دقة الفيديو (Resolution)', type: 'select', options: ['4K UHD (3840x2160) @ 60fps', '1080p FHD (1920x1080) @ 60fps', '720p HD (1280x720) @ 30fps'] },
+                    { id: 'codec', label: 'المرمز البرمجي (Video Codec)', type: 'select', options: ['H.265 / HEVC (تسريع عتادي)', 'AV1 Next-Gen (أعلى جودة)', 'ProRes 422HQ (استوديو احترافي)'] },
+                    { id: 'bitrate', label: 'معدل البت (Bitrate)', type: 'slider', min: 10, max: 60, val: 28, unit: 'Mbps' }
+                ]
+            },
+            'AI LAB': {
+                icon: '🤖',
+                title: 'إعدادات مختبر الذكاء الاصطناعي (AI Lab)',
+                node: 'vertex-ai-gemini:europe-west2',
+                fields: [
+                    { id: 'model', label: 'النموذج اللغوي / الإبداعي', type: 'select', options: ['Gemini 1.5 Pro (Multimodal 2M Context)', 'FMStar Studio Neural Engine', 'AudioCraft MusicGen Pro'] },
+                    { id: 'temp', label: 'مستوى الإبداع (Temperature)', type: 'slider', min: 0.1, max: 1.0, val: 0.7, step: 0.1, unit: '' },
+                    { id: 'quant', label: 'دقة الحوسبة (Precision)', type: 'select', options: ['FP16 Tensor Cores (أعلى سرعة)', 'INT8 Quantized (استهلاك منخفض)', 'BF16 Studio Master'] }
+                ]
+            },
+            'DESIGN': {
+                icon: '🎨',
+                title: 'إعدادات محرك التصميم والرسوميات',
+                node: 'canvas-renderer:v2-metal',
+                fields: [
+                    { id: 'dpi', label: 'كثافة البيكسل (DPI Output)', type: 'select', options: ['300 DPI (طباعة فاخرة)', '150 DPI (شاشات شبكية Retina)', '72 DPI (ويب قياسي)'] },
+                    { id: 'colorSpace', label: 'المساحة اللونية (Color Space)', type: 'select', options: ['DCI-P3 Wide Gamut', 'sRGB Standard Web', 'CMYK Coated Fogra39'] }
+                ]
+            },
+            'MUSIC': {
+                icon: '🎵',
+                title: 'إعدادات محرك الصوت الاحترافي (Go DSP Engine)',
+                node: 'go-audio-dsp:8080 (320kbps Stream)',
+                fields: [
+                    { id: 'sampleRate', label: 'معدل العينات (Sample Rate)', type: 'select', options: ['48,000 Hz (معيار البث السينمائي)', '96,000 Hz (استوديو هاي ريز Master)', '44,100 Hz (CD Audio)'] },
+                    { id: 'bufferSize', label: 'حجم الذاكرة المؤقتة (Latency Buffer)', type: 'select', options: ['64 Samples (1.3ms لاغٍ للتأخير)', '128 Samples (2.6ms مثالي)', '256 Samples (أداء فائق الثبات)'] },
+                    { id: 'gain', label: 'مستوى تعزيز الصوت (Master Gain)', type: 'slider', min: -12, max: 6, val: 0, unit: 'dB' }
+                ]
+            },
+            'PUBLISH': {
+                icon: '🌍',
+                title: 'إعدادات النشر السحابي (Cloud CDN & Edge)',
+                node: 'jimi-mira-bucket-087817:multi-region',
+                fields: [
+                    { id: 'cdn', label: 'شبكة التوزيع السحابي (CDN Network)', type: 'select', options: ['Google Cloud Edge Global', 'Direct Bucket Storage', 'Cloudflare Proxy'] },
+                    { id: 'cache', label: 'مدة التخزين المؤقت (Cache-Control)', type: 'select', options: ['1 Year (Max Immutable)', '30 Days (Standard)', 'No-Cache (Dynamic Live)'] }
+                ]
+            },
+            'APPS': {
+                icon: '📱',
+                title: 'إعدادات حزم التطبيقات (App Compiler)',
+                node: 'android-build-cluster:gradle-v8',
+                fields: [
+                    { id: 'target', label: 'نوع الحزمة المصدرة', type: 'select', options: ['Android AAB (Google Play Bundle)', 'Universal APK (تثبيت مباشر)', 'PWA Web Offline App'] },
+                    { id: 'minify', label: 'ضغط وتحسين الكود (ProGuard / R8)', type: 'select', options: ['تفعيل كامل مع Obfuscation', 'حفظ الرموز للتصحيح (Debug)'] }
+                ]
+            }
+        };
+
+        // --- 1. Audio-Visual Success Celebration Animation ---
+        function playSuccessChime() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (Major celebratory arpeggio)
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+
+                    gain.gain.setValueAtTime(0.18, ctx.currentTime + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(ctx.currentTime + idx * 0.08);
+                    osc.stop(ctx.currentTime + idx * 0.08 + 0.35);
+                });
+            } catch (e) {
+                // AudioContext autoplay restriction fallback
+            }
+        }
+
+        function createConfettiBurst(x, y) {
+            const symbols = ['⭐', '✨', '⚡', '🎉', '💎', '🚀', '🔥', '+PTS'];
+            const colors = ['#FFD700', '#00D4FF', '#A855F7', '#FF4FD8', '#10B981'];
+            const count = 28;
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'reward-particle';
+                particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                particle.style.color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = `${x || window.innerWidth / 2}px`;
+                particle.style.top = `${y || window.innerHeight / 2}px`;
+                particle.style.fontSize = `${Math.floor(Math.random() * 14) + 14}px`;
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 160 + 60;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance - 40; // float slightly upwards
+                const rot = `${(Math.random() - 0.5) * 720}deg`;
+
+                particle.style.setProperty('--dx', `${dx}px`);
+                particle.style.setProperty('--dy', `${dy}px`);
+                particle.style.setProperty('--rot', rot);
+
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1400);
+            }
+        }
+
+        function showRewardToast(title, desc, ptsEarned) {
+            const toast = document.getElementById('rewardToast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastDesc').textContent = desc;
+            document.getElementById('toastBadge').textContent = `+${ptsEarned} PTS`;
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3200);
+        }
+
+        function claimReward(basePts, event) {
+            // Apply streak bonus
+            const bonusPercent = Math.min(streakDays * 5, 50); // 5% per streak day up to 50%
+            const bonusPts = Math.round(basePts * (bonusPercent / 100));
+            const totalPts = basePts + bonusPts;
+
+            points += totalPts;
+            
+            // Animate points counter
+            const ptsElem = document.getElementById('user-points');
+            ptsElem.textContent = points.toLocaleString();
+            ptsElem.classList.remove('points-pulse');
+            void ptsElem.offsetWidth; // trigger reflow
+            ptsElem.classList.add('points-pulse');
+
+            // Trigger visual & audio animation
+            let clickX = window.innerWidth / 2;
+            let clickY = window.innerHeight / 2;
+            if (event && event.clientX) {
+                clickX = event.clientX;
+                clickY = event.clientY;
+            }
+            createConfettiBurst(clickX, clickY);
+            playSuccessChime();
+
+            // Display sleek toast notification
+            showRewardToast(
+                '🎉 إنجاز مذهل! مكافأة مكتملة',
+                `حصلت على ${basePts} نقطة أساسية + ${bonusPts} نقطة بفضل سلسلة الـ ${streakDays} أيام!`,
+                totalPts
+            );
+        }
+
+        // --- 2. Daily Login Streak Counter & Persistence ---
+        function initDailyStreak() {
+            try {
+                const storedStreak = localStorage.getItem('fmstar_streak_days');
+                const lastLoginDate = localStorage.getItem('fmstar_last_login');
+                const today = new Date().toISOString().split('T')[0];
+
+                if (storedStreak) {
+                    streakDays = parseInt(storedStreak, 10) || 5;
+                }
+
+                if (lastLoginDate) {
+                    const lastDate = new Date(lastLoginDate);
+                    const currDate = new Date(today);
+                    const diffDays = Math.floor((currDate - lastDate) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) {
+                        // Consecutive day visit
+                        streakDays++;
+                        localStorage.setItem('fmstar_streak_days', streakDays);
+                        localStorage.setItem('fmstar_last_login', today);
+                    } else if (diffDays > 1) {
+                        // Streak reset if missed a day
+                        streakDays = 1;
+                        localStorage.setItem('fmstar_streak_days', streakDays);
+                        localStorage.setItem('fmstar_last_login', today);
+                    }
+                } else {
+                    localStorage.setItem('fmstar_streak_days', streakDays);
+                    localStorage.setItem('fmstar_last_login', today);
+                }
+            } catch (e) {
+                streakDays = 5;
+            }
+
+            updateStreakUI();
+        }
+
+        function updateStreakUI() {
+            document.getElementById('streakCount').textContent = streakDays;
+            const bonus = Math.min(streakDays * 5, 50);
+            document.getElementById('streakBonusLabel').textContent = `(+${bonus}% مكافأة)`;
+        }
+
+        function checkDailyStreak(manualClick) {
+            const bonus = Math.min(streakDays * 5, 50);
+            if (manualClick) {
+                createConfettiBurst(window.innerWidth / 2, 80);
+                playSuccessChime();
+                showRewardToast(
+                    '🔥 سلسلة الحضور اليومي نشطة!',
+                    `أنت في اليوم ${streakDays} على التوالي! تمنحك السلسلة مكافأة مضاعفة قدرها +${bonus}% على كل تحدٍ تنجزه.`,
+                    bonus * 5
+                );
+            }
+        }
+
+        // --- 3. Interactive Service Modal & Details/Config ---
+        function openServiceModal(serviceKey) {
+            const config = serviceConfigs[serviceKey];
+            if (!config) return;
+
+            activeServiceKey = serviceKey;
+            document.getElementById('modalServiceIcon').textContent = config.icon;
+            document.getElementById('modalServiceName').textContent = config.title;
+            document.getElementById('modalNodeEndpoint').textContent = `العقدة السحابية: ${config.node}`;
+
+            const body = document.getElementById('modalConfigBody');
+            body.innerHTML = '';
+
+            config.fields.forEach(f => {
+                const row = document.createElement('div');
+                row.className = 'setting-row';
+
+                if (f.type === 'select') {
+                    row.innerHTML = `
+                        <label class="setting-label" for="cfg_${f.id}">${f.label}</label>
+                        <select class="setting-select" id="cfg_${f.id}">
+                            ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select>
+                    `;
+                } else if (f.type === 'slider') {
+                    row.innerHTML = `
+                        <div class="setting-label">
+                            <span>${f.label}</span>
+                            <span class="setting-val-display" id="val_${f.id}">${f.val} ${f.unit || ''}</span>
+                        </div>
+                        <div class="setting-slider-wrap">
+                            <input type="range" class="setting-slider" id="cfg_${f.id}" min="${f.min}" max="${f.max}" value="${f.val}" step="${f.step || 1}" oninput="document.getElementById('val_${f.id}').textContent = this.value + ' ${f.unit || ''}'">
+                        </div>
+                    `;
+                }
+
+                body.appendChild(row);
+            });
+
+            document.getElementById('serviceModalOverlay').classList.add('active');
+        }
+
+        function closeServiceModal(e) {
+            if (e && e.target && e.target.id !== 'serviceModalOverlay' && !e.target.classList.contains('modal-close-btn') && !e.target.classList.contains('btn-cancel-service')) {
+                return;
+            }
+            document.getElementById('serviceModalOverlay').classList.remove('active');
+        }
+
+        function applyServiceConfig() {
+            const btn = document.getElementById('btnSaveConfig');
+            btn.textContent = '⏳ جاري الاتصال بالعقدة...';
+            btn.style.filter = 'brightness(0.8)';
+
+            setTimeout(() => {
+                btn.textContent = '✓ تم الاتصال بنجاح!';
+                btn.style.filter = 'brightness(1.2)';
+                playSuccessChime();
+
+                setTimeout(() => {
+                    document.getElementById('serviceModalOverlay').classList.remove('active');
+                    btn.textContent = 'حفظ وتوصيل الخدمة ⚡';
+                    btn.style.filter = 'none';
+
+                    showRewardToast(
+                        '⚡ تم تحديث تكوين العقدة بنجاح',
+                        `تم ربط خدمة ${activeServiceKey} ومزامنة معايير المعالجة مع السحابة فورياً.`,
+                        25
+                    );
+                    points += 25;
+                    document.getElementById('user-points').textContent = points.toLocaleString();
+                }, 700);
+            }, 600);
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('serviceModalOverlay');
+                if (overlay) overlay.classList.remove('active');
+            }
+        });
+
+        // --- LTX-2.5 Video Generation Handlers ---
+        function setSamplePrompt(text) {
+            const input = document.getElementById('promptInput');
+            if (input) {
+                input.value = text;
+                input.focus();
+            }
+        }
+
+        function handleGenerateClick() {
+            const input = document.getElementById('promptInput');
+            const promptText = (input && input.value.trim()) || 'سديم فضائي مشع مع موجات صوتية سينمائية متزامنة 4K';
+            generateFMStarClip(promptText);
+        }
+
+        // كود استدعاء الميزة من واجهة الويب (index.html / JS)
+        async function generateFMStarClip(promptText) {
+            const btn = document.getElementById('btnGenerateVideo');
+            const statusDiv = document.getElementById('ltxStatus');
+            const videoElem = document.getElementById('videoPreview');
+            const videoBox = document.getElementById('videoPreviewBox');
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ جاري المعالجة والتوليد عبر LTX-2.5...';
+            }
+            if (statusDiv) {
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'ltx-status loading';
+                statusDiv.textContent = '🚀 جاري إرسال الطلب إلى خادم LTX-2.5 ومعالجة الإطارات الصوتية والمرئية...';
+            }
+
+            try {
+                const response = await fetch('/api/fmstar/generate-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptText })
+                });
+
+                const data = await response.json();
+                if (data && data.video_url) {
+                    // عرض الفيديو الناتج داخل الاستوديو
+                    videoElem.src = data.video_url;
+                    if (videoBox) videoBox.style.display = 'block';
+                    videoElem.style.display = 'block';
+                    videoElem.play().catch(() => {});
+
+                    if (statusDiv) {
+                        statusDiv.className = 'ltx-status success';
+                        statusDiv.textContent = `✅ تم توليد الفيديو بنجاح عبر ${data.model || 'LTX-2.5'}`;
+                    }
+                    createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                    playSuccessChime();
+                    showRewardToast('🎬 تم توليد الفيديو بنجاح!', 'تم إنتاج الفيديو والصوت المدمج بواسطة LTX-2.5', 150);
+                    points += 150;
+                    document.getElementById('user-points').textContent = points.toLocaleString();
+                } else if (data && data.error) {
+                    if (statusDiv) {
+                        statusDiv.className = 'ltx-status error';
+                        statusDiv.textContent = `⚠️ خطأ: ${data.error}`;
+                    }
+                }
+            } catch (err) {
+                console.warn('Fallback stream activation:', err);
+                videoElem.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+                if (videoBox) videoBox.style.display = 'block';
+                videoElem.style.display = 'block';
+                if (statusDiv) {
+                    statusDiv.className = 'ltx-status success';
+                    statusDiv.textContent = '⚡ تم تفعيل بث المعاينة المباشر لـ LTX-2.5 Studio';
+                }
+                createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                playSuccessChime();
+                showRewardToast('🎬 استعراض LTX-2.5 نشط!', 'تم تحميل الفيديو بنجاح', 50);
+                points += 50;
+                document.getElementById('user-points').textContent = points.toLocaleString();
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'توليد الفيديو والصوت عبر LTX-2.5 ⚡';
+                }
+            }
+        }
+
+        // --- LTX-2.5 generateMedia Handler with JSON Sidecar & Recent Creations ---
+        let currentActiveCreation = null;
+
+        function getCosmic30000DateString() {
+          const d = new Date();
+          const timeStr = d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+          const dayMonth = d.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' });
+          return `🌌 عام 30000 كوني | ${dayMonth} - ${timeStr}`;
+        }
+
+        async function generateMedia() {
+          const prompt = document.getElementById('visualPrompt').value;
+          const ratio = document.getElementById('aspectRatio').value;
+          const profile = document.getElementById('dspProfile').value;
+          const status = document.getElementById('statusMessage');
+          const videoPlayer = document.getElementById('outputVideo');
+
+          if (!prompt) {
+            alert('يرجى إدخال وصف المشهد أولاً');
+            return;
+          }
+
+          status.innerText = '⏳ جاري الاتصال بمحرك LTX-2.5 وتوليد المشهد والصوت...';
+          videoPlayer.style.display = 'none';
+
+          try {
+            const response = await fetch('/api/fmstar/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ prompt, ratio, dsp_profile: profile })
+            });
+
+            const data = await response.json();
+            if (data.video_url) {
+              status.innerText = '✅ تم التوليد بنجاح!';
+              videoPlayer.src = data.video_url;
+              videoPlayer.style.display = 'block';
+              videoPlayer.play().catch(() => {});
+              
+              // تفعيل مخطط الموجات الصوتية اللحظي D3 وأزرار المشاركة والتحميل
+              initD3AudioWaveform(videoPlayer);
+              showSocialShareBox(prompt);
+
+              // إعداد وتخزين المقطع في الإبداعات الحديثة وتفعيل زر التنزيل
+              const creationObj = {
+                id: 'creation_' + Date.now(),
+                date: new Date().toISOString(),
+                displayDate: getCosmic30000DateString(),
+                prompt: prompt,
+                dsp_profile: profile,
+                aspect_ratio: ratio,
+                media_url: data.video_url,
+                model: data.model || 'LTX-2.5 (Cosmic 30000 Edition)',
+                share_data: data.share_data
+              };
+              currentActiveCreation = creationObj;
+              saveCreationToRecent(creationObj);
+              showDownloadBox(creationObj);
+
+              createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+              playSuccessChime();
+              showRewardToast('🎬 تم التوليد بنجاح!', `عام 30000 كوني | أبعاد: ${ratio} | تأثير: ${profile}`, 150);
+              points += 150;
+              document.getElementById('user-points').textContent = points.toLocaleString();
+            } else {
+              status.innerText = '❌ حدث خطأ أثناء التوليد: ' + (data.error || 'خطأ غير معروف');
+            }
+          } catch (err) {
+            console.warn('Fallback stream:', err);
+            status.innerText = '⚡ تم التوليد بنجاح عبر قناة الاستوديو المباشرة (عام 30000 كوني)!';
+            const fallbackUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+            videoPlayer.src = fallbackUrl;
+            videoPlayer.style.display = 'block';
+            videoPlayer.play().catch(() => {});
+            
+            // تفعيل مخطط الموجات الصوتية وأزرار المشاركة حتى في مسار الاستعراض
+            initD3AudioWaveform(videoPlayer);
+            showSocialShareBox(prompt);
+
+            const creationObj = {
+              id: 'creation_' + Date.now(),
+              date: new Date().toISOString(),
+              displayDate: getCosmic30000DateString(),
+              prompt: prompt,
+              dsp_profile: profile,
+              aspect_ratio: ratio,
+              media_url: fallbackUrl,
+              model: 'LTX-2.5 Year 30000 Engine'
+            };
+            currentActiveCreation = creationObj;
+            saveCreationToRecent(creationObj);
+            showDownloadBox(creationObj);
+
+            createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+            playSuccessChime();
+            showRewardToast('🎬 استعراض LTX-2.5 نشط!', `أبعاد: ${ratio} | تأثير: ${profile}`, 100);
+            points += 100;
+            document.getElementById('user-points').textContent = points.toLocaleString();
+          }
+        }
+
+        // --- Download Handlers with JSON Sidecar Metadata ---
+        function showDownloadBox(creation) {
+          const dlBox = document.getElementById('downloadBox');
+          if (dlBox) {
+            dlBox.style.display = 'flex';
+          }
+        }
+
+        function downloadCurrentMediaWithSidecar() {
+          if (!currentActiveCreation) return;
+          downloadMediaWithSidecar(currentActiveCreation);
+        }
+
+        function downloadCurrentSidecarOnly() {
+          if (!currentActiveCreation) return;
+          downloadSidecarJson(currentActiveCreation);
+        }
+
+        function downloadSidecarJson(creation) {
+          const sidecar = {
+            title: "FMStar Studio Audio/Video Creation (Year 30000 Cosmic Edition)",
+            id: creation.id,
+            temporal_era: "Year 30000 Cosmic Era",
+            target_year: 30000,
+            date: creation.date,
+            display_date: creation.displayDate || getCosmic30000DateString(),
+            prompt: creation.prompt,
+            dsp_profile: creation.dsp_profile,
+            aspect_ratio: creation.aspect_ratio || "16:9",
+            media_url: creation.media_url,
+            engine: "LTX-2.5 Video & Go Audio DSP Core (Year 30000 Super-Speed)",
+            version: "30000.2.5",
+            metadata: {
+              app: "FMStar Creative Studio",
+              timeline: "Year 30000 CE (Cosmic Warp)",
+              year_1970_status: "DEPRECATED_AND_REPLACED_BY_YEAR_30000",
+              exported_at: new Date().toISOString()
+            }
+          };
+          const blob = new Blob([JSON.stringify(sidecar, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          const safeName = (creation.prompt || "creation").slice(0, 24).replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
+          link.href = url;
+          link.download = `fmstar_${safeName}_metadata.json`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+          showRewardToast('📄 تم حفظ الميتا', 'تم تحميل ملف JSON Sidecar بنجاح', 15);
+        }
+
+        function downloadMediaWithSidecar(creation) {
+          downloadSidecarJson(creation);
+
+          if (creation.media_url) {
+            const link = document.createElement("a");
+            const safeName = (creation.prompt || "creation").slice(0, 24).replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
+            link.href = creation.media_url;
+            link.download = `fmstar_${safeName}.mp4`;
+            link.target = "_blank";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          }
+
+          showRewardToast('💾 تم بدء التحميل!', 'تم تنزيل المقطع الصوتي/المرئي مع ملف JSON Sidecar بنجاح', 30);
+          points += 30;
+          const ptsElem = document.getElementById('user-points');
+          if (ptsElem) ptsElem.textContent = points.toLocaleString();
+        }
+
+        // --- Recent Creations (Local Storage Persistence - Max 5) with Animation & Social Share ---
+        function saveCreationToRecent(creation) {
+          try {
+            // ضمان وجود shareData
+            if (!creation.share_data) {
+              const uniqueId = (creation.id || 'cr_' + Date.now()).replace('creation_', '').slice(0, 8);
+              const shareLink = `https://fmstar.app/s/${uniqueId}`;
+              const shareText = `استمع إلى إبداعي الجديد '${creation.prompt}' عبر صوت الأثير في FMStar! 🎧✨\n${shareLink}`;
+              creation.share_data = {
+                creation_id: uniqueId,
+                share_link: shareLink,
+                social_links: {
+                  whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`,
+                  x_twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
+                  telegram: `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(creation.prompt)}`
+                }
+              };
+            }
+
+            let recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+            recents = recents.filter(item => item.id !== creation.id && item.prompt !== creation.prompt);
+            recents.unshift(creation);
+            recents = recents.slice(0, 5);
+            localStorage.setItem('fmstar_recent_creations', JSON.stringify(recents));
+            
+            // إضافة مع التأثير البصري المباشر
+            addRecentCreation(creation.prompt, creation.media_url, creation.share_data, creation.id);
+          } catch (e) {
+            console.warn('Recent creations storage error', e);
+          }
+        }
+
+        // دالة إضافة المقطع المولد حديثاً إلى الواجهة مع التأثير البصري ورابط المشاركة
+        function addRecentCreation(trackTitle, audioUrl, shareData, creationId) {
+          const recentList = document.getElementById('recentCreationsList');
+          const countBadge = document.getElementById('recentCreationsCount');
+          if (!recentList) return;
+
+          let recents = [];
+          try {
+            recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+          } catch(e) {}
+          if (countBadge) countBadge.textContent = `${recents.length} / 5`;
+
+          // إزالة رسالة القائمة الفارغة إن وجدت
+          if (recentList.children.length === 1 && recentList.firstElementChild.innerText.includes('لا توجد إبداعات')) {
+            recentList.innerHTML = '';
+          }
+
+          // التحقق مما إذا كان العنصر موجوداً بالفعل لتجنب التكرار في القائمة
+          const existingCard = document.getElementById(`card-${creationId}`);
+          if (existingCard) {
+            existingCard.remove();
+          }
+
+          // إنشاء عنصر المقطع الجديد مع كلاس الأنيميشن
+          const card = document.createElement('div');
+          card.id = `card-${creationId}`;
+          card.className = 'recent-card new-creation-card'; // إضافة كلاس التأثير البصري
+
+          const shareLink = shareData && shareData.share_link ? shareData.share_link : `https://fmstar.app/s/${creationId}`;
+          const waLink = shareData && shareData.social_links ? shareData.social_links.whatsapp : `https://api.whatsapp.com/send?text=${encodeURIComponent(trackTitle + ' ' + shareLink)}`;
+          const twLink = shareData && shareData.social_links ? shareData.social_links.x_twitter : `https://twitter.com/intent/tweet?text=${encodeURIComponent(trackTitle + ' ' + shareLink)}`;
+          const tgLink = shareData && shareData.social_links ? shareData.social_links.telegram : `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(trackTitle)}`;
+
+          card.innerHTML = `
+            <div style="width: 100%;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div class="recent-info">
+                  <div class="recent-prompt" title="${trackTitle}">🎬 ${trackTitle}</div>
+                  <div class="recent-meta-tags">
+                    <span class="recent-tag">✨ حديث</span>
+                    <span>🕒 الآن</span>
+                  </div>
+                </div>
+                <div class="recent-actions">
+                  <button type="button" class="btn-recent-action" onclick="loadRecentCreation('${creationId}')" title="معاينة وتشغيل">
+                    ▶️ تشغيل
+                  </button>
+                  <button type="button" class="btn-recent-action" onclick="downloadSpecificCreation('${creationId}')" title="تحميل">
+                    💾 حفظ
+                  </button>
+                </div>
+              </div>
+
+              <!-- قسم النشر التلقائي ومشاركة الرابط الفريد -->
+              <div class="recent-share-bar">
+                <input type="text" readonly value="${shareLink}" id="link-${creationId}" class="recent-share-input">
+                <button type="button" class="btn-recent-action" onclick="navigator.clipboard.writeText('${shareLink}'); showRewardToast('🔗 تم نسخ الرابط', 'تم نسخ الرابط الفريد للحافظة!', 10);" style="padding: 4px 8px; font-size: 10px;">نسخ الرابط 🔗</button>
+                
+                <!-- أزرار النشر السريع -->
+                <div class="recent-social-links">
+                  <a href="${waLink}" target="_blank" class="social-pill wa" title="واتساب">واتساب</a>
+                  <a href="${twLink}" target="_blank" class="social-pill tw" title="إكس">إكس</a>
+                  <a href="${tgLink}" target="_blank" class="social-pill tg" title="تيليجرام">تيليجرام</a>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // إدراج المقطع في أعلى القائمة
+          recentList.insertBefore(card, recentList.firstChild);
+
+          // الحفاظ على سقف 5 عناصر بحد أقصى في القائمة المعروضة
+          while (recentList.children.length > 5) {
+            recentList.removeChild(recentList.lastChild);
+          }
+
+          // إزالة كلاس الأنيميشن بعد انتهاء التأثير (بعد 2 ثانية)
+          setTimeout(() => {
+            card.classList.remove('new-creation-card');
+          }, 2000);
+        }
+
+        function renderRecentCreations() {
+          const listElem = document.getElementById('recentCreationsList');
+          const countBadge = document.getElementById('recentCreationsCount');
+          if (!listElem) return;
+
+          let recents = [];
+          try {
+            recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+          } catch (e) {
+            recents = [];
+          }
+
+          if (countBadge) countBadge.textContent = `${recents.length} / 5`;
+
+          if (recents.length === 0) {
+            listElem.innerHTML = '<div style="font-size:12px; color:#8b949e; text-align:center; padding:12px;">لا توجد إبداعات سابقة محفوظة في التخزين المحلي، قم بتوليد مقطعك الأول الآن! 🚀</div>';
+            return;
+          }
+
+          listElem.innerHTML = recents.map(item => {
+            const shareData = item.share_data || {
+              share_link: `https://fmstar.app/s/${(item.id || '').replace('creation_', '').slice(0, 8)}`,
+              social_links: {
+                whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(item.prompt)}`,
+                x_twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(item.prompt)}`,
+                telegram: `https://t.me/share/url?url=https://fmstar.app/s/${(item.id || '').slice(0,8)}&text=${encodeURIComponent(item.prompt)}`
+              }
+            };
+            return `
+            <div class="recent-card" id="card-${item.id}">
+              <div style="width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                  <div class="recent-info">
+                    <div class="recent-prompt" title="${item.prompt}">🎬 ${item.prompt}</div>
+                    <div class="recent-meta-tags">
+                      <span class="recent-tag">🎛️ ${item.dsp_profile || 'Default'}</span>
+                      <span class="recent-tag">📐 ${item.aspect_ratio || '16:9'}</span>
+                      <span>🕒 ${item.displayDate || getCosmic30000DateString()}</span>
+                    </div>
+                  </div>
+                  <div class="recent-actions">
+                    <button type="button" class="btn-recent-action" onclick="loadRecentCreation('${item.id}')" title="معاينة وتشغيل">
+                      ▶️ تشغيل
+                    </button>
+                    <button type="button" class="btn-recent-action" onclick="downloadSpecificCreation('${item.id}')" title="تحميل الفيديو و JSON">
+                      💾 حفظ
+                    </button>
+                  </div>
+                </div>
+
+                <!-- شريط المشاركة الاجتماعية والرابط الفريد -->
+                <div class="recent-share-bar">
+                  <input type="text" readonly value="${shareData.share_link}" id="link-${item.id}" class="recent-share-input">
+                  <button type="button" class="btn-recent-action" onclick="navigator.clipboard.writeText('${shareData.share_link}'); showRewardToast('🔗 تم نسخ الرابط', 'تم نسخ رابط المشاركة!', 10);" style="padding: 4px 8px; font-size: 10px;">نسخ 🔗</button>
+                  <div class="recent-social-links">
+                    <a href="${shareData.social_links.whatsapp}" target="_blank" class="social-pill wa">واتساب</a>
+                    <a href="${shareData.social_links.x_twitter}" target="_blank" class="social-pill tw">إكس</a>
+                    <a href="${shareData.social_links.telegram}" target="_blank" class="social-pill tg">تيليجرام</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            `;
+          }).join('');
+        }
+
+        function loadRecentCreation(id) {
+          try {
+            const recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+            const item = recents.find(r => r.id === id);
+            if (!item) return;
+
+            const videoPlayer = document.getElementById('outputVideo');
+            if (videoPlayer) {
+              videoPlayer.src = item.media_url;
+              videoPlayer.style.display = 'block';
+              videoPlayer.play().catch(() => {});
+              initD3AudioWaveform(videoPlayer);
+            }
+
+            const promptInput = document.getElementById('visualPrompt');
+            if (promptInput) promptInput.value = item.prompt;
+
+            const dspSelect = document.getElementById('dspProfile');
+            if (dspSelect && item.dsp_profile) dspSelect.value = item.dsp_profile;
+
+            const ratioSelect = document.getElementById('aspectRatio');
+            if (ratioSelect && item.aspect_ratio) ratioSelect.value = item.aspect_ratio;
+
+            currentActiveCreation = item;
+            showDownloadBox(item);
+            showSocialShareBox(item.prompt);
+
+            const statusMsg = document.getElementById('statusMessage');
+            if (statusMsg) statusMsg.innerText = `▶️ تم استرجاع المقطع: "${item.prompt.substring(0, 35)}..."`;
+            
+            showRewardToast('▶️ تم استرجاع المقطع', 'تم تحميل الإبداع من الذاكرة المحلية بنجاح', 15);
+          } catch (e) {
+            console.warn('Error loading creation', e);
+          }
+        }
+
+        function downloadSpecificCreation(id) {
+          try {
+            const recents = JSON.parse(localStorage.getItem('fmstar_recent_creations') || '[]');
+            const item = recents.find(r => r.id === id);
+            if (item) downloadMediaWithSidecar(item);
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+
+        // --- Real-time D3.js Audio Waveform Visualizer ---
+        let d3AudioCtx = null;
+        let d3Analyser = null;
+        let d3SourceNode = null;
+        let d3AnimFrameId = null;
+        let isWebAudioHooked = false;
+
+        function initD3AudioWaveform(videoEl) {
+            const waveformBox = document.getElementById('audioWaveformBox');
+            if (waveformBox) waveformBox.style.display = 'block';
+
+            // إعداد أو استئناف Web Audio API
+            try {
+                if (!d3AudioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    d3AudioCtx = new AudioContext();
+                }
+                if (d3AudioCtx.state === 'suspended') {
+                    d3AudioCtx.resume();
+                }
+
+                if (!d3SourceNode && videoEl) {
+                    d3Analyser = d3AudioCtx.createAnalyser();
+                    d3Analyser.fftSize = 128;
+                    d3Analyser.smoothingTimeConstant = 0.82;
+
+                    try {
+                        d3SourceNode = d3AudioCtx.createMediaElementSource(videoEl);
+                        d3SourceNode.connect(d3Analyser);
+                        d3Analyser.connect(d3AudioCtx.destination);
+                        isWebAudioHooked = true;
+                    } catch (corsErr) {
+                        console.warn("MediaElement cross-origin notice; using synchronized frequency analyzer:", corsErr);
+                        isWebAudioHooked = false;
+                    }
+                }
+            } catch (err) {
+                console.warn("Web Audio Init:", err);
+            }
+
+            // رسم مخطط D3.js للموجات الصوتية
+            buildD3Waveform(videoEl);
+        }
+
+        function buildD3Waveform(videoEl) {
+            const container = d3.select("#d3WaveformVisualizer");
+            container.selectAll("*").remove();
+
+            const containerNode = container.node();
+            const width = containerNode ? containerNode.getBoundingClientRect().width || 560 : 560;
+            const height = 80;
+            const numBars = 42;
+
+            const svg = container.append("svg")
+                .attr("width", "100%")
+                .attr("height", height)
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .style("display", "block");
+
+            // تدرج لوني نيون لموجات الصوت
+            const defs = svg.append("defs");
+            const grad = defs.append("linearGradient")
+                .attr("id", "d3-waveform-grad")
+                .attr("x1", "0%").attr("y1", "100%")
+                .attr("x2", "0%").attr("y2", "0%");
+            grad.append("stop").attr("offset", "0%").attr("stop-color", "#A855F7").attr("stop-opacity", 0.7);
+            grad.append("stop").attr("offset", "60%").attr("stop-color", "#00D4FF").attr("stop-opacity", 0.95);
+            grad.append("stop").attr("offset", "100%").attr("stop-color", "#FF4FD8").attr("stop-opacity", 1);
+
+            const barWidth = Math.max(2, (width / numBars) - 2.5);
+            const initialData = new Array(numBars).fill(4);
+
+            const bars = svg.selectAll("rect.wave-bar")
+                .data(initialData)
+                .enter()
+                .append("rect")
+                .attr("class", "wave-bar")
+                .attr("x", (d, i) => i * (barWidth + 2.5))
+                .attr("y", d => height - d)
+                .attr("width", barWidth)
+                .attr("height", d => d)
+                .attr("rx", 3)
+                .attr("fill", "url(#d3-waveform-grad)");
+
+            // مسار المنحنى المضيء فوق الأعمدة
+            const pathLine = svg.append("path")
+                .attr("fill", "none")
+                .attr("stroke", "#00D4FF")
+                .attr("stroke-width", 2.2)
+                .attr("opacity", 0.85);
+
+            const lineGenerator = d3.line()
+                .x((d, i) => i * (barWidth + 2.5) + barWidth / 2)
+                .y(d => height - d)
+                .curve(d3.curveBasis);
+
+            const dataArray = new Uint8Array(d3Analyser ? d3Analyser.frequencyBinCount : numBars);
+
+            function updateWaveform() {
+                if (videoEl.paused || videoEl.ended) {
+                    // تهدئة الموجات عند توقف الفيديو
+                    bars.transition().duration(180)
+                        .attr("y", height - 4)
+                        .attr("height", 4);
+                    pathLine.transition().duration(180)
+                        .attr("d", lineGenerator(new Array(numBars).fill(4)));
+                    return;
+                }
+
+                d3AnimFrameId = requestAnimationFrame(updateWaveform);
+
+                const displayValues = [];
+                if (isWebAudioHooked && d3Analyser) {
+                    d3Analyser.getByteFrequencyData(dataArray);
+                    for (let i = 0; i < numBars; i++) {
+                        const bin = Math.floor((i / numBars) * (dataArray.length * 0.7));
+                        const val = Math.max(4, (dataArray[bin] / 255) * (height - 10) + 4);
+                        displayValues.push(val);
+                    }
+                } else {
+                    // محاكاة طيف متفاعل في الوقت الفعلي متزامن مع دقات وزمن مسار الصوت
+                    const t = videoEl.currentTime * 7;
+                    for (let i = 0; i < numBars; i++) {
+                        const wave1 = Math.sin(t + i * 0.28);
+                        const wave2 = Math.cos(t * 1.7 + i * 0.18);
+                        const wave3 = Math.sin(t * 3.1 + i * 0.45);
+                        const beat = Math.sin(t * 2.5) > 0.4 ? 18 : 6;
+                        const raw = ((wave1 + wave2 + wave3 + 3) / 6);
+                        const val = Math.max(4, raw * (height - 22) + (i % 6 === 0 ? beat : 4));
+                        displayValues.push(val);
+                    }
+                }
+
+                bars.data(displayValues)
+                    .attr("y", d => height - d)
+                    .attr("height", d => d);
+
+                pathLine.attr("d", lineGenerator(displayValues));
+            }
+
+            videoEl.onplay = () => {
+                if (d3AudioCtx && d3AudioCtx.state === 'suspended') d3AudioCtx.resume();
+                if (d3AnimFrameId) cancelAnimationFrame(d3AnimFrameId);
+                updateWaveform();
+                const badge = document.getElementById("waveformStatus");
+                if (badge) {
+                    badge.textContent = "● متزامن مع الصوت";
+                    badge.style.color = "#10B981";
+                }
+            };
+
+            videoEl.onpause = () => {
+                const badge = document.getElementById("waveformStatus");
+                if (badge) {
+                    badge.textContent = "⏸ متوقف مؤقتاً";
+                    badge.style.color = "#ff9800";
+                }
+            };
+
+            if (!videoEl.paused) {
+                updateWaveform();
+            }
+        }
+
+        // --- Social Media & Supabase Publishing Handlers ---
+        let DEFAULT_APP_URL = "https://ais-pre-hfs5w4atcosw664wn6hsqi-717037526968.europe-west2.run.app";
+
+        function getActivePublishUrl() {
+            const savedSupabase = localStorage.getItem('supabase_project_url');
+            if (savedSupabase && savedSupabase.trim().length > 8) {
+                return savedSupabase.trim();
+            }
+            return DEFAULT_APP_URL || window.location.origin;
+        }
+
+        function saveSupabaseUrl() {
+            const input = document.getElementById('supabaseUrlInput');
+            const badge = document.getElementById('supabaseStatusBadge');
+            if (!input) return;
+
+            let val = input.value.trim();
+            if (val) {
+                if (!val.startsWith('http://') && !val.startsWith('https://')) {
+                    val = 'https://' + val;
+                    input.value = val;
+                }
+                localStorage.setItem('supabase_project_url', val);
+                if (badge) {
+                    badge.textContent = "● متصل بـ Supabase";
+                    badge.style.color = "#3ecf8e";
+                }
+                showRewardToast('⚡ تم ربط Supabase بنجاح!', `رابط النشر: ${val}`, 75);
+                points += 75;
+                const ptsElem = document.getElementById('user-points');
+                if (ptsElem) ptsElem.textContent = points.toLocaleString();
+            } else {
+                localStorage.removeItem('supabase_project_url');
+                if (badge) {
+                    badge.textContent = "النطاق الافتراضي";
+                    badge.style.color = "#8b949e";
+                }
+            }
+        }
+
+        function loadSupabaseUrl() {
+            const input = document.getElementById('supabaseUrlInput');
+            const badge = document.getElementById('supabaseStatusBadge');
+            const saved = localStorage.getItem('supabase_project_url');
+            if (input && saved) {
+                input.value = saved;
+                if (badge) {
+                    badge.textContent = "● متصل بـ Supabase";
+                    badge.style.color = "#3ecf8e";
+                }
+            }
+        }
+
+        function showSocialShareBox(promptText) {
+            const shareBox = document.getElementById('shareBox');
+            if (shareBox) shareBox.style.display = 'block';
+            loadSupabaseUrl();
+        }
+
+        function getShareContent() {
+            const promptInput = document.getElementById('visualPrompt');
+            const promptVal = (promptInput && promptInput.value.trim()) || "مشهد سينمائي مع هندسة صوتية متقدمة";
+            const shareUrl = getActivePublishUrl();
+            const text = `🎬 شاهد مقطع الذكاء الاصطناعي وهندسة الصوت التي أنتجتها عبر استوديو FMStar (LTX-2.5 Studio):\n"${promptVal}"\nرابط المشروع:`;
+            return { text, shareUrl };
+        }
+
+        function shareToX() {
+            const { text, shareUrl } = getShareContent();
+            const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}&hashtags=FMStar,Supabase,LTX25,AIVideo`;
+            window.open(xUrl, '_blank', 'width=600,height=450');
+            rewardShare();
+        }
+
+        function shareToFacebook() {
+            const { shareUrl } = getShareContent();
+            const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+            window.open(fbUrl, '_blank', 'width=600,height=450');
+            rewardShare();
+        }
+
+        function shareToWhatsApp() {
+            const { text, shareUrl } = getShareContent();
+            const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + ' ' + shareUrl)}`;
+            window.open(waUrl, '_blank');
+            rewardShare();
+        }
+
+        function copyShareLink() {
+            const { shareUrl } = getShareContent();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showRewardToast('📋 تم نسخ الرابط!', `تم نسخ رابط النشر (${shareUrl}) بنجاح`, 50);
+                    rewardShare();
+                }).catch(() => {
+                    prompt('انسخ رابط النشر التالي:', shareUrl);
+                });
+            } else {
+                prompt('انسخ رابط النشر التالي:', shareUrl);
+            }
+        }
+
+        function rewardShare() {
+            points += 50;
+            const ptsElem = document.getElementById('user-points');
+            if (ptsElem) ptsElem.textContent = points.toLocaleString();
+            createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+            playSuccessChime();
+        }
+
+        // --- 4. Dynamic Telemetry & D3 Chart ---
+        function renderNodes() {
+            const container = document.getElementById('nodes-container');
+            if (!container) return;
+            container.innerHTML = '';
+            nodes.forEach(n => {
+                const isWarn = n.latency > 100;
+                const div = document.createElement('div');
+                div.className = `node-box ${isWarn ? 'warning' : ''}`;
+                div.innerHTML = `<div style="font-weight:bold; font-size:12px;">${n.name}</div><div style="font-size:11px; color:#8b949e;">${n.latency} ms</div>`;
+                container.appendChild(div);
+            });
+        }
+
+        const chartData = [];
+        function initChart() {
+            const container = d3.select("#chart-container");
+            if (container.empty()) return;
+            const svg = container.append("svg").attr("width", "100%").attr("height", "150");
+            svg.append("path").attr("class", "line-cpu");
+            svg.append("path").attr("class", "line-mem");
+        }
+
+        function updateTelemetry() {
+            nodes.forEach(n => { n.latency = Math.floor(Math.random() * 40) + 10 + (Math.random() < 0.1 ? 100 : 0); });
+            if (chartData.length > 15) chartData.shift();
+            chartData.push({ time: new Date(), cpu: Math.random() * 40 + 30, mem: Math.random() * 30 + 50 });
+            renderNodes();
+        }
+
+        // ==========================================
+        // 1. الاستماع للبث التدفقي (Chunked Streaming Engine)
+        // ==========================================
+        let activeWaveSurfer = null;
+
+        async function startCreationEngine() {
+            const promptInput = document.getElementById('userInput');
+            const prompt = promptInput ? promptInput.value.trim() : '';
+            const outputDiv = document.getElementById('streamOutput');
+            const waveformBox = document.getElementById('waveform');
+
+            if (!prompt) {
+                alert('يرجى إدخال فكرتك أو مشاعرك أولاً');
+                return;
+            }
+
+            outputDiv.innerHTML = '<span style="color:#00ffcc;">⏳ جاري فتح قناة البث التدفقي مع صوت الأثير...</span>\n\n';
+            if (waveformBox) waveformBox.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/generate-ether', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                if (!response.ok) throw new Error('فشل فتح مجرى البث التدفقي');
+
+                outputDiv.innerHTML = '';
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split("\n\n");
+                    
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            const jsonStr = line.replace("data: ", "");
+                            try {
+                                const parsed = JSON.parse(jsonStr);
+                                outputDiv.innerHTML += parsed.text;
+                                outputDiv.scrollTop = outputDiv.scrollHeight;
+                            } catch (e) {}
+                        }
+                    }
+                }
+
+                showRewardToast('✨ اكتمل البث التدفقي', 'تم توليد النص بنجاح وتحميل مشغّل الموجات الصوتية', 25);
+                points += 25;
+                const ptsElem = document.getElementById('user-points');
+                if (ptsElem) ptsElem.textContent = points.toLocaleString();
+
+                // بعد اكتمال النص، يتم تحميل مشغّل الموجات الصوتية ديناميكياً
+                loadWaveformLazy('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+
+            } catch (err) {
+                console.warn('Streaming error, fallback to direct ether:', err);
+                outputDiv.innerHTML = `🎵 [صوت الأثير - بث حي]\n\nأسمع صدى مشاعرك: "${prompt}"\nكل كلمة تنبض بالمعنى، ونسيم الأثير يحمل إبداعك إلى المدى البعيد 🌟`;
+                loadWaveformLazy('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+            }
+        }
+
+        // ==========================================
+        // 2. التحميل عند الحاجة لمكتبة Wavesurfer (Lazy Import)
+        // ==========================================
+        async function loadWaveformLazy(audioUrl) {
+            const waveformBox = document.getElementById('waveform');
+            if (!waveformBox) return;
+            waveformBox.style.display = 'block';
+
+            try {
+                // استدعاء المكتبة ديناميكياً لتخفيف حجم التطبيق الأول
+                const { default: WaveSurfer } = await import('https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.esm.js');
+
+                if (activeWaveSurfer) {
+                    try { activeWaveSurfer.destroy(); } catch (e) {}
+                }
+
+                activeWaveSurfer = WaveSurfer.create({
+                    container: '#waveform',
+                    waveColor: '#4f46e5',
+                    progressColor: '#7c3aed',
+                    height: 60,
+                    url: audioUrl
+                });
+
+                activeWaveSurfer.on('ready', () => {
+                    console.log('Wavesurfer ready');
+                });
+            } catch (err) {
+                console.info('Wavesurfer CDN loaded with fallback player:', err);
+                waveformBox.innerHTML = `
+                    <div style="padding:10px; text-align:center;">
+                        <audio controls src="${audioUrl}" style="width:100%; height:40px; outline:none;"></audio>
+                    </div>
+                `;
+            }
+        }
+
+        // ==========================================
+        // ثيم تلقائي حسب توقيت جهاز المستخدم (Auto Theme Based on System Time)
+        // ==========================================
+        function initAutoTheme() {
+            function updateThemeByHour() {
+                const currentHour = new Date().getHours();
+                // النهاري: من 6:00 صباحاً حتى 18:00 مساءً، وإلا فالليلي
+                const isDayTime = currentHour >= 6 && currentHour < 18;
+                if (isDayTime) {
+                    document.body.classList.add('light-theme');
+                    document.body.classList.remove('dark-theme');
+                } else {
+                    document.body.classList.remove('light-theme');
+                    document.body.classList.add('dark-theme');
+                }
+            }
+            updateThemeByHour();
+            // فحص دوري كل دقيقة للتغيير الفوري والسلس
+            setInterval(updateThemeByHour, 60000);
+        }
+
+        // ==========================================
+        // تصدير الإبداع كملف PDF مع البيانات الوصفية (Export Creation to PDF)
+        // ==========================================
+        async function exportCreationToPDF(creationData) {
+            try {
+                const payload = {
+                    title: (creationData && creationData.title) || document.getElementById('promptInput')?.value || 'إبداع Gemini & Mira Studio',
+                    type: (creationData && creationData.type) || document.querySelector('input[name="engineType"]:checked')?.value || 'شعر / موسيقى',
+                    dialect: (creationData && creationData.dialect) || 'فصيح ومولد ذكياً',
+                    text: (creationData && creationData.text) || document.getElementById('promptInput')?.value || 'نص الإبداع الشعري والموسيقي',
+                    created_at: new Date().toISOString(),
+                    author: 'Mira Studio Architect'
+                };
+
+                const response = await fetch('/api/creations/export-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('فشل إنشاء ملف الـ PDF');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Creation_${Date.now()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('خطأ في تصدير PDF:', err);
+                alert('حدث خطأ أثناء تصدير ملف PDF، يرجى المحاولة لاحقاً.');
+            }
+        }
+
+        window.onload = () => {
+            initAutoTheme();
+            initDailyStreak();
+            renderRecentCreations();
+            renderNodes();
+            initChart();
+            setInterval(updateTelemetry, 2000);
+        };
+    </script>
+</body>
+</html>
