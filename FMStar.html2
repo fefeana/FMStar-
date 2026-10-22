@@ -114,8 +114,6 @@
         }
         .btn-outline:hover { background: rgba(139, 92, 246, 0.1); }
     </style>
-    <!-- استدعاء الخطوط -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -140,7 +138,7 @@
             </div>
             
             <label class="input-label">وصف المشهد المرئي والصوتي:</label>
-            <textarea class="text-area" rows="3" placeholder="مثال: مشهد سينمائي لشاعر يلقي إلقاءً حماسياً مع إضاءة خافتة وموسيقى خلفية..."></textarea>
+            <textarea class="text-area" id="promptInput" rows="3" placeholder="مثال: مشهد سينمائي لشاعر يلقي إلقاءً حماسياً مع إضاءة خافتة وموسيقى خلفية..."></textarea>
 
             <div class="controls-grid">
                 <div>
@@ -159,7 +157,8 @@
                 </div>
             </div>
 
-            <button class="btn-primary" onclick="alert('جاهز للربط!')">
+            <!-- ربط الزرار بدالة التوليد -->
+            <button class="btn-primary" id="generateBtn" onclick="generateAI()">
                 <span>🚀</span> توليد الفيديو والصوت
             </button>
         </div>
@@ -213,102 +212,53 @@
 
     </div>
 
-</body>
-</html>s="w-8 h-8 rounded-[6px] bg-[#18191a] border border-hairline flex items-center justify-center mb-4 group-hover:border-primary/50 transition-colors">
-                    <i data-lucide="mic" class="w-4 h-4 text-primary"></i>
-                </div>
-                <h3 class="text-[16px] font-semibold text-ink mb-2">Voice Cloning</h3>
-                <p class="text-[14px] text-inkSubtle leading-[1.5]">Create realistic AI voices with emotion, timbre, and precise control.</p>
-            </div>
-            
-            <!-- Card 2 -->
-            <div class="bg-surface border border-hairline rounded-[12px] p-6 hover:border-[#34343a] transition-colors cursor-pointer group">
-                <div class="w-8 h-8 rounded-[6px] bg-[#18191a] border border-hairline flex items-center justify-center mb-4 group-hover:border-primary/50 transition-colors">
-                    <i data-lucide="music" class="w-4 h-4 text-primary"></i>
-                </div>
-                <h3 class="text-[16px] font-semibold text-ink mb-2">Music Generation</h3>
-                <p class="text-[14px] text-inkSubtle leading-[1.5]">Compose full tracks, melodies, and harmonies from text prompts instantly.</p>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="bg-surface border border-hairline rounded-[12px] p-6 hover:border-[#34343a] transition-colors cursor-pointer group">
-                <div class="w-8 h-8 rounded-[6px] bg-[#18191a] border border-hairline flex items-center justify-center mb-4 group-hover:border-primary/50 transition-colors">
-                    <i data-lucide="sliders" class="w-4 h-4 text-primary"></i>
-                </div>
-                <h3 class="text-[16px] font-semibold text-ink mb-2">Sound Design</h3>
-                <p class="text-[14px] text-inkSubtle leading-[1.5]">Craft cinematic audio effects, ambience, and textures with AI precision.</p>
-            </div>
-        </section>
-    </main>
-
-    <!-- Command Palette (⌘K) Fixed at bottom -->
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-50">
-        <div class="bg-surface border border-hairline rounded-[8px] flex items-center px-3 h-12 shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
-            <i data-lucide="search" class="w-4 h-4 text-inkSubtle mr-3"></i>
-            <input type="text" id="commandInput" placeholder="Type a command or prompt..." class="flex-1 bg-transparent border-none outline-none text-[14px] text-ink placeholder-inkSubtle">
-            <div class="flex items-center gap-1">
-                <kbd class="px-1.5 py-0.5 rounded-[4px] bg-[#18191a] border border-hairline text-[10px] font-mono text-inkSubtle">⌘</kbd>
-                <kbd class="px-1.5 py-0.5 rounded-[4px] bg-[#18191a] border border-hairline text-[10px] font-mono text-inkSubtle">K</kbd>
-            </div>
-        </div>
-    </div>
-
+    <!-- الكود البرمجي لربط الواجهة (هنا السحر كله) -->
     <script>
-        // Initialize Icons
-        lucide.createIcons();
+        async function generateAI() {
+            const btn = document.getElementById('generateBtn');
+            const input = document.getElementById('promptInput');
+            const promptText = input.value;
 
-        // Generate Waveform Bars (Linear Style)
-        const waveformContainer = document.getElementById('waveform');
-        const totalBars = 100;
-        const activeIndex = 50; // Center playhead
-
-        for (let i = 0; i < totalBars; i++) {
-            const bar = document.createElement('div');
-            bar.classList.add('wave-bar');
-            
-            // Generate a smooth pseudo-random wave
-            const height = Math.sin(i * 0.2) * 20 + Math.random() * 40 + 10;
-            bar.style.height = `${height}%`;
-            
-            if (i <= activeIndex) {
-                bar.classList.add('active');
+            if (!promptText.trim()) {
+                alert("اكتب فكرة المشهد أولاً يا ساموراي!");
+                return;
             }
-            waveformContainer.appendChild(bar);
-        }
 
-        // Command Palette Keyboard Shortcut (Cmd+K or Ctrl+K)
-        document.addEventListener('keydown', (e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                document.getElementById('commandInput').focus();
+            // تغيير شكل الزرار
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⏳ جاري التوليد...";
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+
+            try {
+                // الاتصال بالسيرفر (main.go)
+                const response = await fetch("http://localhost:8080/api/v1/generate", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        prompt: promptText,
+                        type: "video" // حددنا النوع فيديو
+                    })
+                });
+
+                if (!response.ok) throw new Error("السيرفر مش شغال");
+
+                const data = await response.json();
+                
+                // عرض النتيجة
+                alert(`تم التوليد بنجاح بواسطة: ${data.model_used} 🎉\n\nالنتيجة:\n${data.result}`);
+
+            } catch (error) {
+                console.error(error);
+                alert("⚠️ لم نتمكن من الاتصال بالمحرك. تأكد من تشغيل السيرفر (main.go).");
+            } finally {
+                // إرجاع الزرار لشكله الطبيعي
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.style.opacity = "1";
             }
-        });
-    </script>
-</body>
-</html>
-        <div class="input-box">
-            <input type="text" placeholder="اكتب فكرتك هنا...">
-            <button class="btn" onclick="alert('الواجهة شغالة! المحرك هيتربط هنا قريباً.')">Generate ✨</button>
-        </div>
-
-        <div class="nav">
-            <div class="active">الاستوديو</div>
-            <div>مشاريعي</div>
-            <div style="background: #8B5CF6; width: 50px; height: 50px; border-radius: 50%; margin-top: -25px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">+</div>
-            <div>المكتبة</div>
-            <div>حسابي</div>
-        </div>
-    </div>
-
-    <script>
-        const container = document.getElementById('waveform');
-        for(let i=0; i<40; i++) {
-            let bar = document.createElement('div');
-            bar.className = 'wave-bar';
-            let h = Math.random() * 100;
-            bar.style.height = h + '%';
-            if(h < 50) bar.style.backgroundColor = '#1A1A2E';
-            container.appendChild(bar);
         }
     </script>
 </body>
