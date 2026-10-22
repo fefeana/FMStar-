@@ -1,186 +1,220 @@
-<!<!DOCTYPE html>
-<html lang="en" dir="ltr">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMStarAI Studio — Build Audio Intelligence</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Fonts: Inter & JetBrains Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        void: '#0E0E10',
-                        surface: '#1A1A1E',
-                        hairline: '#2A2A2E',
-                        primary: '#5E6AD2',
-                        primaryHover: '#828fff',
-                        ink: '#f7f8f8',
-                        inkMuted: '#d0d6e0',
-                        inkSubtle: '#8a8f98',
-                        inkTertiary: '#62666d',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    borderRadius: {
-                        'linear': '6px',
-                    }
-                }
-            }
-        }
-    </script>
-
+    <title>FMStarAI Studio</title>
     <style>
-        body { 
-            background-color: #0E0E10; 
-            color: #f7f8f8; 
-            font-family: 'Inter', sans-serif; 
+        /* ====== Design System Variables ====== */
+        :root {
+            --canvas: #0E0E10;          /* الخلفية العميقة */
+            --surface-1: #1A1A1E;       /* الكروت */
+            --surface-2: #23252a;       /* الكروت عند التمرير */
+            --hairline: #2A2A2E;        /* الحدود الدقيقة */
+            --primary: #8B5CF6;         /* البنفسجي الأساسي */
+            --primary-hover: #A855F7;
+            --ink: #F7F8F8;             /* النص الفاتح */
+            --ink-muted: #8A8F98;       /* النص الثانوي */
+            --success: #27A644;
+            --danger: #EF4444;
+            --font-sans: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--canvas);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
             -webkit-font-smoothing: antialiased;
         }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Linear Focus Ring */
-        *:focus { outline: none; }
-        *:focus-visible { outline: 2px solid rgba(94, 106, 210, 0.5); outline-offset: 2px; }
 
-        /* Custom Waveform Bars */
-        .wave-bar { width: 2px; background-color: #62666d; border-radius: 1px; transition: background-color 0.2s; }
-        .wave-bar.active { background-color: #5E6AD2; }
+        .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* ====== Top Bar ====== */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--hairline); padding-bottom: 16px; }
+        .brand { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 6px; }
+        .brand-icon { color: var(--primary); font-size: 20px; }
+        
+        .gamification-badge { 
+            display: flex; align-items: center; gap: 10px; background: var(--surface-1); 
+            border: 1px solid var(--hairline); padding: 6px 12px; border-radius: 8px; 
+        }
+        .pts { font-family: var(--font-mono); font-size: 14px; color: var(--primary-hover); font-weight: 600; }
+        .streak { font-size: 12px; color: var(--ink-muted); display: flex; align-items: center; gap: 4px; }
+
+        /* ====== Cards General ====== */
+        .card { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: 12px; padding: 20px; }
+        .card-header { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* ====== LTX Studio Section ====== */
+        .studio-title { color: var(--primary-hover); display: flex; align-items: center; gap: 8px; }
+        .stream-badge { font-size: 10px; font-family: var(--font-mono); background: rgba(139, 92, 246, 0.15); color: var(--primary-hover); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(139, 92, 246, 0.3); }
+        
+        .input-label { font-size: 11px; font-family: var(--font-mono); color: var(--ink-muted); margin-bottom: 6px; display: block; }
+        .text-area { 
+            width: 100%; background: var(--canvas); border: 1px solid var(--hairline); 
+            border-radius: 8px; padding: 12px; color: var(--ink); font-family: var(--font-sans); 
+            font-size: 13px; resize: none; outline: none; transition: border-color 0.2s; 
+        }
+        .text-area:focus { border-color: var(--primary); }
+
+        .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+        .select-box { 
+            width: 100%; background: var(--canvas); border: 1px solid var(--hairline); 
+            border-radius: 8px; padding: 10px; color: var(--ink); font-size: 12px; outline: none; 
+        }
+        
+        .btn-primary {
+            width: 100%; background: var(--primary); color: white; border: none;
+            padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px;
+            cursor: pointer; transition: background 0.2s; display: flex; justify-content: center; gap: 8px; margin-top: 16px;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* ====== Gamification Section ====== */
+        .challenge-box { background: var(--canvas); border: 1px solid var(--hairline); border-radius: 8px; padding: 16px; }
+        .challenge-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .challenge-name { font-size: 13px; font-weight: 600; color: #F59E0B; }
+        .challenge-points { font-family: var(--font-mono); font-size: 11px; color: #3B82F6; background: rgba(59, 130, 246, 0.1); padding: 2px 6px; border-radius: 4px; }
+        .challenge-desc { font-size: 11px; color: var(--ink-muted); margin-bottom: 12px; line-height: 1.4; }
+        .btn-claim { width: 100%; background: linear-gradient(90deg, #8B5CF6, #06B6D4); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
+
+        /* Leaderboard */
+        .leaderboard-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--hairline); }
+        .leaderboard-row:last-child { border-bottom: none; }
+        .lb-name { font-size: 13px; font-weight: 500; }
+        .lb-pts { font-family: var(--font-mono); font-size: 12px; color: var(--primary-hover); font-weight: 600; }
+
+        /* ====== Apps Grid ====== */
+        .apps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .app-tile { 
+            background: var(--surface-1); border: 1px solid var(--hairline); border-radius: 12px; 
+            padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s;
+        }
+        .app-tile:hover { background: var(--surface-2); }
+        .app-icon { font-size: 24px; }
+        .app-name { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); }
+
+        /* ====== Jimmy & Mira Studio ====== */
+        .studio-banner { 
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.1)); 
+            border: 1px solid var(--hairline); border-radius: 12px; padding: 24px; 
+        }
+        .banner-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+        .banner-desc { font-size: 12px; color: var(--ink-muted); margin-bottom: 16px; }
+        .btn-outline { 
+            background: transparent; color: var(--primary-hover); border: 1px solid var(--primary); 
+            padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .btn-outline:hover { background: rgba(139, 92, 246, 0.1); }
     </style>
+    <!-- استدعاء الخطوط -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
-<body class="min-h-screen flex flex-col items-center selection:bg-primary/30">
+<body>
 
-    <!-- Top Navigation (Linear Style) -->
-    <nav class="w-full max-w-5xl flex items-center justify-between px-6 py-4">
-        <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-[4px] bg-primary flex items-center justify-center text-white font-bold text-xs">F</div>
-            <span class="font-semibold text-[15px] tracking-tight">FMStarAI Studio</span>
-        </div>
-        <div class="flex items-center gap-6 text-sm text-inkSubtle font-medium">
-            <a href="#" class="hover:text-ink transition-colors">Projects</a>
-            <a href="#" class="hover:text-ink transition-colors">Settings</a>
-            <button class="h-8 px-3 rounded-linear bg-surface border border-hairline text-ink hover:bg-[#23252a] transition-colors text-xs">Sign In</button>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="w-full max-w-5xl px-6 py-16 flex flex-col gap-16 flex-1">
+    <div class="app-container">
         
-        <!-- Hero Section -->
-        <section class="flex flex-col gap-4 max-w-2xl">
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface border border-hairline w-fit">
-                <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                <span class="text-[12px] font-medium text-inkMuted font-mono tracking-tight">v1.0.0 Alpha</span>
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="brand">
+                <span class="brand-icon">✧</span> FMSTAR
             </div>
-            <h1 class="text-[56px] font-semibold leading-[1.1] tracking-[-1.8px] text-ink">
-                Build audio<br>intelligence
-            </h1>
-            <p class="text-[18px] text-inkSubtle leading-[1.5] tracking-[-0.1px] max-w-lg mt-2">
-                Transform ideas into voices, music, and extraordinary sound experiences with AI. Engineered for precision and speed.
-            </p>
-        </section>
+            <div class="gamification-badge">
+                <div class="pts">1,250 PTS</div>
+                <div class="streak">🔥 5 أيام</div>
+            </div>
+        </header>
 
-        <!-- Studio Window (Linear Product UI Style) -->
-        <section class="w-full bg-surface border border-hairline rounded-[12px] flex overflow-hidden h-[400px] shadow-sm">
+        <!-- LTX Studio Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="studio-title">🎬 (LTX-2.5) الاستوديو المرئي</div>
+                <div class="stream-badge">Gemini 2.5 Flash</div>
+            </div>
             
-            <!-- Sidebar (Projects) -->
-            <div class="w-64 border-r border-hairline bg-[#141516] flex flex-col">
-                <div class="p-4 border-b border-hairline flex items-center justify-between">
-                    <span class="text-xs font-semibold text-inkSubtle tracking-wide uppercase font-mono">Projects</span>
-                    <i data-lucide="plus" class="w-4 h-4 text-inkSubtle cursor-pointer hover:text-ink"></i>
+            <label class="input-label">وصف المشهد المرئي والصوتي:</label>
+            <textarea class="text-area" rows="3" placeholder="مثال: مشهد سينمائي لشاعر يلقي إلقاءً حماسياً مع إضاءة خافتة وموسيقى خلفية..."></textarea>
+
+            <div class="controls-grid">
+                <div>
+                    <label class="input-label">تأثير الصوت (DSP):</label>
+                    <select class="select-box">
+                        <option>Brass Studio</option>
+                        <option>Chunked Stream</option>
+                    </select>
                 </div>
-                <div class="flex-1 overflow-y-auto no-scrollbar p-2 flex flex-col gap-1">
-                    <div class="flex items-center gap-2 p-2 rounded-linear bg-hairline/50 text-ink text-sm cursor-pointer border border-transparent">
-                        <i data-lucide="music" class="w-4 h-4 text-primary"></i>
-                        <span class="font-medium">غروب الروح</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded-linear text-inkSubtle hover:bg-hairline/30 hover:text-ink text-sm cursor-pointer transition-colors">
-                        <i data-lucide="mic" class="w-4 h-4"></i>
-                        <span>Voice Sample 01</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded-linear text-inkSubtle hover:bg-hairline/30 hover:text-ink text-sm cursor-pointer transition-colors">
-                        <i data-lucide="sliders" class="w-4 h-4"></i>
-                        <span>Sound Design</span>
-                    </div>
+                <div>
+                    <label class="input-label">أبعاد الفيديو:</label>
+                    <select class="select-box">
+                        <option>(16:9) شاشة عريضة</option>
+                        <option>(9:16) ريلز / شورتس</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Center (Waveform & Controls) -->
-            <div class="flex-1 flex flex-col relative">
-                <!-- Toolbar -->
-                <div class="h-12 border-b border-hairline flex items-center px-4 justify-between bg-[#141516]">
-                    <div class="flex items-center gap-3 text-sm text-inkMuted">
-                        <span class="font-mono text-xs text-primary">REC</span>
-                        <span class="font-mono text-xs">00:34:12</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="undo-2" class="w-4 h-4 text-inkSubtle hover:text-ink cursor-pointer"></i>
-                        <i data-lucide="redo-2" class="w-4 h-4 text-inkSubtle hover:text-ink cursor-pointer"></i>
-                    </div>
-                </div>
-                
-                <!-- Waveform Area -->
-                <div class="flex-1 bg-[#0f1011] flex items-center justify-center p-8 relative overflow-hidden">
-                    <div class="w-full h-32 flex items-center gap-[3px]" id="waveform">
-                        <!-- JS will generate bars here -->
-                    </div>
-                    <!-- Playhead -->
-                    <div class="absolute top-0 bottom-0 left-1/2 w-px bg-primary z-10 shadow-[0_0_8px_rgba(94,106,210,0.8)]"></div>
-                </div>
+            <button class="btn-primary" onclick="alert('جاهز للربط!')">
+                <span>🚀</span> توليد الفيديو والصوت
+            </button>
+        </div>
 
-                <!-- Bottom Controls -->
-                <div class="h-16 border-t border-hairline flex items-center justify-center gap-6 px-4 bg-[#141516]">
-                    <i data-lucide="skip-back" class="w-5 h-5 text-inkSubtle hover:text-ink cursor-pointer"></i>
-                    <button class="w-10 h-10 rounded-full bg-primary hover:bg-primaryHover text-white flex items-center justify-center transition-colors">
-                        <i data-lucide="play" class="w-5 h-5 ml-0.5" fill="currentColor"></i>
-                    </button>
-                    <i data-lucide="skip-forward" class="w-5 h-5 text-inkSubtle hover:text-ink cursor-pointer"></i>
+        <!-- Gamification Card -->
+        <div class="card">
+            <div class="card-header">🎯 التحديات والجوائز اليومية</div>
+            
+            <div class="challenge-box">
+                <div class="challenge-top">
+                    <span class="challenge-name">🔥 تحدي هندسة الصوت السحابية</span>
+                    <span class="challenge-points">PTS 100+</span>
                 </div>
+                <div class="challenge-desc">قم بتوليد مقطع صوتي باستخدام خادم Go DSP واستفد من مضاعف السلسلة اليومية.</div>
+                <button class="btn-claim">🚀 تحصيل المكافأة</button>
             </div>
 
-            <!-- Inspector (Right) -->
-            <div class="w-56 border-l border-hairline bg-[#141516] hidden md:flex flex-col">
-                <div class="p-4 border-b border-hairline">
-                    <span class="text-xs font-semibold text-inkSubtle tracking-wide uppercase font-mono">Inspector</span>
+            <div style="margin-top: 20px;">
+                <div class="card-header" style="margin-bottom: 8px;">🏆 لوحة الصدارة المباشرة</div>
+                <div class="leaderboard-row">
+                    <span class="lb-name">✨ فيفيانا</span>
+                    <span class="lb-pts">2,450</span>
                 </div>
-                <div class="p-4 flex flex-col gap-4">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[11px] text-inkSubtle font-mono uppercase">BPM</label>
-                        <input type="text" value="70" class="h-8 bg-surface border border-hairline rounded-linear px-2 text-sm text-ink font-mono focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none">
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[11px] text-inkSubtle font-mono uppercase">Key</label>
-                        <input type="text" value="A Minor" class="h-8 bg-surface border border-hairline rounded-linear px-2 text-sm text-ink font-mono focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none">
-                    </div>
-                    <div class="flex flex-col gap-1.5 mt-2">
-                        <label class="text-[11px] text-inkSubtle font-mono uppercase">AI Model</label>
-                        <div class="text-sm text-ink flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#27a644]"></span> Gemini 2.5 Pro
-                        </div>
-                    </div>
+                <div class="leaderboard-row">
+                    <span class="lb-name">Jimi Audio Bot</span>
+                    <span class="lb-pts">1,890</span>
+                </div>
+                <div class="leaderboard-row">
+                    <span class="lb-name">Mira AI</span>
+                    <span class="lb-pts">1,250</span>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- 3 Cards (Linear Style) -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-            <!-- Card 1 -->
-            <div class="bg-surface border border-hairline rounded-[12px] p-6 hover:border-[#34343a] transition-colors cursor-pointer group">
-                <div class="w-8 h-8 rounded-[6px] bg-[#18191a] border border-hairline flex items-center justify-center mb-4 group-hover:border-primary/50 transition-colors">
+        <!-- Apps Grid -->
+        <div class="apps-grid">
+            <div class="app-tile"><span class="app-icon">🤖</span><span class="app-name">AI LAB</span></div>
+            <div class="app-tile"><span class="app-icon">🎬</span><span class="app-name">VIDEO</span></div>
+            <div class="app-tile"><span class="app-icon">🎵</span><span class="app-name">MUSIC</span></div>
+            <div class="app-tile"><span class="app-icon">🎨</span><span class="app-name">DESIGN</span></div>
+            <div class="app-tile"><span class="app-icon">📱</span><span class="app-name">APPS</span></div>
+            <div class="app-tile"><span class="app-icon">🌍</span><span class="app-name">PUBLISH</span></div>
+        </div>
+
+        <!-- Jimmy & Mira Studio -->
+        <div class="studio-banner">
+            <div class="banner-title">(Gemini & Mira Studio) استوديو جيمي وميرا</div>
+            <div class="banner-desc">إنشاء الأغاني الموسيقية وتوليد الإلقاء الشعري بـ 17 لهجة ونمط عالمي.</div>
+            <button class="btn-outline">فتح الاستوديو 🚀</button>
+        </div>
+
+    </div>
+
+</body>
+</html>s="w-8 h-8 rounded-[6px] bg-[#18191a] border border-hairline flex items-center justify-center mb-4 group-hover:border-primary/50 transition-colors">
                     <i data-lucide="mic" class="w-4 h-4 text-primary"></i>
                 </div>
                 <h3 class="text-[16px] font-semibold text-ink mb-2">Voice Cloning</h3>
