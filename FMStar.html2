@@ -1,53 +1,257 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!<!DOCTYPE html>
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMStar AI Studio</title>
+    <title>FMStarAI Studio — Build Audio Intelligence</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;800&family=Reem+Kufi:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#0E0E10',
+                        surface: '#1A1A1E',
+                        hairline: '#2A2A2E',
+                        primary: '#5E6AD2',
+                        primaryHover: '#828fff',
+                        ink: '#f7f8f8',
+                        inkMuted: '#d0d6e0',
+                        inkSubtle: '#8a8f98',
+                        inkTertiary: '#62666d',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    borderRadius: {
+                        'linear': '6px',
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { background-color: #050510; color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; }
-        .app { width: 100%; max-width: 400px; min-height: 100vh; position: relative; }
-        .hero { background-image: url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800'); background-size: cover; background-position: center; height: 300px; border-radius: 32px; position: relative; margin: 20px; overflow: hidden; }
-        .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050510, transparent); }
-        .wave-container { display: flex; align-items: flex-end; justify-content: space-between; height: 60px; gap: 2px; margin-bottom: 20px; }
-        .wave-bar { width: 100%; border-radius: 2px; background-color: #8B5CF6; }
-        .card { background-color: #11111C; border: 1px solid #312E81; border-radius: 24px; padding: 20px; margin: 0 20px; }
-        .btn { background-color: #8B5CF6; color: white; padding: 10px 20px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; }
-        .input-box { background-color: #11111C; border: 1px solid #312E81; border-radius: 20px; display: flex; padding: 10px; margin: 20px; }
-        .input-box input { background: transparent; border: none; outline: none; color: white; flex: 1; padding: 5px; font-family: 'Inter'; }
-        .nav { position: fixed; bottom: 0; width: 100%; max-width: 400px; background: #050510; border-top: 1px solid #312E81; display: flex; justify-content: space-around; padding: 15px 0; }
-        .nav div { color: #B8B8C5; font-size: 12px; text-align: center; }
-        .nav .active { color: #8B5CF6; font-weight: bold; }
-        .font-arabic { font-family: 'Reem Kufi', sans-serif; }
+        body { 
+            background-color: #0E0E10; 
+            color: #f7f8f8; 
+            font-family: 'Inter', sans-serif; 
+            -webkit-font-smoothing: antialiased;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Linear Focus Ring */
+        *:focus { outline: none; }
+        *:focus-visible { outline: 2px solid rgba(94, 106, 210, 0.5); outline-offset: 2px; }
+
+        /* Custom Waveform Bars */
+        .wave-bar { width: 2px; background-color: #62666d; border-radius: 1px; transition: background-color 0.2s; }
+        .wave-bar.active { background-color: #5E6AD2; }
     </style>
 </head>
-<body>
-    <div class="app">
-        <div style="display: flex; justify-content: space-between; padding: 20px; align-items: center;">
-            <div style="font-size: 24px;">☰</div>
-            <div style="font-weight: bold; font-size: 18px;">✧ FMStarAI Studio</div>
-            <div style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #8B5CF6;"></div>
-        </div>
+<body class="min-h-screen flex flex-col items-center selection:bg-primary/30">
 
-        <div class="hero">
-            <div class="hero-gradient"></div>
-            <div style="position: absolute; bottom: 20px; right: 20px;">
-                <h2 class="font-arabic" style="color: #A855F7; font-size: 28px; margin: 0 0 10px 0;">شِعر اف ام</h2>
-                <h1 style="font-size: 36px; margin: 0 0 10px 0; line-height: 1.1;">Build Audio<br>Intelligence</h1>
+    <!-- Top Navigation (Linear Style) -->
+    <nav class="w-full max-w-5xl flex items-center justify-between px-6 py-4">
+        <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-[4px] bg-primary flex items-center justify-center text-white font-bold text-xs">F</div>
+            <span class="font-semibold text-[15px] tracking-tight">FMStarAI Studio</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-inkSubtle font-medium">
+            <a href="#" class="hover:text-ink transition-colors">Projects</a>
+            <a href="#" class="hover:text-ink transition-colors">Settings</a>
+            <button class="h-8 px-3 rounded-linear bg-surface border border-hairline text-ink hover:bg-[#23252a] transition-colors text-xs">Sign In</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="w-full max-w-5xl px-6 py-16 flex flex-col gap-16 flex-1">
+        
+        <!-- Hero Section -->
+        <section class="flex flex-col gap-4 max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface border border-hairline w-fit">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                <span class="text-[12px] font-medium text-inkMuted font-mono tracking-tight">v1.0.0 Alpha</span>
+            </div>
+            <h1 class="text-[56px] font-semibold leading-[1.1] tracking-[-1.8px] text-ink">
+                Build audio<br>intelligence
+            </h1>
+            <p class="text-[18px] text-inkSubtle leading-[1.5] tracking-[-0.1px] max-w-lg mt-2">
+                Transform ideas into voices, music, and extraordinary sound experiences with AI. Engineered for precision and speed.
+            </p>
+        </section>
+
+        <!-- Studio Window (Linear Product UI Style) -->
+        <section class="w-full bg-surface border border-hairline rounded-[12px] flex overflow-hidden h-[400px] shadow-sm">
+            
+            <!-- Sidebar (Projects) -->
+            <div class="w-64 border-r border-hairline bg-[#141516] flex flex-col">
+                <div class="p-4 border-b border-hairline flex items-center justify-between">
+                    <span class="text-xs font-semibold text-inkSubtle tracking-wide uppercase font-mono">Projects</span>
+                    <i data-lucide="plus" class="w-4 h-4 text-inkSubtle cursor-pointer hover:text-ink"></i>
+                </div>
+                <div class="flex-1 overflow-y-auto no-scrollbar p-2 flex flex-col gap-1">
+                    <div class="flex items-center gap-2 p-2 rounded-linear bg-hairline/50 text-ink text-sm cursor-pointer border border-transparent">
+                        <i data-lucide="music" class="w-4 h-4 text-primary"></i>
+                        <span class="font-medium">غروب الروح</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded-linear text-inkSubtle hover:bg-hairline/30 hover:text-ink text-sm cursor-pointer transition-colors">
+                        <i data-lucide="mic" class="w-4 h-4"></i>
+                        <span>Voice Sample 01</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded-linear text-inkSubtle hover:bg-hairline/30 hover:text-ink text-sm cursor-pointer transition-colors">
+                        <i data-lucide="sliders" class="w-4 h-4"></i>
+                        <span>Sound Design</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center (Waveform & Controls) -->
+            <div class="flex-1 flex flex-col relative">
+                <!-- Toolbar -->
+                <div class="h-12 border-b border-hairline flex items-center px-4 justify-between bg-[#141516]">
+                    <div class="flex items-center gap-3 text-sm text-inkMuted">
+                        <span class="font-mono text-xs text-primary">REC</span>
+                        <span class="font-mono text-xs">00:34:12</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="undo-2" class="w-4 h-4 text-inkSubtle hover:text-ink cursor-pointer"></i>
+                        <i data-lucide="redo-2" class="w-4 h-4 text-inkSubtle hover:text-ink cursor-pointer"></i>
+                    </div>
+                </div>
+                
+                <!-- Waveform Area -->
+                <div class="flex-1 bg-[#0f1011] flex items-center justify-center p-8 relative overflow-hidden">
+                    <div class="w-full h-32 flex items-center gap-[3px]" id="waveform">
+                        <!-- JS will generate bars here -->
+                    </div>
+                    <!-- Playhead -->
+                    <div class="absolute top-0 bottom-0 left-1/2 w-px bg-primary z-10 shadow-[0_0_8px_rgba(94,106,210,0.8)]"></div>
+                </div>
+
+                <!-- Bottom Controls -->
+                <div class="h-16 border-t border-hairline flex items-center justify-center gap-6 px-4 bg-[#141516]">
+                    <i data-lucide="skip-back" class="w-5 h-5 text-inkSubtle hover:text-ink cursor-pointer"></i>
+                    <button class="w-10 h-10 rounded-full bg-primary hover:bg-primaryHover text-white flex items-center justify-center transition-colors">
+                        <i data-lucide="play" class="w-5 h-5 ml-0.5" fill="currentColor"></i>
+                    </button>
+                    <i data-lucide="skip-forward" class="w-5 h-5 text-inkSubtle hover:text-ink cursor-pointer"></i>
+                </div>
+            </div>
+
+            <!-- Inspector (Right) -->
+            <div class="w-56 border-l border-hairline bg-[#141516] hidden md:flex flex-col">
+                <div class="p-4 border-b border-hairline">
+                    <span class="text-xs font-semibold text-inkSubtle tracking-wide uppercase font-mono">Inspector</span>
+                </div>
+                <div class="p-4 flex flex-col gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-[11px] text-inkSubtle font-mono uppercase">BPM</label>
+                        <input type="text" value="70" class="h-8 bg-surface border border-hairline rounded-linear px-2 text-sm text-ink font-mono focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-[11px] text-inkSubtle font-mono uppercase">Key</label>
+                        <input type="text" value="A Minor" class="h-8 bg-surface border border-hairline rounded-linear px-2 text-sm text-ink font-mono focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none">
+                    </div>
+                    <div class="flex flex-col gap-1.5 mt-2">
+                        <label class="text-[11px] text-inkSubtle font-mono uppercase">AI Model</label>
+                        <div class="text-sm text-ink flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#27a644]"></span> Gemini 2.5 Pro
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3 Cards (Linear Style) -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+            <!-- Card 1 -->
+            <div class="bg-surface border border-hairline rounded-[12px] p-6 hover:border-[#34343a] transition-colors cursor-pointer group">
+                <div class="w-8 h-8 rounded-[6px] bg-[#18191a] border border-hairline flex items-center justify-center mb-4 group-hover:border-primary/50 transition-colors">
+                    <i data-lucide="mic" class="w-4 h-4 text-primary"></i>
+                </div>
+                <h3 class="text-[16px] font-semibold text-ink mb-2">Voice Cloning</h3>
+                <p class="text-[14px] text-inkSubtle leading-[1.5]">Create realistic AI voices with emotion, timbre, and precise control.</p>
+            </div>
+            
+            <!-- Card 2 -->
+            <div class="bg-surface border border-hairline rounded-[12px] p-6 hover:border-[#34343a] transition-colors cursor-pointer group">
+                <div class="w-8 h-8 rounded-[6px] bg-[#18191a] border border-hairline flex items-center justify-center mb-4 group-hover:border-primary/50 transition-colors">
+                    <i data-lucide="music" class="w-4 h-4 text-primary"></i>
+                </div>
+                <h3 class="text-[16px] font-semibold text-ink mb-2">Music Generation</h3>
+                <p class="text-[14px] text-inkSubtle leading-[1.5]">Compose full tracks, melodies, and harmonies from text prompts instantly.</p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bg-surface border border-hairline rounded-[12px] p-6 hover:border-[#34343a] transition-colors cursor-pointer group">
+                <div class="w-8 h-8 rounded-[6px] bg-[#18191a] border border-hairline flex items-center justify-center mb-4 group-hover:border-primary/50 transition-colors">
+                    <i data-lucide="sliders" class="w-4 h-4 text-primary"></i>
+                </div>
+                <h3 class="text-[16px] font-semibold text-ink mb-2">Sound Design</h3>
+                <p class="text-[14px] text-inkSubtle leading-[1.5]">Craft cinematic audio effects, ambience, and textures with AI precision.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Command Palette (⌘K) Fixed at bottom -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-50">
+        <div class="bg-surface border border-hairline rounded-[8px] flex items-center px-3 h-12 shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
+            <i data-lucide="search" class="w-4 h-4 text-inkSubtle mr-3"></i>
+            <input type="text" id="commandInput" placeholder="Type a command or prompt..." class="flex-1 bg-transparent border-none outline-none text-[14px] text-ink placeholder-inkSubtle">
+            <div class="flex items-center gap-1">
+                <kbd class="px-1.5 py-0.5 rounded-[4px] bg-[#18191a] border border-hairline text-[10px] font-mono text-inkSubtle">⌘</kbd>
+                <kbd class="px-1.5 py-0.5 rounded-[4px] bg-[#18191a] border border-hairline text-[10px] font-mono text-inkSubtle">K</kbd>
             </div>
         </div>
+    </div>
 
-        <div class="card">
-            <div class="wave-container" id="waveform"></div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                <div style="color: #B8B8C5;">⏮</div>
-                <div style="width: 60px; height: 60px; background: #8B5CF6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px #C084FC;">▶</div>
-                <div style="color: white;">⏭</div>
-            </div>
-        </div>
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
 
+        // Generate Waveform Bars (Linear Style)
+        const waveformContainer = document.getElementById('waveform');
+        const totalBars = 100;
+        const activeIndex = 50; // Center playhead
+
+        for (let i = 0; i < totalBars; i++) {
+            const bar = document.createElement('div');
+            bar.classList.add('wave-bar');
+            
+            // Generate a smooth pseudo-random wave
+            const height = Math.sin(i * 0.2) * 20 + Math.random() * 40 + 10;
+            bar.style.height = `${height}%`;
+            
+            if (i <= activeIndex) {
+                bar.classList.add('active');
+            }
+            waveformContainer.appendChild(bar);
+        }
+
+        // Command Palette Keyboard Shortcut (Cmd+K or Ctrl+K)
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('commandInput').focus();
+            }
+        });
+    </script>
+</body>
+</html>
         <div class="input-box">
             <input type="text" placeholder="اكتب فكرتك هنا...">
             <button class="btn" onclick="alert('الواجهة شغالة! المحرك هيتربط هنا قريباً.')">Generate ✨</button>
