@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FMStar AI Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;800&family=Reem+Kufi:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #050510; color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; }
+        .app { width: 100%; max-width: 400px; min-height: 100vh; position: relative; }
+        .hero { background-image: url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800'); background-size: cover; background-position: center; height: 300px; border-radius: 32px; position: relative; margin: 20px; overflow: hidden; }
+        .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050510, transparent); }
+        .wave-container { display: flex; align-items: flex-end; justify-content: space-between; height: 60px; gap: 2px; margin-bottom: 20px; }
+        .wave-bar { width: 100%; border-radius: 2px; background-color: #8B5CF6; }
+        .card { background-color: #11111C; border: 1px solid #312E81; border-radius: 24px; padding: 20px; margin: 0 20px; }
+        .btn { background-color: #8B5CF6; color: white; padding: 10px 20px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; }
+        .input-box { background-color: #11111C; border: 1px solid #312E81; border-radius: 20px; display: flex; padding: 10px; margin: 20px; }
+        .input-box input { background: transparent; border: none; outline: none; color: white; flex: 1; padding: 5px; font-family: 'Inter'; }
+        .nav { position: fixed; bottom: 0; width: 100%; max-width: 400px; background: #050510; border-top: 1px solid #312E81; display: flex; justify-content: space-around; padding: 15px 0; }
+        .nav div { color: #B8B8C5; font-size: 12px; text-align: center; }
+        .nav .active { color: #8B5CF6; font-weight: bold; }
+        .font-arabic { font-family: 'Reem Kufi', sans-serif; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div style="display: flex; justify-content: space-between; padding: 20px; align-items: center;">
+            <div style="font-size: 24px;">☰</div>
+            <div style="font-weight: bold; font-size: 18px;">✧ FMStarAI Studio</div>
+            <div style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #8B5CF6;"></div>
+        </div>
+
+        <div class="hero">
+            <div class="hero-gradient"></div>
+            <div style="position: absolute; bottom: 20px; right: 20px;">
+                <h2 class="font-arabic" style="color: #A855F7; font-size: 28px; margin: 0 0 10px 0;">شِعر اف ام</h2>
+                <h1 style="font-size: 36px; margin: 0 0 10px 0; line-height: 1.1;">Build Audio<br>Intelligence</h1>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="wave-container" id="waveform"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <div style="color: #B8B8C5;">⏮</div>
+                <div style="width: 60px; height: 60px; background: #8B5CF6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px #C084FC;">▶</div>
+                <div style="color: white;">⏭</div>
+            </div>
+        </div>
+
+        <div class="input-box">
+            <input type="text" placeholder="اكتب فكرتك هنا...">
+            <button class="btn" onclick="alert('الواجهة شغالة! المحرك هيتربط هنا قريباً.')">Generate ✨</button>
+        </div>
+
+        <div class="nav">
+            <div class="active">الاستوديو</div>
+            <div>مشاريعي</div>
+            <div style="background: #8B5CF6; width: 50px; height: 50px; border-radius: 50%; margin-top: -25px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">+</div>
+            <div>المكتبة</div>
+            <div>حسابي</div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('waveform');
+        for(let i=0; i<40; i++) {
+            let bar = document.createElement('div');
+            bar.className = 'wave-bar';
+            let h = Math.random() * 100;
+            bar.style.height = h + '%';
+            if(h < 50) bar.style.backgroundColor = '#1A1A2E';
+            container.appendChild(bar);
+        }
+    </script>
+</body>
+</html>
