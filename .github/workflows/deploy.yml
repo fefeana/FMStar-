@@ -8,25 +8,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# 🛡️ إجبار جميع إجراءات GitHub على استخدام Node.js 24 فوراً
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+      # 🛡️ ترقية الأدوات إلى الإصدارات التي تدعم Node.js 24
       - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      # 🛡️ استخدام Node.js الآمن
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
+        uses: actions/checkout@v5
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '1.22'
 
@@ -35,8 +26,8 @@ jobs:
           cd backend-go
           go build -ldflags="-s -w" -o fmstar-core
 
-      - name: Verify Python Environment
-        uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
 
