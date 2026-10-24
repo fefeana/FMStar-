@@ -207,12 +207,14 @@
         <div class="studio-banner">
             <div class="banner-title">(Gemini & Mira Studio) استوديو جيمي وميرا</div>
             <div class="banner-desc">إنشاء الأغاني الموسيقية وتوليد الإلقاء الشعري بـ 17 لهجة ونمط عالمي.</div>
-            <button class="btn-outline">فتح الاستوديو 🚀</button>
+            <a href="jm_studio.html" style="text-decoration: none;">
+                <button class="btn-outline">فتح الاستوديو 🚀</button>
+            </a>
         </div>
 
     </div>
 
-    <!-- الكود البرمجي لربط الواجهة (هنا السحر كله) -->
+    <!-- الكود البرمجي لربط الواجهة بالمحرك الآمن -->
     <script>
         async function generateAI() {
             const btn = document.getElementById('generateBtn');
@@ -224,35 +226,37 @@
                 return;
             }
 
-            // تغيير شكل الزرار
+            // تغيير شكل الزرار لمنع النقر المتكرر
             const originalText = btn.innerHTML;
             btn.innerHTML = "⏳ جاري التوليد...";
             btn.disabled = true;
             btn.style.opacity = "0.7";
 
             try {
-                // الاتصال بالسيرفر (main.go)
-                const response = await fetch("http://localhost:8080/api/v1/generate", {
+                // 🎛️ الاتصال بالمحرك الآمن (FastAPI) 
+                const response = await fetch("http://localhost:8000/internal/generate", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "X-FMStar-Key": "samurai_secret_2026" // مفتاح الأمان السري
                     },
                     body: JSON.stringify({
                         prompt: promptText,
-                        type: "video" // حددنا النوع فيديو
+                        ratio: "16:9", 
+                        dsp_profile: "hybrid"
                     })
                 });
 
-                if (!response.ok) throw new Error("السيرفر مش شغال");
+                if (!response.ok) throw new Error("السيرفر رفض الطلب. تأكد من المفتاح.");
 
                 const data = await response.json();
                 
                 // عرض النتيجة
-                alert(`تم التوليد بنجاح بواسطة: ${data.model_used} 🎉\n\nالنتيجة:\n${data.result}`);
+                alert(`تم التوليد بنجاح! 🎉\n\nالحالة: ${data.status}\nتأثير الصوت: ${data.dsp_applied}\nالرابط: ${data.video_url}`);
 
             } catch (error) {
                 console.error(error);
-                alert("⚠️ لم نتمكن من الاتصال بالمحرك. تأكد من تشغيل السيرفر (main.go).");
+                alert("⚠️ لم نتمكن من الاتصال بالمحرك. تأكد من تشغيل سيرفر البايثون (ai_service.py).");
             } finally {
                 // إرجاع الزرار لشكله الطبيعي
                 btn.innerHTML = originalText;
