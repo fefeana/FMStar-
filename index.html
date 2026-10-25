@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMStar AI-Studio - VIP Portal</title>
+    <title>FMStar AI-Studio - Omni Root VIP Portal</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -29,9 +29,9 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* بدء العناصر من الأعلى لضمان ظهور العنوان */
             align-items: center;
-            padding: 20px 15px;
+            padding: 25px 15px;
             overflow-x: hidden;
             position: relative;
         }
@@ -56,6 +56,7 @@
             gap: 20px;
             perspective: 1000px;
             z-index: 2;
+            margin-top: 10px;
         }
 
         .header-title {
@@ -87,6 +88,7 @@
             transform-style: preserve-3d;
             transition: transform 0.1s ease-out;
             cursor: pointer;
+            margin: 10px 0;
         }
 
         /* Metallic VIP Card Structure */
@@ -227,6 +229,7 @@
         .footer-note {
             color: #5d6679;
             font-size: 0.82rem;
+            margin-top: 5px;
         }
     </style>
 </head>
