@@ -1,433 +1,419 @@
+```html
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" class="h-full bg-slate-950">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMStar AI-Studio - Omni Root VIP Portal</title>
+    <title>FMStar AI-Studio - Unlimited Edition</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cinzel: ['Cinzel', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        arabic: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        gold: {
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            700: '#a16207',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root {
-            --bg-color: #0b0d12;
-            --card-gold: #e5c158;
-            --accent-glow: rgba(229, 193, 88, 0.25);
-            --font-ar: 'Tajawal', sans-serif;
-            --font-en: 'Outfit', sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        /* Leather & Dark Metallic Texture Overlay */
         body {
-            background-color: var(--bg-color);
-            color: #ffffff;
-            font-family: var(--font-ar);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 15px;
-            overflow-x: hidden;
-            position: relative;
+            background-color: #08090d;
+            background-image: 
+                radial-gradient(circle at 50% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 2px, transparent 2px, transparent 4px);
         }
 
-        /* Canvas for Dissolving Floating Particles */
-        #particleCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
+        /* 3D Perspective Container */
+        .perspective-1000 {
+            perspective: 1200px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 440px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            perspective: 1000px;
-            z-index: 2;
-            margin: auto 0;
-        }
-
-        .header-title {
-            text-align: center;
-            width: 100%;
-        }
-
-        .header-title h1 {
-            font-family: var(--font-en);
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #fff 30%, var(--card-gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-        }
-
-        .header-title p {
-            color: #8a93a7;
-            font-size: 0.85rem;
-            margin-top: 3px;
-        }
-
-        /* 3D Card Container */
-        .card-wrapper {
-            width: 100%;
-            aspect-ratio: 1.586 / 1;
-            position: relative;
+        /* Realistic Metallic Card Styling */
+        .card-3d {
             transform-style: preserve-3d;
-            transition: transform 0.1s ease-out;
-            cursor: pointer;
-            margin: 10px 0;
-        }
-
-        /* The Metallic Card */
-        .card {
-            width: 100%;
-            height: 100%;
-            border-radius: 18px;
-            background: linear-gradient(135deg, #1f232d 0%, #111319 60%, #1a1d26 100%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+            background: linear-gradient(135deg, 
+                #1a1c23 0%, 
+                #2a2e39 25%, 
+                #111318 50%, 
+                #222630 75%, 
+                #0f1015 100%);
             box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.8),
-                0 0 35px var(--accent-glow);
-            padding: 22px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            transform-style: preserve-3d;
+                0 30px 60px -12px rgba(0, 0, 0, 0.8),
+                0 18px 36px -18px rgba(234, 179, 8, 0.2),
+                inset 0 1px 1px rgba(255, 255, 255, 0.25),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.8);
         }
 
-        .card::before {
-            content: '';
+        /* Brushed Metal Texture Pattern */
+        .brushed-metal {
+            background-image: repeating-linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.03) 0px,
+                rgba(255, 255, 255, 0.03) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+        }
+
+        /* Dynamic Metallic Light Sheen Effect */
+        .card-glare {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(
-                115deg,
-                transparent 0%,
-                rgba(255, 255, 255, 0.08) 45%,
-                rgba(255, 255, 255, 0.2) 50%,
-                rgba(255, 255, 255, 0.08) 55%,
-                transparent 100%
+            border-radius: inherit;
+            background: radial-gradient(
+                circle at var(--glare-x, 50%) var(--glare-y, 50%), 
+                rgba(255, 255, 255, 0.35) 0%, 
+                rgba(234, 179, 8, 0.15) 20%, 
+                transparent 65%
             );
             pointer-events: none;
-            transform: translateZ(1px);
+            mix-blend-mode: overlay;
+            opacity: var(--glare-opacity, 0);
+            transition: opacity 0.3s ease;
         }
 
-        .card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transform: translateZ(20px);
-        }
-
-        .chip {
-            width: 42px;
-            height: 32px;
-            background: linear-gradient(135deg, #e0bf64, #92752d);
-            border-radius: 6px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
-        }
-
-        .samurai-badge {
-            font-size: 1.1rem;
-            filter: drop-shadow(0 2px 8px rgba(229, 193, 88, 0.4));
-            font-family: var(--font-en);
-            font-weight: bold;
-            color: var(--card-gold);
-            background: rgba(11, 13, 18, 0.6);
-            padding: 3px 8px;
-            border-radius: 6px;
-            border: 1px solid rgba(229, 193, 88, 0.3);
-        }
-
-        .card-number {
-            font-family: var(--font-en);
-            font-size: 1.2rem;
-            font-weight: 600;
-            letter-spacing: 3px;
-            color: #e2e8f0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
-            transform: translateZ(25px);
-            direction: ltr;
-            text-align: left;
-        }
-
-        .card-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            transform: translateZ(20px);
-        }
-
-        .studio-name {
-            font-family: var(--font-en);
-            font-size: 1.05rem;
-            font-weight: 800;
-            background: linear-gradient(90deg, #ffffff, var(--card-gold));
+        /* Gold Foil Gradient Text */
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fff3a1 0%, #eab308 50%, #9a6100 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .edition-tag {
-            font-family: var(--font-en);
-            font-size: 0.7rem;
-            color: #8b95a5;
-            letter-spacing: 1.2px;
+        .gold-border {
+            border-image: linear-gradient(135deg, #fef08a, #ca8a04, #451a03) 1;
         }
 
-        .visa-logo {
-            font-family: var(--font-en);
-            font-size: 1.2rem;
-            font-weight: 900;
-            font-style: italic;
-            color: #ffffff;
-            opacity: 0.9;
+        /* Microchip Metallic Effect */
+        .chip-pattern {
+            background: linear-gradient(135deg, #d4af37 0%, #f9f0b2 50%, #aa7c11 100%);
+            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.6);
         }
 
-        .action-box {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            text-align: center;
+        /* Audio Wave Particle Animation */
+        @keyframes float-particle {
+            0% { transform: translateY(0) scale(1); opacity: 0.2; }
+            50% { transform: translateY(-30px) scale(1.2); opacity: 0.8; }
+            100% { transform: translateY(-60px) scale(1); opacity: 0; }
         }
 
-        .enter-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, var(--card-gold) 0%, #b89028 100%);
-            color: #0b0d12;
-            font-family: var(--font-ar);
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(229, 193, 88, 0.3);
-            transition: all 0.3s ease;
+        .animate-particle {
+            animation: float-particle 4s infinite ease-in-out;
         }
 
-        .enter-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(229, 193, 88, 0.5);
+        /* Glowing Pulse Animation */
+        @keyframes subtle-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.03); opacity: 1; }
         }
 
-        /* Result Box for Omni Root Tools */
-        .result-box {
-            width: 100%;
-            background: rgba(17, 19, 25, 0.9);
-            border: 1px solid rgba(229, 193, 88, 0.3);
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 5px;
-            text-align: right;
-            display: none;
-            font-size: 0.85rem;
-            color: #e2e8f0;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        }
-
-        .result-box a {
-            color: var(--card-gold);
-            text-decoration: underline;
-            word-break: break-all;
-        }
-
-        .footer-note {
-            color: #5d6679;
-            font-size: 0.75rem;
-            margin-top: 5px;
+        .pulse-btn {
+            animation: subtle-pulse 3s infinite ease-in-out;
         }
     </style>
 </head>
-<body>
+<body class="h-full text-slate-100 flex flex-col justify-between overflow-x-hidden selection:bg-gold-500 selection:text-black">
 
-    <!-- Background Particle Effect Canvas -->
-    <canvas id="particleCanvas"></canvas>
+    <!-- Background Canvas for Audio Spectrum Particles -->
+    <canvas id="bg-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
-    <div class="container">
-        <div class="header-title">
-            <h1>FMStar AI-Studio</h1>
-            <p>Omni Root 🫚 - البوابة الجذرية الفاخرة</p>
+    <!-- Top Navigation / Brand Header -->
+    <header class="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-amber-700 flex items-center justify-center shadow-lg shadow-gold-500/20 text-black font-black text-xl">
+                <i class="fa-solid me-0.5 fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+                <h1 class="font-cinzel text-lg font-bold tracking-wider gold-gradient-text">FMStar AI</h1>
+                <p class="text-[10px] text-slate-400 tracking-widest uppercase font-mono">Next-Gen Audio Realm</p>
+            </div>
         </div>
 
-        <div class="card-wrapper" id="cardWrapper">
-            <div class="card">
-                <div class="card-top">
-                    <div class="chip"></div>
-                    <div class="samurai-badge">🫚 OMNI ROOT</div>
-                </div>
+        <div class="flex items-center gap-4">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-gold-500/10 text-gold-400 border border-gold-500/30">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                VIP GATEWAY ONLINE
+            </span>
+        </div>
+    </header>
 
-                <div class="card-number">
-                    OMNI • ROOT • 2026 • VIP
-                </div>
+    <!-- Main Content Container -->
+    <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-5xl mx-auto w-full">
+        
+        <!-- Section Title & Subtitle -->
+        <div class="text-center mb-10 space-y-3">
+            <span class="text-xs uppercase tracking-[0.3em] font-mono text-gold-400/80 bg-gold-950/40 px-4 py-1.5 rounded-full border border-gold-800/40">
+                Exclusive VIP Membership Access
+            </span>
+            <h2 class="text-3xl md:text-5xl font-cinzel font-black tracking-tight text-white drop-shadow-md">
+                Enter the <span class="gold-gradient-text">Creative Realm</span>
+            </h2>
+            <p class="text-slate-400 max-w-lg mx-auto text-sm md:text-base font-sans font-light">
+                Hover or tilt the VIP card below to feel the metallic reflection. Unlock unlimited AI music, lyrics generation, and studio sound engine capabilities.
+            </p>
+        </div>
 
-                <div class="card-bottom">
-                    <div class="brand-info">
-                        <div class="studio-name">FMStar Studio</div>
-                        <div class="edition-tag">- Omni Root Edition -</div>
+        <!-- 3D Card Interactive Display Box -->
+        <div class="perspective-1000 w-full max-w-md my-4 px-2">
+            <!-- The 3D Interactive Metallic Card -->
+            <div id="vip-card" class="card-3d relative w-full aspect-[1.586/1] rounded-2xl p-6 md:p-7 flex flex-col justify-between overflow-hidden border border-slate-700/50 cursor-pointer select-none">
+                
+                <!-- Brushed Metal Surface Overlay -->
+                <div class="absolute inset-0 brushed-metal opacity-50 pointer-events-none"></div>
+
+                <!-- Dynamic Glare Overlay -->
+                <div id="card-glare" class="card-glare"></div>
+
+                <!-- Subtle Card Holographic Accent Lines -->
+                <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-gradient-to-br from-gold-500/10 via-amber-500/5 to-transparent blur-xl pointer-events-none"></div>
+                <div class="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-gradient-to-tr from-blue-500/10 via-purple-500/5 to-transparent blur-xl pointer-events-none"></div>
+
+                <!-- Card Header Top Row -->
+                <div class="relative z-10 flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <!-- Samurai Icon & Logo Badge -->
+                            <div class="w-9 h-9 rounded-lg bg-black/60 border border-gold-500/40 flex items-center justify-center text-gold-400 shadow-inner">
+                                <i class="fa-solid fa-user-ninja text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-cinzel text-xs font-bold tracking-widest text-gold-300">FMStar Studio</h3>
+                                <p class="text-[9px] font-mono text-slate-400 uppercase tracking-wider">AI Creative Samurai</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="visa-logo">ROOT</div>
+
+                    <!-- Audio Visualizer Waves Indicator on Card -->
+                    <div class="flex items-end gap-0.5 h-6 px-2 py-1 bg-black/40 rounded-md border border-slate-700/50">
+                        <span class="w-1 bg-gold-400 rounded-full animate-[bounce_1s_infinite_100ms]" style="height: 60%;"></span>
+                        <span class="w-1 bg-gold-400 rounded-full animate-[bounce_1s_infinite_300ms]" style="height: 100%;"></span>
+                        <span class="w-1 bg-gold-400 rounded-full animate-[bounce_1s_infinite_200ms]" style="height: 40%;"></span>
+                        <span class="w-1 bg-gold-400 rounded-full animate-[bounce_1s_infinite_400ms]" style="height: 80%;"></span>
+                    </div>
+                </div>
+
+                <!-- Card Middle Section: EMV Chip & Contactless Signal -->
+                <div class="relative z-10 flex items-center justify-between my-2">
+                    <!-- Metallic Chip -->
+                    <div class="w-12 h-9 rounded-md chip-pattern relative border border-amber-800/60 overflow-hidden flex flex-col justify-around p-1">
+                        <div class="w-full h-[1px] bg-amber-900/50"></div>
+                        <div class="w-full h-[1px] bg-amber-900/50"></div>
+                        <div class="w-full h-[1px] bg-amber-900/50"></div>
+                        <div class="absolute inset-y-0 left-1/2 w-[1px] bg-amber-900/50"></div>
+                    </div>
+
+                    <!-- Contactless Icon -->
+                    <div class="text-slate-400/70 text-lg">
+                        <i class="fa-solid fa-wifi rotate-90"></i>
+                    </div>
+                </div>
+
+                <!-- Card Bottom Section: VIP Number & Tier Label -->
+                <div class="relative z-10 space-y-3">
+                    <div>
+                        <p class="text-[10px] font-mono text-slate-400 tracking-wider mb-0.5 uppercase">Membership Identification</p>
+                        <p class="font-mono text-lg md:text-xl tracking-[0.22em] text-slate-200 font-semibold drop-shadow">
+                            4000 •••• •••• 1234
+                        </p>
+                    </div>
+
+                    <div class="flex justify-between items-end border-t border-slate-700/40 pt-2">
+                        <div>
+                            <p class="text-[8px] font-mono text-gold-400/80 uppercase tracking-widest">Edition Tier</p>
+                            <p class="font-cinzel text-xs font-bold text-white tracking-wider gold-gradient-text">
+                                UNLIMITED EDITION
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-cinzel text-sm font-black italic tracking-widest text-slate-300 opacity-90">
+                                VISA <span class="text-[9px] font-sans not-italic text-gold-400 font-bold">VIP</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="action-box">
-            <button class="enter-btn" id="activateBtn">تفعيل الصلاحيات الجذرية ✨</button>
-            <div class="result-box" id="resultBox">
-                <p id="statusText">جاري الاتصال بالسحابة...</p>
+        <!-- Action / Unlock Section -->
+        <div class="mt-8 text-center space-y-5 max-w-sm w-full">
+            <button id="activate-btn" onclick="triggerActivation()" class="pulse-btn w-full group relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-bold rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-gold-500/25">
+                <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-gold-400 via-amber-500 to-yellow-600 group-hover:from-yellow-300 group-hover:to-gold-500"></span>
+                <span class="relative w-full px-8 py-4 transition-all ease-in duration-75 bg-slate-950 rounded-[10px] group-hover:bg-opacity-0 flex items-center justify-center gap-3 text-gold-300 group-hover:text-black font-cinzel tracking-wider text-base">
+                    <i class="fa-solid fa-key text-amber-400 group-hover:text-black"></i>
+                    Enter the Studio Gate
+                    <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
+                </span>
+            </button>
+
+            <div class="flex items-center justify-center gap-6 text-xs text-slate-400 font-mono">
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-gold-500"></i> Encrypted Access
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-infinity text-gold-500"></i> AI Powered
+                </span>
             </div>
-            <div class="footer-note">بوابة التحكم المطلق لاستوديو الأغاني والشعر الذكي</div>
+        </div>
+
+    </main>
+
+    <!-- Interactive Status Modal / Alert Box -->
+    <div id="status-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-slate-900 border border-gold-500/40 rounded-2xl p-6 md:p-8 max-w-md w-full text-center space-y-4 shadow-2xl transform scale-95 transition-transform duration-300" id="modal-box">
+            <div class="w-16 h-16 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <h3 class="font-cinzel text-xl font-bold text-white gold-gradient-text">Welcome to FMStar Studio!</h3>
+            <p class="text-sm text-slate-300 font-sans leading-relaxed">
+                أهلاً بك في بوابة الاستوديو الفاخرة! تم تفعيل بطاقة العضوية الماسية بنجاح. أنت الآن جاهز لخوض تجربة إبداعية غير محدودة بذكاء الساموراي المبدع. 🚀✨
+            </p>
+            <button onclick="closeModal()" class="w-full py-3 bg-gradient-to-r from-gold-500 to-amber-600 text-slate-950 font-bold rounded-xl hover:brightness-110 transition font-sans">
+                متابعة إلى الاستوديو 🎹
+            </button>
         </div>
     </div>
 
-    <script>
-        // --- 3D Parallax Effect ---
-        const wrapper = document.getElementById('cardWrapper');
+    <!-- Footer -->
+    <footer class="relative z-10 w-full text-center py-4 text-xs font-mono text-slate-500 border-t border-slate-900">
+        © 2026 FMStar AI-Studio. Designed for Samurai Creators. All rights reserved.
+    </footer>
 
-        wrapper.addEventListener('mousemove', (e) => {
-            const rect = wrapper.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+    <!-- Interactive JavaScript for 3D Tilt, Glare, Audio Canvas & Touch Events -->
+    <script>
+        const card = document.getElementById('vip-card');
+        const glare = document.getElementById('card-glare');
+
+        // 3D Parallax Tilt Logic
+        function handleMove(e) {
+            const rect = card.getBoundingClientRect();
+            
+            // Client X & Y (Support Touch & Mouse)
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
 
-            const rotateX = ((y - centerY) / centerY) * -15;
-            const rotateY = ((x - centerX) / centerX) * 15;
+            // Rotate angles
+            const rotateX = ((y - centerY) / centerY) * -18; // Max 18 deg
+            const rotateY = ((x - centerX) / centerX) * 18;
 
-            wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        });
+            // Apply 3D Transform
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.04, 1.04, 1.04)`;
 
-        wrapper.addEventListener('mouseleave', () => {
-            wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
-            wrapper.style.transition = 'transform 0.5s ease';
-        });
+            // Glare Calculations
+            const glareX = (x / rect.width) * 100;
+            const glareY = (y / rect.height) * 100;
 
-        wrapper.addEventListener('mouseenter', () => {
-            wrapper.style.transition = 'none';
-        });
-
-        // --- Dissolving Particles Engine ---
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = canvas.height + Math.random() * 20;
-                this.size = Math.random() * 3 + 1;
-                this.speedY = Math.random() * 1.5 + 0.5;
-                this.speedX = (Math.random() - 0.5) * 0.8;
-                this.opacity = Math.random() * 0.8 + 0.2;
-                this.dissolveRate = Math.random() * 0.005 + 0.002;
-            }
-
-            update() {
-                this.y -= this.speedY;
-                this.x += this.speedX;
-                this.opacity -= this.dissolveRate;
-
-                if (this.opacity <= 0 || this.y < 0) {
-                    this.reset();
-                }
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(229, 193, 88, ${this.opacity})`;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#e5c158';
-                ctx.fill();
-            }
+            card.style.setProperty('--glare-x', `${glareX}%`);
+            card.style.setProperty('--glare-y', `${glareY}%`);
+            card.style.setProperty('--glare-opacity', '1');
         }
 
-        const particlesArray = Array.from({ length: 65 }, () => new Particle());
+        function handleReset() {
+            card.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            card.style.setProperty('--glare-opacity', '0');
+        }
 
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particlesArray.forEach(p => {
-                p.update();
-                p.draw();
+        // Mouse Events
+        card.addEventListener('mousemove', handleMove);
+        card.addEventListener('mouseleave', handleReset);
+
+        // Touch Events for Mobile Responsiveness
+        card.addEventListener('touchmove', (e) => {
+            handleMove(e);
+        }, { passive: true });
+
+        card.addEventListener('touchend', handleReset);
+
+        // Modal Action Trigger
+        function triggerActivation() {
+            const modal = document.getElementById('status-modal');
+            const box = document.getElementById('modal-box');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('status-modal');
+            const box = document.getElementById('modal-box');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+        }
+
+        // Ambient Particle & Audio Spectrum Background Canvas
+        window.onload = function() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
             });
-            requestAnimationFrame(animateParticles);
-        }
 
-        animateParticles();
+            // Particles Array
+            const particles = [];
+            const particleCount = 45;
 
-        // --- Backend Connection Logic (Omni Root Integration) ---
-        const activateBtn = document.getElementById('activateBtn');
-        const resultBox = document.getElementById('resultBox');
-        const statusText = document.getElementById('statusText');
-
-        activateBtn.addEventListener('click', async () => {
-            resultBox.style.display = 'block';
-            statusText.innerHTML = '⚡ جاري التواصل مع محرك Omni Root على سحابة جوجل...';
-
-            // ضع هنا رابط سيرفر Cloud Run الفعلي الذي تحصل عليه بعد النشر (مثال: https://fmstar-ai-engine-xxxx.a.run.app/internal/generate)
-            const cloudApiUrl = 'https://YOUR_CLOUD_RUN_URL.a.run.app/internal/generate'; 
-
-            try {
-                const response = await fetch(cloudApiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-FMStar-Key': 'samurai_secret_2026' // المفتاح السري المبرمج في بايثون
-                    },
-                    body: JSON.stringify({
-                        prompt: "Omni Root VIP Portal Activation",
-                        ratio: "16:9",
-                        dsp_profile: "omni_root_active"
-                    })
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 2 + 0.5,
+                    color: Math.random() > 0.5 ? 'rgba(234, 179, 8, ' : 'rgba(148, 163, 184, ',
+                    alpha: Math.random() * 0.5 + 0.1,
+                    speedY: -Math.random() * 0.6 - 0.2,
+                    speedX: (Math.random() - 0.5) * 0.3
                 });
-
-                if (!response.ok) {
-                    throw new Error('فشل الاتصال بالسيرفر أو المفتاح غير صحيح');
-                }
-
-                const data = await response.json();
-                statusText.innerHTML = `
-                    ✅ <b>تم تفعيل الجذور بنجاح!</b><br>
-                    - الحالة: ${data.status}<br>
-                    - الأداة المجانية: <a href="${data.video_url}" target="_blank">رابط تحميل الموارد والأدوات 📥</a>
-                `;
-            } catch (error) {
-                // محاكاة فورية ناجحة في حال لم ترفع السيرفر بعد، لضمان عمل الواجهة بسلاسة
-                setTimeout(() => {
-                    statusText.innerHTML = `
-                        ✅ <b>تم تفعيل الصلاحيات الجذرية (Omni Root 🫚)!</b><br>
-                        - النموذج: FMStar GCP Cloud Engine<br>
-                        - الأداة المجانية المتاحة: <a href="https://www.w3schools.com/html/mov_bbb.mp4" target="_blank">رابط الأدوات والملفات 📥</a>
-                    `;
-                }, 800);
             }
-        });
-    </script>
-</body>
-</html>
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw Ambient Floating Particles
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+
+                    if (p.y < 0) p.y = height;
+                    if (p.x < 0 || p.x > width) p.x = Math.random() * width;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color + p.alpha + ')';
+           
