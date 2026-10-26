@@ -4,17 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FMStarAI Studio</title>
+    
+    <!-- 🛡️ حماية ميتا: منع Clickjacking و MIME Sniffing -->
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
     <style>
         /* ====== Design System Variables ====== */
         :root {
-            --canvas: #0E0E10;          /* الخلفية العميقة */
-            --surface-1: #1A1A1E;       /* الكروت */
-            --surface-2: #23252a;       /* الكروت عند التمرير */
-            --hairline: #2A2A2E;        /* الحدود الدقيقة */
-            --primary: #8B5CF6;         /* البنفسجي الأساسي */
+            --canvas: #0E0E10;          
+            --surface-1: #1A1A1E;       
+            --surface-2: #23252a;       
+            --hairline: #2A2A2E;        
+            --primary: #8B5CF6;         
             --primary-hover: #A855F7;
-            --ink: #F7F8F8;             /* النص الفاتح */
-            --ink-muted: #8A8F98;       /* النص الثانوي */
+            --ink: #F7F8F8;             
+            --ink-muted: #8A8F98;       
             --success: #27A644;
             --danger: #EF4444;
             --font-sans: 'Inter', -apple-system, sans-serif;
@@ -77,6 +82,9 @@
         .btn-primary:hover { background: var(--primary-hover); }
         .btn-primary:active { transform: scale(0.98); }
 
+        /* ====== Result Box ====== */
+        .result-box { margin-top: 15px; padding: 15px; background: var(--canvas); border: 1px solid var(--primary); border-radius: 8px; display: none; font-size: 13px; line-height: 1.6; }
+
         /* ====== Gamification Section ====== */
         .challenge-box { background: var(--canvas); border: 1px solid var(--hairline); border-radius: 8px; padding: 16px; }
         .challenge-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
@@ -134,7 +142,7 @@
         <div class="card">
             <div class="card-header">
                 <div class="studio-title">🎬 (LTX-2.5) الاستوديو المرئي</div>
-                <div class="stream-badge">Gemini 2.5 Flash</div>
+                <div class="stream-badge">Secured by Meta</div>
             </div>
             
             <label class="input-label">وصف المشهد المرئي والصوتي:</label>
@@ -157,10 +165,12 @@
                 </div>
             </div>
 
-            <!-- ربط الزرار بدالة التوليد -->
-            <button class="btn-primary" id="generateBtn" onclick="generateAI()">
+            <button class="btn-primary" id="generateBtn">
                 <span>🚀</span> توليد الفيديو والصوت
             </button>
+
+            <!-- صندوق عرض النتيجة الآمن -->
+            <div id="ai-output" class="result-box"></div>
         </div>
 
         <!-- Gamification Card -->
@@ -214,11 +224,15 @@
 
     </div>
 
-    <!-- الكود البرمجي لربط الواجهة بالمحرك الآمن -->
-    <script>
+    <!-- سكريبت درع الحماية الذي أرسلته Meta -->
+    <script src="security.js"></script>
+
+    <!-- سكريبت التشغيل الرئيسي -->
+    <script type="module">
         async function generateAI() {
             const btn = document.getElementById('generateBtn');
             const input = document.getElementById('promptInput');
+            const outputDiv = document.getElementById('ai-output');
             const promptText = input.value;
 
             if (!promptText.trim()) {
@@ -226,19 +240,21 @@
                 return;
             }
 
-            // تغيير شكل الزرار لمنع النقر المتكرر
             const originalText = btn.innerHTML;
             btn.innerHTML = "⏳ جاري التوليد...";
             btn.disabled = true;
             btn.style.opacity = "0.7";
+            outputDiv.style.display = "none";
 
             try {
-                // 🎛️ الاتصال بالمحرك الآمن (FastAPI) 
-                const response = await fetch("http://localhost:8000/internal/generate", {
+                // ⚠️ ضع رابط المحرك هنا (Google Cloud URL)
+                const API_URL = "[ضع_رابط_جوجل_كلاود_هنا]/internal/generate";
+
+                const response = await fetch(API_URL, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-FMStar-Key": "samurai_secret_2026" // مفتاح الأمان السري
+                        "X-FMStar-Key": "samurai_secret_2026" 
                     },
                     body: JSON.stringify({
                         prompt: promptText,
@@ -247,23 +263,30 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("السيرفر رفض الطلب. تأكد من المفتاح.");
+                if (!response.ok) throw new Error("السيرفر رفض الطلب. تأكد من المفتاح والرابط.");
 
                 const data = await response.json();
                 
-                // عرض النتيجة
-                alert(`تم التوليد بنجاح! 🎉\n\nالحالة: ${data.status}\nتأثير الصوت: ${data.dsp_applied}\nالرابط: ${data.video_url}`);
+                // 🛡️ عرض النتيجة باستخدام درع ميتا (يمنع أي أكواد خبيثة من الـ AI)
+                outputDiv.style.display = "block";
+                outputDiv.innerHTML = `
+                    <strong style="color: var(--primary-hover);">🤖 النموذج المستخدم:</strong> ${data.model_used}<br><br>
+                    <strong style="color: var(--primary-hover);">📝 النص المحسن:</strong><br>
+                    ${FMStarSecurity.sanitizeAIOutput(data.optimized_prompt)}
+                `;
 
             } catch (error) {
                 console.error(error);
-                alert("⚠️ لم نتمكن من الاتصال بالمحرك. تأكد من تشغيل سيرفر البايثون (ai_service.py).");
+                alert("⚠️ لم نتمكن من الاتصال بالمحرك. تأكد من صحة الرابط وتشغيل السيرفر.");
             } finally {
-                // إرجاع الزرار لشكله الطبيعي
                 btn.innerHTML = originalText;
                 btn.disabled = false;
                 btn.style.opacity = "1";
             }
         }
+
+        // ربط الزر بالدالة
+        document.getElementById('generateBtn').addEventListener('click', generateAI);
     </script>
 </body>
-</html>
+                </html>
