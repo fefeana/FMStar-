@@ -16,7 +16,7 @@
 
     <style>
         :root {
-            --bg-color: #060608;
+            --bg-color: #050507;
             --gold-primary: #D4AF37;
             --gold-light: #F3E5AB;
             --gold-dark: #997A00;
@@ -42,100 +42,106 @@
             padding: 20px;
         }
 
-        /* ✨ تأثير النجوم والغبار الذهبي في الخلفية */
+        /* ✨ تأثير النجوم */
         .stars {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             background-image: radial-gradient(var(--gold-primary) 1px, transparent 1px);
-            background-size: 50px 50px;
-            opacity: 0.1;
+            background-size: 60px 60px;
+            opacity: 0.05;
             z-index: -1;
         }
 
-        /* 🏷️ الترويسة العلوية */
+        /* 🏷️ الترويسة العلوية (الفخمة) */
         .header {
             width: 100%;
-            max-width: 480px;
+            max-width: 420px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #F59E0B, #D97706);
             border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 20px;
+            font-size: 22px;
+            color: white;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
         }
 
         .brand-text h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 18px;
+            font-size: 20px;
             color: var(--gold-light);
             letter-spacing: 1px;
         }
 
         .brand-text p {
-            font-size: 10px;
+            font-size: 9px;
             color: var(--text-muted);
             letter-spacing: 2px;
+            margin-top: 2px;
         }
 
         .vip-badge {
             border: 1px solid rgba(212, 175, 55, 0.3);
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 9px;
             color: var(--gold-primary);
             display: flex;
             align-items: center;
             gap: 6px;
             background: rgba(212, 175, 55, 0.05);
+            font-weight: 600;
+            letter-spacing: 1px;
         }
 
         .dot {
             width: 6px; height: 6px;
-            background-color: #27A644;
+            background-color: #10B981;
             border-radius: 50%;
-            box-shadow: 0 0 8px #27A644;
+            box-shadow: 0 0 8px #10B981;
         }
 
-        /* ✨ العنوان الرئيسي */
-        .hero-title {
+        /* ✨ القسم النصي */
+        .hero-section {
             text-align: center;
-            margin-bottom: 20px;
-            max-width: 480px;
+            max-width: 420px;
+            margin-bottom: 30px;
         }
 
-        .subtitle {
-            font-size: 10px;
-            letter-spacing: 4px;
-            color: var(--text-muted);
-            margin-bottom: 15px;
+        .subtitle-badge {
             display: inline-block;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--text-muted);
             border-top: 1px solid rgba(255,255,255,0.1);
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding: 6px 0;
+            padding: 6px 20px;
+            margin-bottom: 20px;
         }
 
         .main-heading {
             font-family: 'Playfair Display', serif;
-            font-size: 42px;
+            font-size: 40px;
             line-height: 1.1;
             margin-bottom: 15px;
+            font-weight: 800;
         }
 
         .main-heading span.white { color: #ffffff; }
@@ -150,28 +156,29 @@
             color: var(--text-muted);
             line-height: 1.6;
             text-align: center;
-            max-width: 400px;
-            margin: 0 auto 40px auto;
+            padding: 0 10px;
         }
 
-        /* 💳 الكارت المعدني الفخم (3D Card) */
+        /* 💳 الكارت المعدني 3D */
         .card-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
             perspective: 1000px;
             margin-bottom: 40px;
+            z-index: 10;
         }
 
         .vip-card {
-            background: linear-gradient(145deg, #1A1A1E, #0E0E10);
+            background: linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(15, 15, 18, 0.9));
             border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 16px;
+            padding: 22px;
             position: relative;
             overflow: hidden;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
-            transition: transform 0.1s ease;
+            transition: transform 0.1s ease-out;
             transform-style: preserve-3d;
+            backdrop-filter: blur(10px);
         }
 
         /* لمعة الكارت */
@@ -180,7 +187,7 @@
             position: absolute;
             top: -50%; left: -50%;
             width: 200%; height: 200%;
-            background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(212, 175, 55, 0.1) 50%, rgba(255,255,255,0) 100%);
+            background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(212, 175, 55, 0.08) 50%, rgba(255,255,255,0) 100%);
             transform: rotate(30deg);
             pointer-events: none;
         }
@@ -189,19 +196,20 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            transform: translateZ(20px); /* تأثير 3D */
         }
 
         .card-logo {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
 
         .card-logo-icon {
-            background: #000;
+            background: rgba(0,0,0,0.6);
             border: 1px solid var(--gold-primary);
-            width: 35px; height: 35px;
+            width: 38px; height: 38px;
             border-radius: 8px;
             display: flex;
             justify-content: center;
@@ -214,6 +222,7 @@
             font-family: 'Playfair Display', serif;
             font-size: 16px;
             margin-bottom: 2px;
+            letter-spacing: 1px;
         }
 
         .card-title p {
@@ -224,10 +233,8 @@
         }
 
         .card-chart {
-            background: #000;
-            padding: 5px;
-            border-radius: 6px;
             color: var(--gold-primary);
+            transform: translateZ(25px);
         }
 
         .card-middle {
@@ -235,32 +242,39 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            transform: translateZ(15px);
         }
 
+        /* الشريحة الذهبية */
         .gold-chip {
-            width: 45px; height: 35px;
-            background: linear-gradient(135deg, #D4AF37, #997A00);
+            width: 50px; height: 38px;
+            background: linear-gradient(135deg, #EAB308, #854D0E);
             border-radius: 6px;
             position: relative;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
         }
 
         .gold-chip::after {
             content: '';
             position: absolute;
-            top: 5px; left: 5px; right: 5px; bottom: 5px;
-            border: 1px solid rgba(0,0,0,0.3);
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 1px solid rgba(0,0,0,0.2);
             border-radius: 3px;
         }
 
         .nfc-icon {
-            color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.2);
+        }
+
+        .card-footer {
+            transform: translateZ(10px);
         }
 
         .card-footer p {
             color: var(--text-muted);
             font-size: 9px;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
         }
 
         .card-number {
@@ -269,23 +283,26 @@
             letter-spacing: 2px;
             color: #ffffff;
             display: flex;
-            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .card-number .dots {
             color: var(--gold-primary);
+            font-size: 14px;
+            letter-spacing: 3px;
         }
 
         /* 🚪 زر الدخول */
         .enter-btn {
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
             background: transparent;
             border: 1px solid var(--gold-primary);
             color: var(--gold-light);
             padding: 18px;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 15px;
             font-family: 'Playfair Display', serif;
             font-weight: 600;
             letter-spacing: 2px;
@@ -299,22 +316,19 @@
             overflow: hidden;
         }
 
-        .enter-btn:hover {
+        .enter-btn:hover, .enter-btn:active {
             background: rgba(212, 175, 55, 0.1);
             box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
         }
 
-        .enter-btn:active {
-            transform: scale(0.98);
-        }
-
         /* 📱 الفوتر */
         .footer {
-            margin-top: 40px;
+            margin-top: 30px;
             display: flex;
             gap: 30px;
             color: var(--text-muted);
             font-size: 12px;
+            margin-bottom: 20px;
         }
 
         .footer-item {
@@ -330,7 +344,7 @@
         /* أنيميشن التحميل */
         .loader {
             display: none;
-            width: 20px; height: 20px;
+            width: 18px; height: 18px;
             border: 2px solid rgba(212, 175, 55, 0.3);
             border-top-color: var(--gold-primary);
             border-radius: 50%;
@@ -339,13 +353,19 @@
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        /* تعديلات للشاشات الصغيرة جداً */
+        @media (max-width: 380px) {
+            .main-heading { font-size: 32px; }
+            .vip-card { padding: 18px; }
+            .card-number { font-size: 16px; }
+        }
     </style>
 </head>
 <body>
 
     <div class="stars"></div>
 
-    <!-- الترويسة -->
+    <!-- الترويسة العلوية الفخمة -->
     <header class="header">
         <div class="brand">
             <div class="brand-icon">✨</div>
@@ -359,17 +379,17 @@
         </div>
     </header>
 
-    <!-- العنوان -->
-    <div class="hero-title">
-        <div class="subtitle">EXCLUSIVE VIP MEMBERSHIP ACCESS</div>
+    <!-- القسم النصي -->
+    <main class="hero-section">
+        <div class="subtitle-badge">EXCLUSIVE VIP MEMBERSHIP ACCESS</div>
         <h1 class="main-heading">
             <span class="white">ENTER THE </span><span class="gold">CREATIVE</span><br>
             <span class="gold">REALM</span>
         </h1>
         <p class="description">Hover or tilt the VIP card below to feel the metallic reflection. Unlock unlimited AI music, lyrics generation, and studio sound engine capabilities.</p>
-    </div>
+    </main>
 
-    <!-- الكارت المعدني -->
+    <!-- الكارت المعدني 3D -->
     <div class="card-container" id="cardContainer">
         <div class="vip-card" id="vipCard">
             <div class="card-header">
@@ -388,7 +408,9 @@
             </div>
 
             <div class="card-middle">
+                <!-- الشريحة الذهبية -->
                 <div class="gold-chip"></div>
+                <!-- أيقونة الواي فاي/NFC -->
                 <div class="nfc-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
                 </div>
@@ -427,24 +449,42 @@
     <script src="security.js"></script>
 
     <script>
-        // ✨ حركة الـ 3D للكارت عند اللمس أو الماوس
+        // ✨ حركة الـ 3D للكارت
         const card = document.getElementById('vipCard');
         const container = document.getElementById('cardContainer');
 
+        // للكمبيوتر (الماوس)
         container.addEventListener('mousemove', (e) => {
-            let xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-            let yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            let xAxis = (window.innerWidth / 2 - e.pageX) / 20;
+            let yAxis = (window.innerHeight / 2 - e.pageY) / 20;
             card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
         });
 
-        container.addEventListener('mouseleave', () => {
+        // للهاتف (اللمس)
+        container.addEventListener('touchmove', (e) => {
+            let touch = e.touches[0];
+            let xAxis = (window.innerWidth / 2 - touch.pageX) / 20;
+            let yAxis = (window.innerHeight / 2 - touch.pageY) / 20;
+            card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        }, { passive: true });
+
+        // إرجاع الكارت لوضعه الطبيعي عند سحب الإصبع أو الماوس
+        const resetCard = () => {
             card.style.transform = `rotateY(0deg) rotateX(0deg)`;
             card.style.transition = "transform 0.5s ease";
-        });
+        };
+
+        container.addEventListener('mouseleave', resetCard);
+        container.addEventListener('touchend', resetCard);
 
         container.addEventListener('mouseenter', () => {
             card.style.transition = "none";
         });
+        
+        container.addEventListener('touchstart', () => {
+            card.style.transition = "none";
+        }, { passive: true });
+
 
         // 🚪 دالة دخول الاستوديو
         async function enterStudio() {
@@ -459,15 +499,9 @@
             loader.style.display = 'block';
             btn.disabled = true;
 
-            // محاكاة التحقق (هنا سنضع الرابط الحقيقي لاحقاً)
+            // توجيه المستخدم للاستوديو الفعلي بعد ثانية ونصف
             setTimeout(() => {
-                // توجيه المستخدم للاستوديو الفعلي (الملف اللي فيه التوليد)
                 window.location.href = "FMStar.html"; 
-                
-                // إعادة الزرار لشكله الطبيعي لو حصل خطأ
-                btn.innerHTML = originalText;
-                loader.style.display = 'none';
-                btn.disabled = false;
             }, 1500);
         }
     </script>
