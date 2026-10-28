@@ -1,12 +1,18 @@
 # Multi-stage build for Go Backend
 FROM golang:1.22-alpine AS builder
 WORKDIR /app
-COPY backend-go/ .
-RUN go build -ldflags="-s -w" -o fmstar-core
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o fmstar-core
 
 # Final Lightweight Runtime Image
 FROM alpine:latest
+RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /root/
 COPY --from=builder /app/fmstar-core .
+
+ENV PORT=8080
 EXPOSE 8080
+
 CMD ["./fmstar-core"]
