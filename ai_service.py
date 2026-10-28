@@ -8,7 +8,7 @@ import os
 # 🛡️ استيراد درع الحماية
 from secure_brain import sanitize_prompt
 
-app = FastAPI(title="FMStar AI Engine with OmniRoute", version="8.0")
+app = FastAPI(title="FMStar AI Engine with OmniRoute", version="9.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,42 +32,49 @@ class GenerateRequest(BaseModel):
     ratio: str = "16:9"
     dsp_profile: str = "hybrid"
 
-# 🌐 إعدادات OmniRoute
-# ⚠️ استبدلي هذا الرابط برابط OmniRoute الخاص بكِ (سحابي أو محلي)
+# 🌐 رابط OmniRoute السحابي (جاهز ومجاني)
 OMNIROUTE_URL = "https://cloud.omniroute.online/v1/chat/completions"
-# ⚠️ ضعي هنا مفتاح البوابة الذي نسختيه من لوحة التحكم
-OMNIROUTE_API_KEY = "sk-ضعي_مفتاح_البوابة_هنا"
+# 💡 إذا طلب منك مفتاح، ضعيه هنا. وإذا لم يطلب، اتركيه كما هو.
+OMNIROUTE_API_KEY = "sk-omniroute-free"
 
 @app.post("/internal/generate", dependencies=[Depends(get_api_key)])
 async def generate_multimodal_content(req: GenerateRequest):
     if not req.prompt.strip():
         raise HTTPException(status_code=400, detail="الرجاء كتابة وصف المشهد.")
 
+    # 🛡️ تنظيف المدخلات
     safe_prompt = sanitize_prompt(req.prompt)
 
+    # ⚙️ تجهيز الطلب لـ OmniRoute
     headers = {
         "Authorization": f"Bearer {OMNIROUTE_API_KEY}",
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "auto", 
+        "model": "auto", # سيختار أفضل نموذج مجاني تلقائياً
         "messages": [
-            {"role": "system", "content": "You are an expert AI prompt engineer."},
+            {"role": "system", "content": "You are an expert AI prompt engineer. Enhance this prompt for cinematic generation."},
             {"role": "user", "content": safe_prompt}
         ]
     }
 
     try:
+        # 🚀 إرسال الطلب للسحابة
         response = requests.post(OMNIROUTE_URL, json=payload, headers=headers, timeout=30)
         response.raise_for_status()
+        
         ai_data = response.json()
         optimized_prompt = ai_data['choices'][0]['message']['content']
+        model_used = ai_data.get('model', 'OmniRoute Auto')
         
         return {
             "status": "success",
-            "model_used": ai_data.get('model', 'OmniRoute Auto'),
+            "model_used": model_used,
+            "original_prompt": req.prompt,
             "optimized_prompt": optimized_prompt,
             "video_url": "https://www.w3schools.com/html/mov_bbb.mp4"
         }
+    except requests.exceptions.Timeout:
+        raise HTTPException(status_code=504, detail="انتهى وقت الاتصال بـ OmniRoute. حاولي مرة أخرى.")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"خطأ: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"خطأ في OmniRoute: {str(e)}")
