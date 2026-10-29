@@ -99,4 +99,4 @@ async def create_audio_generation(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail=f"Failed to connect to OmniRoute: {str(e)}"
-        )
+)
