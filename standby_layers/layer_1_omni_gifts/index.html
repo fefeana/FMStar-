@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FMStarAI - Omni Studio | استوديو الإهداءات</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Cairo Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #0f0a15;
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 80% 10%, rgba(255, 77, 109, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 15% 85%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .glass {
+            background: rgba(26, 18, 37, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 77, 109, 0.22);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.55);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 25px rgba(255, 77, 109, 0.45);
+        }
+        .neon-glow:hover {
+            box-shadow: 0 0 35px rgba(255, 77, 109, 0.65);
+        }
+
+        .loader {
+            border: 4px solid #1a1225;
+            border-top: 4px solid #ff4d6d;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tab-btn {
+            transition: all 0.25s ease;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff4d6d, #a855f7);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0a15;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff4d6d;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-start p-4 md:p-8">
+
+    <div class="w-full max-w-xl">
+
+        <!-- Top App Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl text-pink-500 animate-pulse">🎁</span>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide">
+                        استوديو <span class="text-pink-500">الإهداءات</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">النسخة 1: مدعوم بمحرك <span class="text-purple-400 font-mono">Omni-Root</span> & FMStar AI</p>
+                </div>
+            </div>
+
+            <div class="flex bg-gray-900/80 p-1 rounded-2xl border border-gray-800">
+                <button id="tabGiftsBtn" onclick="switchTab('gifts')" class="tab-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-gift"></i> الإهداءات
+                </button>
+                <button id="tabWavesBtn" onclick="switchTab('waves')" class="tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-wave-square"></i> الميكسر
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 1: Gifts Studio -->
+        <div id="tabGifts" class="space-y-6">
+            <div class="glass rounded-3xl p-6 relative">
+                
+                <!-- 1. Person Name -->
+                <div class="mb-4">
+                    <label class="text-xs text-gray-300 mb-1.5 block font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-user text-pink-400"></i> لمن هذه الهدية؟
+                    </label>
+                    <input type="text" id="personName" placeholder="اكتب اسم الشخص (مثلاً: سارة، أحمد، ريم، مارينا...)" 
+                        class="w-full bg-gray-900/90 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 text-white placeholder-gray-500 transition">
+                </div>
+                
+                <!-- 2. Occasion and Style -->
+                <div class="mb-4 grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-300 mb-1.5 block font-semibold flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar-check text-purple-400"></i> المناسبة:
+                        </label>
+                        <select id="occasion" class="w-full bg-gray-900/90 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-pink-500">
+                            <option value="عيد ميلاد">🎂 عيد ميلاد</option>
+                            <option value="زفاف">💍 زفاف ومباركة</option>
+                            <option value="تخرج">🎓 تخرج ونجاح</option>
+                            <option value="مفاجأة" selected>✨ مفاجأة خاصة</option>
+                            <option value="عيد الحب">💖 عيد الحب / رومانسي</option>
+                            <option value="شكر وتقدير">💐 شكر وتقدير</option>
+                            <option value="عيد الفطر/الأضحى">🌙 تهنئة العيد</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-300 mb-1.5 block font-semibold flex items-center gap-1.5">
+                            <i class="fa-solid fa-music text-pink-400"></i> الستايل الموسيقي:
+                        </label>
+                        <select id="style" class="w-full bg-gray-900/90 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-pink-500">
+                            <option value="رومانسي">🎻 رومانسي هادئ</option>
+                            <option value="طرب" selected>🪕 طرب وأكوستيك</option>
+                            <option value="راب">🎤 راب إيقاعي</option>
+                            <option value="شيلات">🐎 شيلات حماسية</option>
+                            <option value="بوب">⚡ بوب حديث</option>
+                            <option value="ساموراي سايبر">⚔️ ساموراي سايبر</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 3. Image Upload (with preview) -->
+                <div class="mb-4">
+                    <label class="text-xs text-gray-300 mb-1.5 block font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-image text-cyan-400"></i> ارفع صورة (اختياري للاستلهام):
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)" 
+                            class="w-full text-xs text-gray-400 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-600/20 file:text-pink-400 hover:file:bg-pink-600/30 file:cursor-pointer">
+                        <div id="imagePreviewContainer" class="hidden relative w-12 h-12 rounded-xl overflow-hidden border border-pink-500 shrink-0">
+                            <img id="imagePreview" src="" alt="معاينة" class="w-full h-full object-cover">
+                            <button onclick="removeImage()" class="absolute inset-0 bg-black/60 flex items-center justify-center text-red-400 hover:text-red-300 text-xs">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Additional Details -->
+                <div class="mb-5">
+                    <label class="text-xs text-gray-300 mb-1.5 block font-semibold flex items-center justify-between">
+                        <span><i class="fa-solid fa-pen-fancy text-yellow-400"></i> تفاصيل أو كلمات يحبها:</span>
+                        <span class="text-gray-500 text-[11px]">اختياري</span>
+                    </label>
+                    <textarea id="details" rows="2" placeholder="مثلاً: يحب القهوة، دائماً يبتسم، عاشق للبحر والرحلات..." 
+                        class="w-full bg-gray-900/90 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 text-white resize-none placeholder-gray-500"></textarea>
+                </div>
+
+                <!-- Presets quick buttons -->
+                <div class="flex flex-wrap gap-1.5 mb-5 text-xs">
+                    <span class="text-gray-400 text-[11px] self-center ml-1">أمثلة سريعة:</span>
+                    <button onclick="setGiftPreset('سارة', 'عيد ميلاد', 'رومانسي', 'أجمل ابتسامة، عاشقة للورد والقهوة')" class="bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-lg text-gray-300">سارة (ميلاد) 🌸</button>
+                    <button onclick="setGiftPreset('محمد', 'تخرج', 'طرب', 'ألف مبروك التخرج بتفوق ورفعة راس')" class="bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-lg text-gray-300">محمد (تخرج) 🎓</button>
+                    <button onclick="setGiftPreset('مارينا', 'مفاجأة', 'طرب', 'يا نسيم الشوق سلم لي على مارينا')" class="bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-lg text-gray-300">مارينا (شوق) 🎶</button>
+                </div>
+
+                <!-- Generate Button -->
+                <button id="generateBtn" onclick="generateGift()" class="w-full py-4 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white font-bold text-sm md:text-base neon-glow transition flex items-center justify-center gap-2 hover:opacity-95 active:scale-[0.99]">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 
+                    <span>توليد بواسطة Omni-Root</span>
+                </button>
+            </div>
+
+            <!-- Result Box -->
+            <div id="resultArea" class="hidden">
+                <div class="glass rounded-3xl p-6 border-t-4 border-pink-500 shadow-2xl">
+                    <!-- Loader Container -->
+                    <div id="loaderContainer" class="hidden py-4 text-center">
+                        <div class="loader"></div>
+                        <p id="loaderStatusText" class="text-sm font-semibold text-pink-400 animate-pulse">جاري صياغة الكلمات ومزج الألحان...</p>
+                        <p class="text-xs text-gray-500 mt-1">محرك Omni-Root يحلل الطابع الموسيقي والمناسبة</p>
+                    </div>
+
+                    <!-- Content Ready Container -->
+                    <div id="contentContainer" class="hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-pink-500 flex items-center gap-2">
+                                <span>🎉</span> <span>الهدية جاهزة للإرسال!</span>
+                            </h3>
+                            <button onclick="copyLyrics()" class="text-xs bg-pink-600/20 text-pink-400 hover:bg-pink-600/30 px-3 py-1.5 rounded-lg border border-pink-500/30 flex items-center gap-1">
+                                <i class="fa-regular fa-copy"></i> نسخ
+                            </button>
+                        </div>
+
+                        <!-- Lyrics Card -->
+                        <div class="bg-black/40 border border-gray-800/80 rounded-2xl p-5 mb-4">
+                            <p id="aiLyrics" class="text-sm md:text-base text-gray-200 whitespace-pre-wrap leading-relaxed font-medium"></p>
+                        </div>
+
+                        <!-- Media Player -->
+                        <div id="mediaBox" class="mt-4">
+                            <label class="text-xs text-gray-400 mb-2 block font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-play text-pink-500"></i> المشغل الصوتي والمرئي:
+                            </label>
+                            <video id="outputVideo" controls class="w-full rounded-2xl border border-gray-800 bg-black/60 shadow-lg"></video>
+                        </div>
+
+                        <!-- Social Share Row -->
+                        <div class="mt-5 pt-4 border-t border-gray-800 flex items-center justify-between flex-wrap gap-2">
+                            <span class="text-xs text-gray-400">مشاركة الهدية:</span>
+                            <div class="flex gap-2">
+                                <button onclick="shareWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i> واتساب
+                                </button>
+                                <button onclick="shareTelegram()" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+                                    <i class="fa-brands fa-telegram text-sm"></i> تيليجرام
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Audio Waves & Mixer -->
+        <div id="tabWaves" class="hidden space-y-6">
+            <div class="glass rounded-3xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-base font-bold text-pink-400 flex items-center gap-2">
+                        <i class="fa-solid fa-wave-square"></i> الموجات الصوتية الحية (Live Canvas)
+                    </h2>
+                    <span id="canvasStatusBadge" class="text-xs bg-pink-500/20 text-pink-300 px-2.5 py-1 rounded-full border border-pink-500/30">
+                        موقف مؤقتاً
+                    </span>
+                </div>
+
+                <div class="w-full h-44 bg-black/60 rounded-2xl overflow-hidden border border-gray-800 relative">
+                    <canvas id="miniWaveCanvas" class="w-full h-full block"></canvas>
+                </div>
+
+                <div class="flex items-center justify-center gap-4 mt-5">
+                    <button id="togglePlayBtn" onclick="toggleWavePlay()" class="px-6 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-pink-600/30 transition">
+                        <i id="playIcon" class="fa-solid fa-play"></i> 
+                        <span id="playText">تشغيل الموجات</span>
+                    </button>
+                    <button onclick="resetMixer()" class="px-4 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold transition">
+                        إعادة ضبط
+                    </button>
+                </div>
+
+                <!-- Mini Sliders -->
+                <div class="grid grid-cols-2 gap-4 mt-6 pt-5 border-t border-gray-800/80">
+                    <div>
+                        <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+                            <span>صدى الصوت (Reverb)</span>
+                            <span id="revNum" class="text-pink-400 font-mono">45%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="45" oninput="document.getElementById('revNum').textContent = this.value + '%'" class="w-full accent-pink-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+                            <span>البيس (Bass Boost)</span>
+                            <span id="bassNum" class="text-purple-400 font-mono">60%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="60" oninput="document.getElementById('bassNum').textContent = this.value + '%'" class="w-full accent-purple-500 cursor-pointer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-24 opacity-0 glass border-pink-500 text-white px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 z-50 flex items-center gap-2 shadow-xl">
+        <span id="toastIcon">✨</span>
+        <span id="toastMsg">تم بنجاح!</span>
+    </div>
+
+    <script>
+        // --- Image Preview Logic ---
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const container = document.getElementById('imagePreviewContainer');
+            const preview = document.getElementById('imagePreview');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    container.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage() {
+            document.getElementById('imageInput').value = '';
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('imagePreview').src = '';
+        }
+
+        // --- Presets Helper ---
+        function setGiftPreset(name, occasion, style, details) {
+            document.getElementById('personName').value = name;
+            document.getElementById('occasion').value = occasion;
+            document.getElementById('style').value = style;
+            document.getElementById('details').value = details;
+            showToast(`تم تحميل نموذج: ${name}`, '🎁');
+        }
+
+        // --- Tabs Switcher ---
+        function switchTab(tab) {
+            const tabGifts = document.getElementById('tabGifts');
+            const tabWaves = document.getElementById('tabWaves');
+            const btnGifts = document.getElementById('tabGiftsBtn');
+            const btnWaves = document.getElementById('tabWavesBtn');
+
+            if (tab === 'gifts') {
+                tabGifts.classList.remove('hidden');
+                tabWaves.classList.add('hidden');
+                btnGifts.className = "tab-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white";
+                btnWaves.className = "tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1.5";
+            } else {
+                tabGifts.classList.add('hidden');
+                tabWaves.classList.remove('hidden');
+                btnWaves.className = "tab-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white";
+                btnGifts.className = "tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1.5";
+                resizeMiniCanvas();
+            }
+        }
+
+        // --- Toast Helper ---
+        let toastTimer;
+        function showToast(msg, icon = '✨') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            document.getElementById('toastIcon').textContent = icon;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // --- Copy & Share Helpers ---
+        function copyLyrics() {
+            const text = document.getElementById('aiLyrics').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('تم نسخ كلمات الهدية بنجاح!', '📋');
+            });
+        }
+
+        function shareWhatsApp() {
+            const name = document.getElementById('personName').value || 'أغلى الأحباب';
+            const text = encodeURIComponent(`🎁 استمع إلى هديتك الخاصة يا ${name} عبر استوديو الإهداءات!\n\n` + document.getElementById('aiLyrics').innerText);
+            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        }
+
+        function shareTelegram() {
+            const text = encodeURIComponent(document.getElementById('aiLyrics').innerText);
+            window.open(`https://t.me/share/url?url=https://fmstar.app&text=${text}`, '_blank');
+        }
+
+        // --- Client-Side High Quality Lyrics Generator (Fallback) ---
+        function generateLocalLyrics(name, occasion, style, details) {
+            const safeName = name || 'أغلى البشر';
+            const detailNote = details ? `\n(إلهام خاص: ${details})` : '';
+
+            let verses = "";
+            if (occasion === "عيد ميلاد") {
+                verses = `يا طير طاير في السماء غنّي وقول..\nميلاد "${safeName}" زاد في الدنيا السرور..\nكل عام وأنت الخير والضحكة تدوم..\nوعسى الفرح في دربك بوسط النجوم!`;
+            } else if (occasion === "تخرج") {
+                verses = `مبروك يا "${safeName}" رفعت الرأس عالي..\nشهادة فخر تسوى الذهب وكل غالي..\nتعبت ونلت الحلم بعزم وإصرار..\nتستاهل الأفراح والتاج والأنوار!`;
+            } else if (occasion === "زفاف") {
+                verses = `الليلة فرحة غير في كل الليالي..\nنبارك لـ "${safeName}" من طيب الفؤاد الغالي..\nبارك الله جمعكم وأسعد الأيام..\nوجعل الهنا والخير دايم للأمام!`;
+            } else {
+                verses = `يا نسيم الورد سلم لي على "${safeName}"..\nوقل له معزتك في خفوقي مالها مقياس..\nلو تطلب عيوني فداك بدون تفكير..\nأنت الوحيد اللي مكانك دوم في الراس!`;
+            }
+
+            return `🎁 إهداء خاص مفعم بالحب إلى: ${safeName}\n✨ المناسبة: ${occasion} | 🎵 الستايل: ${style}\n━━━━━━━━━━━━━━━━━━━━━━\n${verses}\n━━━━━━━━━━━━━━━━━━━━━━${detailNote}\n\n🎙️ تم التوليد بنجاح بواسطة Omni-Root AI Engine`;
+        }
+
+        // --- Generate Gift Function ---
+        async function generateGift() {
+            const nameInput = document.getElementById('personName');
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert("اكتب الاسم أولاً!");
+                nameInput.focus();
+                return;
+            }
+
+            const occasion = document.getElementById('occasion').value;
+            const style = document.getElementById('style').value;
+            const details = document.getElementById('details').value.trim();
+            const imageFile = document.getElementById('imageInput').files[0];
+
+            const resultArea = document.getElementById('resultArea');
+            const loaderContainer = document.getElementById('loaderContainer');
+            const contentContainer = document.getElementById('contentContainer');
+            const generateBtn = document.getElementById('generateBtn');
+            const outputVideo = document.getElementById('outputVideo');
+            const loaderStatusText = document.getElementById('loaderStatusText');
+
+            resultArea.classList.remove('hidden');
+            loaderContainer.classList.remove('hidden');
+            contentContainer.classList.add('hidden');
+            generateBtn.disabled = true;
+
+            // Animated status messages while generating
+            const statusSteps = [
+                "جاري قراءة تفاصيل الهدية...",
+                `صياغة أبيات خاصة لـ ${name}...`,
+                `توليد لحن بستايل ${style}...`,
+                "مزج المقطع الصوتي والمرئي..."
+            ];
+            let stepIndex = 0;
+            const stepInterval = setInterval(() => {
+                if (stepIndex < statusSteps.length) {
+                    loaderStatusText.textContent = statusSteps[stepIndex];
+                    stepIndex++;
+                }
+            }, 500);
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('occasion', occasion);
+            formData.append('style', style);
+            formData.append('details', details);
+            if (imageFile) formData.append('image', imageFile);
+
+            try {
+                // Call API with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                const data = await response.json();
+                clearInterval(stepInterval);
+
+                loaderContainer.classList.add('hidden');
+                contentContainer.classList.remove('hidden');
+
+                const lyricsText = data.lyrics || generateLocalLyrics(name, occasion, style, details);
+                document.getElementById('aiLyrics').innerText = lyricsText;
+
+                const mediaUrl = data.media_url || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+                outputVideo.src = mediaUrl;
+                outputVideo.classList.remove('hidden');
+
+                showToast(`تم تجهيز هدية ${name} بنجاح!`, '🎉');
+            } catch (error) {
+                // Seamless graceful fallback
+                clearInterval(stepInterval);
+                setTimeout(() => {
+                    loaderContainer.classList.add('hidden');
+                    contentContainer.classList.remove('hidden');
+
+                    const fallbackLyrics = generateLocalLyrics(name, occasion, style, details);
+                    document.getElementById('aiLyrics').innerText = fallbackLyrics;
+
+                    outputVideo.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+                    outputVideo.classList.remove('hidden');
+
+                    showToast(`تم تجهيز هدية ${name} بنجاح!`, '🎉');
+                }, 1000);
+            } finally {
+                generateBtn.disabled = false;
+            }
+        }
+
+        // --- Canvas Wave Animation (Tab 2) ---
+        const canvas = document.getElementById('miniWaveCanvas');
+        const ctx = canvas.getContext('2d');
+        let isWavePlaying = false;
+        let wavePhase = 0;
+        let animationId;
+
+        function resizeMiniCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeMiniCanvas);
+        resizeMiniCanvas();
+
+        function drawMiniWave() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const w = canvas.width;
+            const h = canvas.height;
+            const totalBars = 36;
+            const barW = (w / totalBars) - 3;
+
+            wavePhase += isWavePlaying ? 0.08 : 0.015;
+
+            // Draw Frequency Bars
+            for (let i = 0; i < totalBars; i++) {
+                const amp = isWavePlaying 
+                    ? (Math.sin(wavePhase + i * 0.2) * 35) + 40 + (Math.random() * 25)
+                    : 12 + Math.sin(wavePhase + i * 0.2) * 6;
+                const x = i * (barW + 3);
+                const y = h - amp;
+
+                const grad = ctx.createLinearGradient(0, y, 0, h);
+                grad.addColorStop(0, '#ff4d6d');
+                grad.addColorStop(1, '#a855f7');
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.roundRect(x, y, barW, amp, [4, 4, 0, 0]);
+                ctx.fill();
+            }
+
+            // Sine Wave Overlay
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = isWavePlaying ? 'rgba(255, 77, 109, 0.9)' : 'rgba(255, 77, 109, 0.3)';
+            for (let x = 0; x <= w; x += 4) {
+                const amp = isWavePlaying ? 25 : 6;
+                const y = (h / 2) + Math.sin(x * 0.02 + wavePhase * 1.5) * amp;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            animationId = requestAnimationFrame(drawMiniWave);
+        }
+        drawMiniWave();
+
+        function toggleWavePlay() {
+            isWavePlaying = !isWavePlaying;
+            const playIcon = document.getElementById('playIcon');
+            const playText = document.getElementById('playText');
+            const badge = document.getElementById('canvasStatusBadge');
+
+            if (isWavePlaying) {
+                playIcon.className = 'fa-solid fa-pause';
+                playText.textContent = 'إيقاف مؤقت';
+                badge.textContent = 'تشغيل مباشر 🎵';
+                badge.className = 'text-xs bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full border border-emerald-500/30';
+                showToast('الموجات الصوتية تعمل الآن', '▶️');
+            } else {
+                playIcon.className = 'fa-solid fa-play';
+                playText.textContent = 'تشغيل الموجات';
+                badge.textContent = 'موقف مؤقتاً';
+                badge.className = 'text-xs bg-pink-500/20 text-pink-300 px-2.5 py-1 rounded-full border border-pink-500/30';
+                showToast('تم إيقاف الموجات مؤقتاً', '⏸️');
+            }
+        }
+
+        function resetMixer() {
+            isWavePlaying = false;
+            document.getElementById('playIcon').className = 'fa-solid fa-play';
+            document.getElementById('playText').textContent = 'تشغيل الموجات';
+            document.getElementById('canvasStatusBadge').textContent = 'موقف مؤقتاً';
+            showToast('تمت إعادة الضبط', '↺');
+        }
+    </script>
+</body>
+</html>

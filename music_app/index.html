@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samurai Music AI</title>
+    <style>
+        body { background-color: #121212; color: #fff; font-family: sans-serif; text-align: center; padding: 50px 20px; }
+        .box { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 30px; border-radius: 16px; border: 1px solid #333; }
+        textarea { width: 90%; height: 110px; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #141414; color: white; font-size: 15px; outline: none; }
+        textarea:focus { border-color: #00FF87; }
+        button { margin-top: 20px; padding: 12px 35px; background: #00FF87; color: #121212; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #00cc6a; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        #result { margin-top: 30px; color: #00FF87; font-weight: bold; line-height: 1.6; }
+        audio { width: 90%; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🎙️ Samurai Music AI</h1>
+        <p style="color: #aaa; margin-bottom: 20px;">اكتب كلمات الأغنية هنا:</p>
+        <textarea id="lyrics" placeholder="يا نسيم الشوق سلم لي على مارينا..."></textarea><br>
+        <button id="btn" onclick="generate()">⚔️ توليد الأغنية (هجوم)</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        async function generate() {
+            const lyrics = document.getElementById('lyrics').value.trim();
+            const resDiv = document.getElementById('result');
+            const btn = document.getElementById('btn');
+            if(!lyrics) { alert('اكتب الكلام أولاً!'); return; }
+            btn.disabled = true;
+            resDiv.innerHTML = "⚔️ جاري التوليد في الخادم...";
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: lyrics })
+                });
+                const data = await response.json();
+                const audioUrl = data.audio_url || '/public/poetry_output.mp3';
+                resDiv.innerHTML = `✅ ${data.message}<br><audio controls autoplay src="${audioUrl}"></audio>`;
+            } catch(e) {
+                resDiv.innerHTML = "❌ فشل الاتصال بالخادم!";
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

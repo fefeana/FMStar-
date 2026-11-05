@@ -1,0 +1,14 @@
+[project]
+name = "fmstar-backend"
+version = "0.1.0"
+description = "FMStar Gemini & Mira Studio Service"
+requires-python = ">=3.10"
+
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

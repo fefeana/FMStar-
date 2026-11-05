@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FMSTAR - Cyber Acoustic Music Studio</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #070913;
+            --card-glass: rgba(18, 24, 38, 0.72);
+            --card-glass-hover: rgba(26, 34, 52, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00F0FF;
+            --neon-purple: #A855F7;
+            --neon-pink: #FF007F;
+            --neon-green: #00FF87;
+            --neon-gold: #FFB800;
+            --text-main: #FFFFFF;
+            --text-sub: #94A3B8;
+            --glow-cyan: rgba(0, 240, 255, 0.35);
+            --glow-pink: rgba(255, 0, 127, 0.35);
+            --glow-green: rgba(0, 255, 135, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Tajawal', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 24px 16px 50px 16px;
+        }
+
+        /* Ambient Glowing Background Orbs */
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+            animation: pulseOrb 10s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 450px; height: 450px; background: var(--neon-purple); top: -80px; right: -50px; }
+        .orb-2 { width: 500px; height: 500px; background: var(--neon-blue); bottom: 5%; left: -100px; animation-duration: 12s; }
+        .orb-3 { width: 350px; height: 350px; background: var(--neon-pink); top: 40%; right: 15%; animation-duration: 8s; opacity: 0.25; }
+
+        @keyframes pulseOrb {
+            0% { transform: scale(0.9) translate(0, 0); }
+            50% { transform: scale(1.15) translate(25px, -20px); }
+            100% { transform: scale(0.95) translate(-20px, 20px); }
+        }
+
+        /* App Layout Container */
+        .studio-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            background: var(--card-glass);
+            border: 1px solid var(--border-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-icon {
+            font-size: 26px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px var(--glow-cyan));
+        }
+        .brand-text {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 1.5px;
+            color: #fff;
+        }
+        .brand-text span {
+            color: var(--neon-blue);
+            text-shadow: 0 0 15px var(--glow-cyan);
+        }
+
+        .studio-badge {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            color: var(--neon-blue);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Tajawal', sans-serif;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
+            animation: blinkDot 1.4s infinite;
+        }
+        @keyframes blinkDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        /* Glass Cards Base */
+        .glass-card {
+            background: var(--card-glass);
+            border: 1px solid var(--border-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Card Headers */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+        }
+        .card-title i {
+            color: var(--neon-blue);
+            font-style: normal;
+        }
+
+        /* 1. Canvas Audio Wave Visualizer */
+        .visualizer-box {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            background: rgba(7, 11, 20, 0.7);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 240, 255, 0.08);
+        }
+        canvas#waveCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .visualizer-overlay {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .track-status-pill {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--neon-green);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.5px;
+        }
+        .bpm-pill {
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid var(--neon-purple);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+        }
+
+        /* 2. Track & Playback Controls Deck */
+        .deck-controls {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .scrubber-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .time-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: var(--text-sub);
+            width: 45px;
+            text-align: center;
+        }
+        .progress-bar-container {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 32%;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            border-radius: 10px;
+            transition: width 0.15s linear;
+            box-shadow: 0 0 12px var(--glow-cyan);
+        }
+
+        .deck-buttons-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .deck-track-info {
+            text-align: right;
+        }
+        .track-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .track-meta {
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .buttons-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.25s ease;
+        }
+        .btn-circle:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--neon-blue);
+            transform: scale(1.08);
+            box-shadow: 0 0 15px var(--glow-cyan);
+        }
+        .btn-circle:active {
+            transform: scale(0.95);
+        }
+        .btn-play {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            color: #070913;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 0 25px var(--glow-cyan);
+        }
+        .btn-play:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 35px var(--glow-cyan), 0 0 20px var(--glow-pink);
+            background: linear-gradient(135deg, #4ef2ff, #b86bfc);
+        }
+
+        /* 3. Song Creation & Lyrics Console */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .input-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .char-counter {
+            font-size: 12px;
+            color: var(--text-sub);
+            font-family: 'Orbitron', sans-serif;
+        }
+        textarea.lyrics-area {
+            width: 100%;
+            height: 110px;
+            background: rgba(9, 13, 24, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            color: #fff;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 15px;
+            padding: 14px;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            line-height: 1.6;
+        }
+        textarea.lyrics-area:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px var(--glow-cyan);
+        }
+        textarea.lyrics-area::placeholder {
+            color: #64748B;
+        }
+
+        /* Preset Chips */
+        .preset-chips-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .preset-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-sub);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .preset-chip:hover {
+            background: rgba(0, 240, 255, 0.12);
+            border-color: var(--neon-blue);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Genre Selector Grid */
+        .genres-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .genre-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 8px;
+            border-radius: 12px;
+            color: var(--text-sub);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .genre-btn:hover {
+            background: rgba(168, 85, 247, 0.15);
+            border-color: var(--neon-purple);
+            color: #fff;
+        }
+        .genre-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(168, 85, 247, 0.25));
+            border-color: var(--neon-blue);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+
+        /* Action Buttons */
+        .generate-btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 14px;
+            background: linear-gradient(90deg, var(--neon-green), #00d4ff);
+            border: none;
+            border-radius: 14px;
+            color: #070913;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 6px 25px var(--glow-green);
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 10px 35px var(--glow-green);
+            background: linear-gradient(90deg, #33ff9f, #4ef2ff);
+        }
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Generation Simulation Progress Bar */
+        .gen-progress-box {
+            display: none;
+            margin-top: 18px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 135, 0.3);
+            border-radius: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--neon-green);
+            font-weight: bold;
+        }
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-indicator {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+        .progress-subtext {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-sub);
+            text-align: right;
+        }
+
+        /* 4. Studio Mixer Console (ميكسر الاستوديو) */
+        .mixer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 14px;
+        }
+        @media (max-width: 650px) {
+            .mixer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .channel-strip {
+            background: rgba(10, 14, 25, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            transition: border-color 0.25s;
+        }
+        .channel-strip:hover {
+            border-color: rgba(0, 240, 255, 0.3);
+        }
+        .channel-strip.muted {
+            opacity: 0.45;
+        }
+        .channel-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+        }
+        .channel-icon {
+            font-size: 20px;
+        }
+        
+        /* Vertical Slider Container */
+        .slider-wrapper {
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 10px 0;
+        }
+        input[type="range"].v-slider {
+            -webkit-appearance: none;
+            width: 120px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            outline: none;
+            transform: rotate(-90deg);
+            cursor: pointer;
+        }
+        input[type="range"].v-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        input[type="range"].v-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background: #fff;
+        }
+
+        .channel-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+        .mute-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-sub);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mute-btn:hover {
+            border-color: var(--neon-pink);
+            color: #fff;
+        }
+        .mute-btn.active {
+            background: rgba(255, 0, 127, 0.2);
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            box-shadow: 0 0 10px var(--glow-pink);
+        }
+
+        /* FX Master Row */
+        .fx-row {
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+        }
+        .fx-control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .fx-label {
+            font-size: 13px;
+            color: var(--text-sub);
+            display: flex;
+            justify-content: space-between;
+        }
+        .fx-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+        }
+        .fx-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--neon-purple);
+            box-shadow: 0 0 8px var(--neon-purple);
+            cursor: pointer;
+        }
+
+        /* Floating Toast Notification */
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(14, 20, 34, 0.92);
+            border: 1px solid var(--neon-blue);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px var(--glow-cyan);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Glowing Orbs -->
+    <div class="ambient-glow orb-1"></div>
+    <div class="ambient-glow orb-2"></div>
+    <div class="ambient-glow orb-3"></div>
+
+    <div class="studio-container">
+
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="brand-logo">
+                <span class="brand-icon">⚡</span>
+                <div class="brand-text">FMSTAR <span>STUDIO</span></div>
+            </div>
+            <div class="studio-badge">
+                <span class="live-dot"></span>
+                <span>محاكاة استوديو تفاعلية (Frontend Mockup)</span>
+            </div>
+        </nav>
+
+        <!-- 1. Canvas Wave Visualizer & Deck Card -->
+        <section class="glass-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i>📊</i> وحدة الموجات الصوتية والمشغل (Visualizer & Deck)
+                </div>
+                <div class="visualizer-overlay">
+                    <span class="track-status-pill" id="trackStatusText">جاهز للتشغيل</span>
+                    <span class="bpm-pill" id="bpmBadge">128 BPM</span>
+                </div>
+            </div>
+
+            <!-- Canvas Spectrum -->
+            <div class="visualizer-box">
+                <canvas id="waveCanvas"></canvas>
+            </div>
+
+            <!-- Scrubber & Controls -->
+            <div class="deck-controls">
+                <div class="scrubber-row">
+                    <span class="time-label" id="currentTimeLabel">00:00</span>
+                    <div class="progress-bar-container" id="progressBarContainer">
+                        <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+                    </div>
+                    <span class="time-label" id="durationTimeLabel">03:20</span>
+                </div>
+
+                <div class="deck-buttons-row">
+                    <div class="deck-track-info">
+                        <div class="track-title" id="trackTitleDisplay">Samurai Cyber Symphony - Acoustic Mix</div>
+                        <div class="track-meta" id="trackMetaDisplay">Master Stereo 48kHz • 128 BPM • Neon D Minor</div>
+                    </div>
+
+                    <div class="buttons-group">
+                        <button class="btn-circle" id="prevBtn" title="المقطع السابق">⏮</button>
+                        <button class="btn-circle btn-play" id="playBtn" title="تشغيل / إيقاف">▶</button>
+                        <button class="btn-circle" id="stopBtn" title="إيقاف مؤقت">⏹</button>
+                        <button class="btn-circle" id="nextBtn" title="المقطع التالي">⏭</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Music Generation Prompt Card -->
+        <section class="glass-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i>🎙️</i> محرك توليد الألحان والكلمات (AI Generator)
+                </div>
+                <span style="font-size: 13px; color: var(--text-sub);">توليد فوري ومحاكاة حية</span>
+            </div>
+
+            <div class="input-group">
+                <div class="input-label">
+                    <span>اكتب كلمات الأغنية أو صف اللحن المطلوب:</span>
+                    <span class="char-counter" id="charCounter">0 / 250</span>
+                </div>
+                <textarea class="lyrics-area" id="lyricsInput" placeholder="اكتب كلماتك هنا... مثلاً: يا نسيم الشوق سلم لي على مارينا، ورد السلام لعينها ولروحي الحزينة..."></textarea>
+                
+                <div class="preset-chips-row">
+                    <span class="preset-chip" data-text="يا نسيم الشوق سلم لي على مارينا... ورد السلام لعينها ولروحي الحزينة">🌸 يا نسيم الشوق</span>
+                    <span class="preset-chip" data-text="سيف الساموراي يلمع في دجى الليل، يعزف نغم النصر على أوتار الخلود">⚔️ سيف الساموراي</span>
+                    <span class="preset-chip" data-text="تحت ضوء النيون نعزف للقدر، لحن أكوستيك دافي يمسح تعب السفر">🌙 نغم أندلسي أكوستيك</span>
+                    <span class="preset-chip" data-text="إيقاع فضائي مستقبلي ينبض بطاقة السايبر وسرعة الضوء">🚀 سايبر سنثويف</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 18px;">
+                <label style="font-size: 14px; font-weight: 700; color: #E2E8F0; display: block; margin-bottom: 8px;">اختر النمط الموسيقي (Genre):</label>
+                <div class="genres-grid">
+                    <div class="genre-btn active" data-genre="Acoustic Folk">🎸 أكوستيك شرقي</div>
+                    <div class="genre-btn" data-genre="Synthwave 80s">⚡ سايبر سنث 80s</div>
+                    <div class="genre-btn" data-genre="Samurai Trap">⚔️ ساموراي تراب</div>
+                    <div class="genre-btn" data-genre="Lo-Fi Chill">☕ لو-فاي هادئ</div>
+                    <div class="genre-btn" data-genre="Orchestral Epic">🎻 أوركسترا ملحمية</div>
+                    <div class="genre-btn" data-genre="Flamenco Passion">💃 فلامنكو إسباني</div>
+                </div>
+            </div>
+
+            <button class="generate-btn" id="generateBtn">
+                <span>⚡</span>
+                <span>توليد اللحن الموسيقي (محاكاة فورية)</span>
+            </button>
+
+            <!-- Generation Progress Box -->
+            <div class="gen-progress-box" id="genProgressBox">
+                <div class="progress-header">
+                    <span id="genStatusText">جارٍ تحليل المقامات والموازين...</span>
+                    <span id="genPercentText">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-indicator" id="genProgressIndicator"></div>
+                </div>
+                <div class="progress-subtext" id="genDetailText">جاري تهيئة النماذج الصوتية والمؤثرات...</div>
+            </div>
+        </section>
+
+        <!-- 3. Studio Audio Mixer (ميكسر الاستوديو) -->
+        <section class="glass-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i>🎚️</i> ميكسر الاستوديو الاحترافي (4-Channel Mixer)
+                </div>
+                <button class="preset-chip" id="resetMixerBtn" style="font-size: 12px;">إعادة ضبط ↺</button>
+            </div>
+
+            <div class="mixer-grid">
+                <!-- Channel 1: Vocals -->
+                <div class="channel-strip" id="ch1">
+                    <span class="channel-icon">🎤</span>
+                    <span class="channel-title">صوت الأداء<br><small style="color:var(--text-sub);">Vocals</small></span>
+                    <div class="slider-wrapper">
+                        <input type="range" class="v-slider" min="0" max="100" value="85" data-ch="vocals">
+                    </div>
+                    <span class="channel-val">85%</span>
+                    <button class="mute-btn" data-mute="vocals">كتم M</button>
+                </div>
+
+                <!-- Channel 2: Acoustic Guitar -->
+                <div class="channel-strip" id="ch2">
+                    <span class="channel-icon">🎸</span>
+                    <span class="channel-title">الجيتار<br><small style="color:var(--text-sub);">Guitar</small></span>
+                    <div class="slider-wrapper">
+                        <input type="range" class="v-slider" min="0" max="100" value="75" data-ch="guitar">
+                    </div>
+                    <span class="channel-val">75%</span>
+                    <button class="mute-btn" data-mute="guitar">كتم M</button>
+                </div>
+
+                <!-- Channel 3: Drums / Beat -->
+                <div class="channel-strip" id="ch3">
+                    <span class="channel-icon">🥁</span>
+                    <span class="channel-title">الإيقاع<br><small style="color:var(--text-sub);">Drums</small></span>
+                    <div class="slider-wrapper">
+                        <input type="range" class="v-slider" min="0" max="100" value="90" data-ch="drums">
+                    </div>
+                    <span class="channel-val">90%</span>
+                    <button class="mute-btn" data-mute="drums">كتم M</button>
+                </div>
+
+                <!-- Channel 4: Bass / Synth -->
+                <div class="channel-strip" id="ch4">
+                    <span class="channel-icon">🎹</span>
+                    <span class="channel-title">البيس والسنث<br><small style="color:var(--text-sub);">Bass/Synth</small></span>
+                    <div class="slider-wrapper">
+                        <input type="range" class="v-slider" min="0" max="100" value="70" data-ch="bass">
+                    </div>
+                    <span class="channel-val">70%</span>
+                    <button class="mute-btn" data-mute="bass">كتم M</button>
+                </div>
+            </div>
+
+            <!-- Master & Effects -->
+            <div class="fx-row">
+                <div class="fx-control">
+                    <div class="fx-label">
+                        <span>صدى الصوت (Reverb)</span>
+                        <span id="reverbVal" style="color:var(--neon-purple); font-weight:bold;">45%</span>
+                    </div>
+                    <input type="range" class="fx-slider" id="reverbSlider" min="0" max="100" value="45">
+                </div>
+
+                <div class="fx-control">
+                    <div class="fx-label">
+                        <span>تضخيم البيس (Bass Boost)</span>
+                        <span id="bassVal" style="color:var(--neon-blue); font-weight:bold;">60%</span>
+                    </div>
+                    <input type="range" class="fx-slider" id="bassSlider" min="0" max="100" value="60">
+                </div>
+
+                <div class="fx-control">
+                    <div class="fx-label">
+                        <span>مستوى الصوت العام (Master Volume)</span>
+                        <span id="masterVal" style="color:var(--neon-green); font-weight:bold;">90%</span>
+                    </div>
+                    <input type="range" class="fx-slider" id="masterSlider" min="0" max="100" value="90">
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Floating Interactive Toast -->
+    <div class="toast-notification" id="toastNotification">
+        <span id="toastIcon">✨</span>
+        <span id="toastMsg">تم تنفيذ العملية بنجاح!</span>
+    </div>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            isPlaying: false,
+            currentTime: 0,
+            duration: 200, // 3:20 in seconds
+            currentTrackIndex: 0,
+            selectedGenre: "Acoustic Folk",
+            masterVolume: 0.9,
+            reverb: 0.45,
+            bassBoost: 0.60,
+            audioCtx: null,
+            timerId: null,
+            tracks: [
+                { title: "Samurai Cyber Symphony - Acoustic Mix", meta: "Master Stereo 48kHz • 128 BPM • Neon D Minor", bpm: 128 },
+                { title: "يا نسيم الشوق (Acoustic Oud & Synth)", meta: "Acoustic Guitar & Oud • 110 BPM • Maqam Rast", bpm: 110 },
+                { title: "Neon Tokyo Midnight Drift", meta: "Retro Synth-Pop • 135 BPM • E Minor", bpm: 135 },
+                { title: "أندلسيات الأثير الفضائي", meta: "Flamenco Chillout • 95 BPM • A Minor", bpm: 95 }
+            ]
+        };
+
+        // --- DOM Elements ---
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const trackStatusText = document.getElementById('trackStatusText');
+        const bpmBadge = document.getElementById('bpmBadge');
+        const trackTitleDisplay = document.getElementById('trackTitleDisplay');
+        const trackMetaDisplay = document.getElementById('trackMetaDisplay');
+        const currentTimeLabel = document.getElementById('currentTimeLabel');
+        const durationTimeLabel = document.getElementById('durationTimeLabel');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const progressBarContainer = document.getElementById('progressBarContainer');
+        const lyricsInput = document.getElementById('lyricsInput');
+        const charCounter = document.getElementById('charCounter');
+        const generateBtn = document.getElementById('generateBtn');
+        const genProgressBox = document.getElementById('genProgressBox');
+        const genStatusText = document.getElementById('genStatusText');
+        const genPercentText = document.getElementById('genPercentText');
+        const genProgressIndicator = document.getElementById('genProgressIndicator');
+        const genDetailText = document.getElementById('genDetailText');
+        const toastNotification = document.getElementById('toastNotification');
+        const toastMsg = document.getElementById('toastMsg');
+        const toastIcon = document.getElementById('toastIcon');
+
+        // --- Canvas Resize & Setup ---
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // --- Canvas Audio Spectrum Animation ---
+        let wavePhase = 0;
+        let barHeights = Array(64).fill(10);
+        let barTargets = Array(64).fill(10);
+
+        function drawWaveform() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const w = canvas.width;
+            const h = canvas.height;
+            const totalBars = 48;
+            const barWidth = (w / totalBars) - 3;
+
+            // Update targets if playing
+            if (state.isPlaying) {
+                wavePhase += 0.08;
+                for (let i = 0; i < totalBars; i++) {
+                    const beatFactor = Math.sin(wavePhase * 2 + i * 0.25);
+                    const randomNoise = Math.random() * 45;
+                    barTargets[i] = Math.max(12, (Math.sin(wavePhase + i * 0.15) * 35) + 40 + randomNoise + (beatFactor > 0.5 ? 25 : 0));
+                }
+            } else {
+                wavePhase += 0.015;
+                for (let i = 0; i < totalBars; i++) {
+                    barTargets[i] = 10 + Math.sin(wavePhase + i * 0.2) * 6;
+                }
+            }
+
+            // Draw Neon Frequency Bars
+            for (let i = 0; i < totalBars; i++) {
+                barHeights[i] += (barTargets[i] - barHeights[i]) * 0.22;
+                const barH = barHeights[i];
+                const x = i * (barWidth + 3);
+                const y = h - barH;
+
+                // Color gradient from cyan to purple to neon pink
+                const ratio = i / totalBars;
+                const grad = ctx.createLinearGradient(0, y, 0, h);
+                if (state.isPlaying) {
+                    grad.addColorStop(0, '#00F0FF');
+                    grad.addColorStop(0.5, '#A855F7');
+                    grad.addColorStop(1, '#FF007F');
+                } else {
+                    grad.addColorStop(0, 'rgba(0, 240, 255, 0.4)');
+                    grad.addColorStop(1, 'rgba(168, 85, 247, 0.15)');
+                }
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.roundRect(x, y, barWidth, barH, [4, 4, 0, 0]);
+                ctx.fill();
+
+                // Peak Glow Dot on Top of each bar
+                if (state.isPlaying && barH > 35) {
+                    ctx.fillStyle = '#00FF87';
+                    ctx.beginPath();
+                    ctx.arc(x + barWidth / 2, y - 3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Draw Smooth Overlay Sine Wave Line
+            ctx.beginPath();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = state.isPlaying ? 'rgba(0, 255, 135, 0.8)' : 'rgba(0, 240, 255, 0.25)';
+            ctx.shadowBlur = state.isPlaying ? 12 : 4;
+            ctx.shadowColor = '#00FF87';
+
+            for (let x = 0; x <= w; x += 6) {
+                const waveAmp = state.isPlaying ? 28 : 8;
+                const y = (h / 2) + Math.sin((x * 0.018) + wavePhase * 1.5) * waveAmp;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            requestAnimationFrame(drawWaveform);
+        }
+        drawWaveform();
+
+        // --- Web Audio API Synth Melodic Simulation ---
+        function playBeepTone(freq = 440, type = 'sine', duration = 0.2) {
+            try {
+                if (!state.audioCtx) {
+                    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (state.audioCtx.state === 'suspended') {
+                    state.audioCtx.resume();
+                }
+                const osc = state.audioCtx.createOscillator();
+                const gain = state.audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, state.audioCtx.currentTime);
+                gain.gain.setValueAtTime(state.masterVolume * 0.15, state.audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, state.audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(state.audioCtx.destination);
+                osc.start();
+                osc.stop(state.audioCtx.currentTime + duration);
+            } catch (e) {
+                // AudioContext blocked or not supported
+            }
+        }
+
+        function playMelodicChime() {
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
+                setTimeout(() => playBeepTone(freq, 'triangle', 0.3), idx * 100);
+            });
+        }
+
+        // --- Toast Notification Helper ---
+        let toastTimeout;
+        function showToast(message, icon = '✨') {
+            toastMsg.textContent = message;
+            toastIcon.textContent = icon;
+            toastNotification.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toastNotification.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- Formatting Helpers ---
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // --- Playback Control Logic ---
+        function updateDeckUI() {
+            const track = state.tracks[state.currentTrackIndex];
+            trackTitleDisplay.textContent = track.title;
+            trackMetaDisplay.textContent = track.meta;
+            bpmBadge.textContent = `${track.bpm} BPM`;
+            durationTimeLabel.textContent = formatTime(state.duration);
+            currentTimeLabel.textContent = formatTime(state.currentTime);
+            const pct = (state.currentTime / state.duration) * 100;
+            progressBarFill.style.width = `${pct}%`;
+        }
+
+        function togglePlay() {
+            state.isPlaying = !state.isPlaying;
+            if (state.isPlaying) {
+                playBtn.innerHTML = '⏸';
+                playBtn.title = 'إيقاف مؤقت';
+                trackStatusText.textContent = 'تشغيل مباشر 🎵';
+                trackStatusText.style.color = 'var(--neon-green)';
+                showToast(`جارٍ تشغيل: ${state.tracks[state.currentTrackIndex].title}`, '▶️');
+                playMelodicChime();
+                startPlaybackTimer();
+            } else {
+                pausePlayback();
+                showToast('تم الإيقاف المؤقت', '⏸️');
+            }
+        }
+
+        function pausePlayback() {
+            state.isPlaying = false;
+            playBtn.innerHTML = '▶';
+            playBtn.title = 'تشغيل';
+            trackStatusText.textContent = 'موقف مؤقتاً';
+            trackStatusText.style.color = 'var(--neon-blue)';
+            clearInterval(state.timerId);
+        }
+
+        function stopPlayback() {
+            pausePlayback();
+            state.currentTime = 0;
+            updateDeckUI();
+            trackStatusText.textContent = 'جاهز للتشغيل';
+            showToast('تم إيقاف التشغيل وإعادة البداية', '⏹️');
+        }
+
+        function nextTrack() {
+            state.currentTrackIndex = (state.currentTrackIndex + 1) % state.tracks.length;
+            state.currentTime = 0;
+            updateDeckUI();
+            showToast(`المقطع التالي: ${state.tracks[state.currentTrackIndex].title}`, '⏭️');
+            if (state.isPlaying) playMelodicChime();
+        }
+
+        function prevTrack() {
+            state.currentTrackIndex = (state.currentTrackIndex - 1 + state.tracks.length) % state.tracks.length;
+            state.currentTime = 0;
+            updateDeckUI();
+            showToast(`المقطع السابق: ${state.tracks[state.currentTrackIndex].title}`, '⏮️');
+            if (state.isPlaying) playMelodicChime();
+        }
+
+        function startPlaybackTimer() {
+            clearInterval(state.timerId);
+            state.timerId = setInterval(() => {
+                if (state.isPlaying) {
+                    state.currentTime += 1;
+                    if (state.currentTime >= state.duration) {
+                        nextTrack();
+                    } else {
+                        updateDeckUI();
+                    }
+                }
+            }, 1000);
+        }
+
+        // Scrubber click to seek
+        progressBarContainer.addEventListener('click', (e) => {
+            const rect = progressBarContainer.getBoundingClientRect();
+            const clickPos = (e.clientX - rect.left) / rect.width;
+            state.currentTime = Math.floor(clickPos * state.duration);
+            updateDeckUI();
+            showToast(`تم التقديم إلى: ${formatTime(state.currentTime)}`, '⏱️');
+        });
+
+        // Button Event Listeners
+        playBtn.addEventListener('click', togglePlay);
+        stopBtn.addEventListener('click', stopPlayback);
+        nextBtn.addEventListener('click', nextTrack);
+        prevBtn.addEventListener('click', prevTrack);
+
+        // --- Lyrics & Character Counter ---
+        lyricsInput.addEventListener('input', () => {
+            charCounter.textContent = `${lyricsInput.value.length} / 250`;
+        });
+
+        // Preset Chips Click
+        document.querySelectorAll('.preset-chip[data-text]').forEach(chip => {
+            chip.addEventListener('click', () => {
+                lyricsInput.value = chip.getAttribute('data-text');
+                charCounter.textContent = `${lyricsInput.value.length} / 250`;
+                showToast('تم تحميل النص النموذجي بنجاح', '📝');
+            });
+        });
+
+        // Genre Selector Click
+        document.querySelectorAll('.genre-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.selectedGenre = btn.getAttribute('data-genre');
+                showToast(`تم اختيار النمط الموسيقي: ${btn.textContent.trim()}`, '🎶');
+            });
+        });
+
+        // --- Generate Button Simulation ---
+        generateBtn.addEventListener('click', () => {
+            const lyrics = lyricsInput.value.trim();
+            if (!lyrics) {
+                lyricsInput.focus();
+                showToast('الرجاء كتابة كلمات الأغنية أولاً!', '⚠️');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            genProgressBox.style.display = 'block';
+            let progress = 0;
+
+            const stages = [
+                { pct: 20, title: "تحليل الكلمات والبحور الشعرية...", detail: "مطابقة الترددات والمقامات الموسيقية لنمط " + state.selectedGenre },
+                { pct: 50, title: "توليد هارموني الأوتار والأكوستيك...", detail: "بناء الأوتار وموجات الساموراي بمعدل 128 BPM" },
+                { pct: 80, title: "دمج الفلاتر والمكساج الصوتي (DSP)...", detail: "تطبيق الترددات وتوزيع القنوات الاستيريو" },
+                { pct: 100, title: "اكتمل التوليد بنجاح! 🎉", detail: "تم تجهيز الأغنية وبدء التشغيل التلقائي عبر المشغل." }
+            ];
+
+            let stageIdx = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                genPercentText.textContent = `${progress}%`;
+                genProgressIndicator.style.width = `${progress}%`;
+
+                if (stageIdx < stages.length && progress >= stages[stageIdx].pct) {
+                    genStatusText.textContent = stages[stageIdx].title;
+                    genDetailText.textContent = stages[stageIdx].detail;
+                    playBeepTone(400 + stageIdx * 120, 'sine', 0.15);
+                    stageIdx++;
+                }
+
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    generateBtn.disabled = false;
+                    
+                    // Add new generated track to playlist & play
+                    const snippet = lyrics.slice(0, 22) + (lyrics.length > 22 ? '...' : '');
+                    state.tracks.unshift({
+                        title: `لحن: ${snippet}`,
+                        meta: `${state.selectedGenre} • Acoustic Stereo • 128 BPM • تم التوليد الآن`,
+                        bpm: 128
+                    });
+                    state.currentTrackIndex = 0;
+                    state.currentTime = 0;
+                    updateDeckUI();
+
+                    showToast(`تم توليد لحن ${state.selectedGenre} بنجاح!`, '✅');
+                    if (!state.isPlaying) togglePlay();
+
+                    setTimeout(() => {
+                        genProgressBox.style.display = 'none';
+                    }, 4000);
+                }
+            }, 70);
+        });
+
+        // --- Mixer Sliders and Mute Buttons ---
+        document.querySelectorAll('input.v-slider').forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                const val = e.target.value;
+                const parent = e.target.closest('.channel-strip');
+                parent.querySelector('.channel-val').textContent = `${val}%`;
+                showToast(`تعديل قناة ${parent.querySelector('.channel-title').textContent.split('\n')[0]}: ${val}%`, '🎚️');
+            });
+        });
+
+        document.querySelectorAll('.mute-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const parent = e.target.closest('.channel-strip');
+                btn.classList.toggle('active');
+                if (btn.classList.contains('active')) {
+                    btn.textContent = 'مكتوم ✕';
+                    parent.classList.add('muted');
+                    showToast(`تم كتم القناة`, '🔇');
+                } else {
+                    btn.textContent = 'كتم M';
+                    parent.classList.remove('muted');
+                    showToast(`تم إلغاء كتم القناة`, '🔊');
+                }
+            });
+        });
+
+        // Reset Mixer
+        document.getElementById('resetMixerBtn').addEventListener('click', () => {
+            document.querySelectorAll('input.v-slider').forEach(s => {
+                s.value = 80;
+                s.closest('.channel-strip').querySelector('.channel-val').textContent = '80%';
+                s.closest('.channel-strip').classList.remove('muted');
+            });
+            document.querySelectorAll('.mute-btn').forEach(b => {
+                b.classList.remove('active');
+                b.textContent = 'كتم M';
+            });
+            document.getElementById('reverbSlider').value = 45;
+            document.getElementById('bassSlider').value = 60;
+            document.getElementById('masterSlider').value = 90;
+            document.getElementById('reverbVal').textContent = '45%';
+            document.getElementById('bassVal').textContent = '60%';
+            document.getElementById('masterVal').textContent = '90%';
+            showToast('تمت إعادة ضبط الميكسر للقيم الافتراضية', '↺');
+        });
+
+        // FX Sliders
+        document.getElementById('reverbSlider').addEventListener('input', (e) => {
+            document.getElementById('reverbVal').textContent = `${e.target.value}%`;
+        });
+        document.getElementById('bassSlider').addEventListener('input', (e) => {
+            document.getElementById('bassVal').textContent = `${e.target.value}%`;
+        });
+        document.getElementById('masterSlider').addEventListener('input', (e) => {
+            state.masterVolume = e.target.value / 100;
+            document.getElementById('masterVal').textContent = `${e.target.value}%`;
+        });
+
+        // Initial UI Render
+        updateDeckUI();
+    </script>
+</body>
+</html>
