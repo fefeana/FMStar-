@@ -7,7 +7,7 @@ export default function StarFMStudio() {
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [videoResult, setVideoResult] = useState<string | null>(null);
-  const [selectedStyles, setSelectedStyles] = useState<string[]>(['سينمائي', 'حزين']); // الستايلات المختارة
+  const [selectedStyles, setSelectedStyles] = useState<string[]>(['سينمائي', 'حزين']); 
 
   const tools = [
     { name: 'توليد الأغنية', icon: Music },
@@ -27,7 +27,7 @@ export default function StarFMStudio() {
     }
   };
 
-  // دالة الاتصال بالباك إند (FastAPI)
+  // دالة الاتصال بالسيرفر الحقيقي (Cloudflare Tunnel)
   const handleGenerate = async () => {
     if (!prompt.trim()) return alert("اكتب فكرتك هنا أولاً...");
     
@@ -35,30 +35,29 @@ export default function StarFMStudio() {
     setVideoResult(null);
 
     try {
-      // الاتصال بالسيرفر المحلي بتاعك (تأكدي إنه شغال)
-      const response = await fetch('http://127.0.0.1:8000/internal/generate', {
+      const response = await fetch('https://cure-bean-renaissance-dept.trycloudflare.com/internal/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-FMStar-Key': 'samurai_secret_2026' // المفتاح بتاعك
+          'X-FMStar-Key': 'samurai_secret_2026' // المفتاح الخاص بك
         },
         body: JSON.stringify({
           prompt: prompt,
           ratio: "16:9",
-          dsp_profile: selectedStyles.join(', ') // بنبعت الستايلات المختارة
+          dsp_profile: selectedStyles.join(', ') 
         })
       });
 
       const data = await response.json();
       
       if (response.ok) {
-        setVideoResult(data.direct_stream_url); // عرض الفيديو الناتج
+        setVideoResult(data.direct_stream_url); 
       } else {
         alert("حدث خطأ: " + data.detail);
       }
     } catch (error) {
       console.error(error);
-      alert("فشل الاتصال بالسيرفر. تأكدي من تشغيل FastAPI (uvicorn).");
+      alert("فشل الاتصال بالسيرفر. تأكدي من أن رابط Cloudflare يعمل وأن FastAPI شغال.");
     } finally {
       setIsLoading(false);
     }
@@ -99,12 +98,12 @@ export default function StarFMStudio() {
           <p className="text-purple-300 text-sm tracking-widest font-semibold mt-2">حيث يلتقي الإبداع بذكاء أعلى</p>
         </div>
 
-        {/* مشغل الفيديو (لو النتيجة ظهرت) */}
+        {/* مشغل الفيديو */}
         <div className="w-full max-w-2xl bg-[#1a1025]/80 backdrop-blur-xl border border-purple-500/30 rounded-3xl p-4 mb-6 relative overflow-hidden shadow-[0_0_40px_rgba(168,85,247,0.15)]">
            <div className="absolute top-4 left-4 text-xs text-gray-400">1 / 3</div>
            <div className="w-full h-64 md:h-80 bg-gray-900 rounded-2xl overflow-hidden relative mb-4">
               {videoResult ? (
-                <video controls src={videoResult} className="w-full h-full object-cover"></video>
+                <video controls autoPlay src={videoResult} className="w-full h-full object-cover"></video>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center">
                    <div className="absolute inset-0 bg-black/50"></div>
@@ -149,7 +148,7 @@ export default function StarFMStudio() {
                 </div>
               )}
             </div>
-            <span className="text-xs text-purple-300">0 / 280</span>
+            <span className="text-xs text-purple-300">{prompt.length} / 280</span>
           </div>
 
           <textarea 
@@ -159,7 +158,7 @@ export default function StarFMStudio() {
             placeholder="اكتب فكرتك هنا... أغنية، قصيدة، أو فيديو"
           ></textarea>
 
-          {/* اختيار التأثيرات (الستايلات) */}
+          {/* اختيار التأثيرات */}
           <div className="mt-4 border-t border-purple-500/20 pt-4">
             <div className="flex items-center gap-2 mb-3">
                <span className="text-sm font-medium">التأثيرات</span>
@@ -191,4 +190,4 @@ export default function StarFMStudio() {
       </main>
     </div>
   );
-                                        }
+          }
