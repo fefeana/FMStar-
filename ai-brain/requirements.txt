@@ -1,4 +1,6 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
 requests
+bleach
+sqlalchemy
