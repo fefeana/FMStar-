@@ -16,26 +16,28 @@
             background-color: #030712;
             color: #ffffff;
             overflow-x: hidden;
+            margin: 0;
+            padding: 0;
         }
 
-        /* خلفية الاستوديو السينمائية الثابتة */
+        /* خلفية الاستوديو الفاخرة المطابقة للصورة */
         .studio-bg {
-            background: radial-gradient(circle at 50% 20%, rgba(30, 58, 138, 0.35) 0%, rgba(3, 7, 18, 0.95) 75%),
+            background: linear-gradient(to bottom, rgba(3, 7, 18, 0.7), rgba(3, 7, 18, 0.9)),
                         url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1920&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
 
-        /* الكارت الزجاجي الهولوغرامي الثابت (Glassmorphism) */
+        /* الكارت الهولوغرامي الزجاجي الشفاف تماماً مثل الصورة */
         .hologram-card {
-            background: rgba(10, 20, 40, 0.45);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            box-shadow: 0 0 50px rgba(0, 149, 255, 0.15),
-                        inset 0 0 20px rgba(56, 189, 248, 0.1);
-            border-radius: 28px;
+            background: rgba(8, 15, 30, 0.55);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            box-shadow: 0 0 60px rgba(0, 149, 255, 0.2),
+                        inset 0 0 25px rgba(56, 189, 248, 0.15);
+            border-radius: 32px;
         }
 
         .brand-title {
@@ -44,22 +46,34 @@
         }
 
         .glow-text-gold {
-            text-shadow: 0 0 12px rgba(234, 179, 8, 0.6);
+            text-shadow: 0 0 15px rgba(234, 179, 8, 0.7);
         }
         
         .glow-text-cyan {
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
         }
 
         .btn-generate {
-            background: linear-gradient(90deg, #d97706 0%, #f59e0b 40%, #0284c7 100%);
-            box-shadow: 0 0 25px rgba(245, 158, 11, 0.4), 0 0 15px rgba(2, 132, 199, 0.4);
+            background: linear-gradient(90deg, #d97706 0%, #f59e0b 45%, #0284c7 100%);
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.5), 0 0 20px rgba(2, 132, 199, 0.5);
             transition: all 0.4s ease;
         }
 
         .btn-generate:hover {
             transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 0 35px rgba(245, 158, 11, 0.7), 0 0 25px rgba(2, 132, 199, 0.7);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.8), 0 0 30px rgba(2, 132, 199, 0.8);
+        }
+
+        /* الأيقونات الجانبية العائمة المطابقة لصورتك */
+        .side-action-btn {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            transition: all 0.3s ease;
+        }
+        .side-action-btn:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: rgba(56, 189, 248, 0.6);
         }
 
         ::-webkit-scrollbar {
@@ -76,61 +90,81 @@
 </head>
 <body class="studio-bg min-h-screen flex flex-col justify-between items-center relative selection:bg-cyan-500 selection:text-black">
 
-    <!-- الإضاءة المحيطية الثابتة -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-cyan-500/10 blur-[120px] pointer-events-none rounded-full"></div>
-    <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-amber-500/15 blur-[90px] pointer-events-none rounded-full"></div>
+    <!-- إضاءة خلفية نيونية منسابة -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-cyan-500/15 blur-[140px] pointer-events-none rounded-full"></div>
+    <div class="absolute top-12 left-1/2 -translate-x-1/2 w-[350px] h-[180px] bg-amber-500/20 blur-[100px] pointer-events-none rounded-full"></div>
 
     <!-- الهيدر العلوي -->
-    <header class="w-full max-w-7xl px-6 py-6 flex justify-between items-center z-10">
+    <header class="w-full max-w-7xl px-6 py-6 flex justify-between items-center z-20">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full border border-amber-400/50 bg-gradient-to-tr from-amber-500/20 to-cyan-500/20 flex items-center justify-center shadow-lg shadow-amber-500/10">
+            <div class="w-10 h-10 rounded-full border border-amber-400/60 bg-gradient-to-tr from-amber-500/30 to-cyan-500/30 flex items-center justify-center shadow-lg shadow-amber-500/20">
                 <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
             </div>
-            <span class="text-xs text-slate-300 font-semibold tracking-wider">FMStar Creator</span>
+            <span class="text-xs text-slate-200 font-bold tracking-wider">FMStar Creator</span>
         </div>
         <div class="flex items-center gap-4">
-            <button class="p-2.5 rounded-full bg-slate-900/60 border border-slate-700/50 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/50 transition-all">
+            <button class="p-2.5 rounded-full bg-slate-900/70 border border-slate-700/60 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/60 transition-all">
                 <i data-lucide="search" class="w-4 h-4"></i>
             </button>
-            <div class="w-9 h-9 rounded-full overflow-hidden border border-amber-400/80 p-0.5">
+            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-amber-400 shadow-md shadow-amber-500/20 p-0.5">
                 <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=250&auto=format&fit=crop" alt="User Avatar" class="w-full h-full object-cover rounded-full">
             </div>
         </div>
     </header>
 
-    <!-- الهيكل الرئيسي الثابت -->
-    <main class="w-full max-w-xl px-4 py-4 z-10 my-auto">
+    <!-- الهيكل الرئيسي والواجهة الزجاجية المركزية -->
+    <main class="w-full max-w-xl px-4 py-2 z-10 my-auto relative flex items-center justify-center">
         
-        <div class="text-center mb-6">
-            <div class="inline-flex flex-col items-center justify-center mb-1">
-                <div class="relative">
-                    <i data-lucide="star" class="w-12 h-12 text-amber-400 fill-amber-400/20 glow-text-gold"></i>
-                    <i data-lucide="sparkle" class="w-5 h-5 text-cyan-400 absolute -top-1 -right-1 animate-pulse"></i>
-                </div>
-                <h1 class="brand-title text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 tracking-wider mt-1 glow-text-gold">
-                    FMStar
-                </h1>
-                <p class="text-[10px] tracking-[0.3em] font-bold text-amber-300/80 uppercase">AI Studio</p>
-            </div>
-            <p class="text-[11px] tracking-widest text-cyan-300/80 font-medium uppercase mt-1 glow-text-cyan">
-                WHERE CREATIVITY MEETS A HIGHER INTELLIGENCE
-            </p>
+        <!-- الأيقونات الجانبية العائمة على يمين الكارت (كما في صورتك) -->
+        <div class="absolute -right-16 md:-right-20 top-1/2 -translate-y-1/2 hidden sm:flex flex-col gap-3 z-20">
+            <button class="side-action-btn p-3 rounded-2xl text-cyan-300 shadow-lg group relative" title="Insights">
+                <i data-lucide="zap" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+            </button>
+            <button class="side-action-btn p-3 rounded-2xl text-amber-400 shadow-lg group relative" title="Pro Studio">
+                <i data-lucide="gem" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+            </button>
+            <button class="side-action-btn p-3 rounded-2xl text-cyan-400 shadow-lg group relative" title="AI Core">
+                <i data-lucide="cpu" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+            </button>
+            <button class="side-action-btn p-3 rounded-2xl text-slate-300 shadow-lg group relative" title="Security">
+                <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+            </button>
         </div>
 
-        <div class="hologram-card p-6 md:p-8 relative overflow-hidden backdrop-blur-2xl">
+        <!-- الكارت الهولوغرامي الرئيسي -->
+        <div class="hologram-card p-6 md:p-8 relative overflow-hidden w-full">
             
-            <div class="text-center mb-6">
-                <h2 class="brand-title text-sm md:text-base font-bold tracking-wide text-cyan-100/90 uppercase">
+            <!-- الشعار العلوي داخل الكارت -->
+            <div class="text-center mb-5">
+                <div class="inline-flex flex-col items-center justify-center">
+                    <div class="relative">
+                        <i data-lucide="star" class="w-12 h-12 text-amber-400 fill-amber-400/30 glow-text-gold"></i>
+                        <i data-lucide="sparkle" class="w-5 h-5 text-cyan-400 absolute -top-1 -right-1 animate-pulse"></i>
+                    </div>
+                    <h1 class="brand-title text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 tracking-wider mt-1 glow-text-gold">
+                        FMStar
+                    </h1>
+                    <p class="text-[10px] tracking-[0.35em] font-bold text-amber-300/90 uppercase">AI STUDIO</p>
+                </div>
+                <p class="text-[10px] tracking-[0.2em] text-cyan-300/90 font-medium uppercase mt-1.5 glow-text-cyan">
+                    WHERE CREATIVITY MEETS A HIGHER INTELLIGENCE
+                </p>
+            </div>
+
+            <!-- عبارة الإلهام المركزية -->
+            <div class="text-center mb-6 bg-slate-950/30 py-3 px-4 rounded-2xl border border-cyan-500/20">
+                <h2 class="brand-title text-xs md:text-sm font-bold tracking-wide text-cyan-100 uppercase">
                     IF YOU CAN IMAGINE IT
                 </h2>
-                <h2 class="brand-title text-sm md:text-base font-extrabold tracking-wide text-amber-400 uppercase glow-text-gold">
+                <h2 class="brand-title text-xs md:text-sm font-extrabold tracking-wide text-amber-400 uppercase glow-text-gold my-0.5">
                     AI CAN CREATE IT
                 </h2>
-                <p class="text-[9px] tracking-[0.25em] font-bold text-slate-400 uppercase mt-1">ONLY PASSION</p>
+                <p class="text-[8px] tracking-[0.3em] font-bold text-slate-400 uppercase">ONLY PASSION</p>
             </div>
 
             <form id="generationForm" class="space-y-4">
                 
+                <!-- قائمة اختيار الأداة (Select AI Creation Tool) -->
                 <div class="relative">
                     <label class="block text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between">
                         <span class="flex items-center gap-2">
@@ -139,7 +173,7 @@
                         </span>
                     </label>
                     <div class="relative">
-                        <select id="aiTool" class="w-full bg-slate-950/70 border border-cyan-500/30 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 appearance-none transition-all cursor-pointer">
+                        <select id="aiTool" class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/60 appearance-none transition-all cursor-pointer">
                             <option value="video" selected>🎥 Video Generation</option>
                             <option value="music">🎵 Music Generation</option>
                             <option value="song">🎙️ Song Creation</option>
@@ -155,11 +189,12 @@
                     </div>
                 </div>
 
+                <!-- صندوق الوصف (Describe your imagination...) -->
                 <div class="relative">
                     <textarea id="promptInput" rows="3" placeholder="Describe your imagination...
 
 Examples: A cinematic video of a girl in a futuristic city... A romantic song... A motivational poem..." 
-                    class="w-full bg-slate-950/70 border border-cyan-500/30 rounded-xl p-4 text-xs md:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 resize-none transition-all dir-auto"></textarea>
+                    class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl p-4 text-xs md:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/60 resize-none transition-all dir-auto"></textarea>
                     
                     <div class="flex justify-between items-center mt-2 px-1 text-slate-400 text-[11px]">
                         <button type="button" class="flex items-center gap-1.5 hover:text-cyan-400 transition-colors">
@@ -173,13 +208,14 @@ Examples: A cinematic video of a girl in a futuristic city... A romantic song...
                     </div>
                 </div>
 
-                <div class="pt-2">
+                <!-- زر التوليد السحري (Generate Now) -->
+                <div class="pt-1">
                     <button type="submit" class="btn-generate w-full py-3.5 rounded-full font-bold text-sm tracking-wider text-white flex items-center justify-center gap-3 cursor-pointer group">
                         <i data-lucide="sparkles" class="w-4 h-4 text-amber-200 group-hover:rotate-12 transition-transform"></i>
                         <span class="uppercase tracking-widest text-xs md:text-sm">Generate Now</span>
                         <i data-lucide="arrow-right" class="w-4 h-4 text-white group-hover:translate-x-1 transition-transform"></i>
                     </button>
-                    <div class="flex justify-between items-center text-[9px] tracking-widest font-semibold text-slate-400 uppercase mt-2 px-4">
+                    <div class="flex justify-between items-center text-[9px] tracking-[0.25em] font-semibold text-slate-400 uppercase mt-2 px-4">
                         <span>FAST</span>
                         <span>•</span>
                         <span>POWERFUL</span>
@@ -193,8 +229,8 @@ Examples: A cinematic video of a girl in a futuristic city... A romantic song...
 
     </main>
 
-    <!-- الفوتر السفلي الثابت -->
-    <footer class="w-full py-4 text-center z-10 border-t border-slate-900/60 bg-slate-950/40 backdrop-blur-md">
+    <!-- الفوتر السفلي -->
+    <footer class="w-full py-4 text-center z-10 border-t border-slate-900/60 bg-slate-950/50 backdrop-blur-md">
         <p class="brand-title text-[10px] tracking-[0.25em] text-slate-400 uppercase">
             FMStar AI Studio
         </p>
@@ -228,4 +264,4 @@ Examples: A cinematic video of a girl in a futuristic city... A romantic song...
         });
     </script>
 </body>
-</html>
+            </html>
