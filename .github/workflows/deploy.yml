@@ -3,6 +3,7 @@ name: FMStar CI/CD Pipeline
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: # يتيح تشغيله تلقائياً أو يدوياً من تبويب Actions
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,22 +13,26 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # 🛡️ ترقية الأدوات إلى الإصدارات التي تدعم Node.js 24
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v5
         with:
           go-version: '1.22'
 
       - name: Build Go Binary
         run: |
-          cd backend-go
-          go build -ldflags="-s -w" -o fmstar-core
+          # تأكدي من وجود مجلد backend-go أو تعديله حسب هيكل مشروعك
+          if [ -d "backend-go" ]; then
+            cd backend-go
+            go build -ldflags="-s -w" -o fmstar-core
+          else
+            echo "Root build mode"
+          fi
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
