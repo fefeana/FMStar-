@@ -1,268 +1,352 @@
+html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMStar AI Studio</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cinzel:wght@600;800&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>FMStar AI Studio | حيث يلتقي الإبداع بالذكاء الفائق</title>
+    
+    <!-- المكتبات الحديثة: Tailwind CSS, Alpine.js, Lucide Icons, Google Fonts -->
+    <script src="https://tailwindcss.com"></script>
+    <script defer src="https://jsdelivr.net"></script>
+    <script src="https://unpkg.com"></script>
+    <link href="https://googleapis.com" rel="stylesheet">
+
     <style>
+        :root {
+            --gold-primary: #F59E0B;
+            --gold-light: #FDE68A;
+            --neon-blue: #38BDF8;
+            --glass-bg: rgba(12, 18, 34, 0.65);
+            --glass-border: rgba(245, 158, 11, 0.35);
+        }
+
         body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: #030712;
-            color: #ffffff;
+            font-family: 'Cairo', sans-serif;
+            background: radial-gradient(circle at top center, #1e293b 0%, #090d16 60%, #03050a 100%);
+            color: #f8fafc;
+            min-height: 100vh;
             overflow-x: hidden;
-            margin: 0;
-            padding: 0;
         }
 
-        /* خلفية الاستوديو الفاخرة المطابقة للصورة */
-        .studio-bg {
-            background: linear-gradient(to bottom, rgba(3, 7, 18, 0.7), rgba(3, 7, 18, 0.9)),
-                        url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1920&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-
-        /* الكارت الهولوغرامي الزجاجي الشفاف تماماً مثل الصورة */
-        .hologram-card {
-            background: rgba(8, 15, 30, 0.55);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(56, 189, 248, 0.35);
-            box-shadow: 0 0 60px rgba(0, 149, 255, 0.2),
-                        inset 0 0 25px rgba(56, 189, 248, 0.15);
-            border-radius: 32px;
-        }
-
-        .brand-title {
+        .font-brand {
             font-family: 'Cinzel', serif;
-            letter-spacing: 2px;
         }
 
-        .glow-text-gold {
-            text-shadow: 0 0 15px rgba(234, 179, 8, 0.7);
-        }
-        
-        .glow-text-cyan {
-            text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
-        }
-
-        .btn-generate {
-            background: linear-gradient(90deg, #d97706 0%, #f59e0b 45%, #0284c7 100%);
-            box-shadow: 0 0 30px rgba(245, 158, 11, 0.5), 0 0 20px rgba(2, 132, 199, 0.5);
-            transition: all 0.4s ease;
+        /* تأثير الزجاج الفاخر المطابق للصورة */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(56, 189, 248, 0.1);
         }
 
-        .btn-generate:hover {
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 0 40px rgba(245, 158, 11, 0.8), 0 0 30px rgba(2, 132, 199, 0.8);
+        .glass-panel-blue {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.15);
         }
 
-        /* الأيقونات الجانبية العائمة المطابقة لصورتك */
-        .side-action-btn {
-            background: rgba(10, 20, 40, 0.6);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(56, 189, 248, 0.25);
+        .gold-glow-btn {
+            background: linear-gradient(135deg, #D97706 0%, #F59E0B 50%, #FBBF24 100%);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
             transition: all 0.3s ease;
         }
-        .side-action-btn:hover {
-            background: rgba(56, 189, 248, 0.2);
-            border-color: rgba(56, 189, 248, 0.6);
+
+        .gold-glow-btn:hover {
+            box-shadow: 0 0 35px rgba(245, 158, 11, 0.85);
+            transform: translateY(-2px);
         }
 
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(3, 7, 18, 0.5);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(56, 189, 248, 0.3);
-            border-radius: 10px;
-        }
+        /* تخصيص شريط التمرير */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #D97706; border-radius: 10px; }
     </style>
 </head>
-<body class="studio-bg min-h-screen flex flex-col justify-between items-center relative selection:bg-cyan-500 selection:text-black">
+<body x-data="fmStarApp()" x-init="initApp()">
 
-    <!-- إضاءة خلفية نيونية منسابة -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-cyan-500/15 blur-[140px] pointer-events-none rounded-full"></div>
-    <div class="absolute top-12 left-1/2 -translate-x-1/2 w-[350px] h-[180px] bg-amber-500/20 blur-[100px] pointer-events-none rounded-full"></div>
-
-    <!-- الهيدر العلوي -->
-    <header class="w-full max-w-7xl px-6 py-6 flex justify-between items-center z-20">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full border border-amber-400/60 bg-gradient-to-tr from-amber-500/30 to-cyan-500/30 flex items-center justify-center shadow-lg shadow-amber-500/20">
-                <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+    <!-- الشريط العلوي (Omni-Root & Cloud Status Bar) -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-amber-500/30 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- الشعار -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-300 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                    <i data-lucide="star" class="text-slate-950 w-6 h-6 fill-current"></i>
+                </div>
+                <div>
+                    <h1 class="font-brand text-xl font-bold tracking-wider text-amber-400">FMStar <span class="text-xs text-sky-400 font-sans">AI STUDIO</span></h1>
+                    <p class="text-[10px] text-slate-300 tracking-widest">WHERE CREATIVITY MEETS HIGHER INTELLIGENCE</p>
+                </div>
             </div>
-            <span class="text-xs text-slate-200 font-bold tracking-wider">FMStar Creator</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <button class="p-2.5 rounded-full bg-slate-900/70 border border-slate-700/60 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/60 transition-all">
-                <i data-lucide="search" class="w-4 h-4"></i>
-            </button>
-            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-amber-400 shadow-md shadow-amber-500/20 p-0.5">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=250&auto=format&fit=crop" alt="User Avatar" class="w-full h-full object-cover rounded-full">
+
+            <!-- شريط حالة الخوادم والربط السحابي (Omni-Root / MCP / Google Cloud) -->
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <!-- تبديل الخادم العالمي والمحلي -->
+                <button @click="toggleServer()" class="flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel-blue hover:border-amber-400 transition">
+                    <span class="w-2.5 h-2.5 rounded-full animate-pulse" :class="serverMode === 'global' ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+                    <span x-text="serverMode === 'global' ? 'Global Cloud (Omni-Root)' : 'Local Server (127.0.0.1:8080)'"></span>
+                </button>
+
+                <!-- حالة بروتوكول MCP -->
+                <button @click="mcpActive = !mcpActive" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition"
+                        :class="mcpActive ? 'bg-sky-950/60 border-sky-400 text-sky-300' : 'bg-slate-900/60 border-slate-700 text-slate-400'">
+                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+                    <span>MCP Protocol: <strong x-text="mcpActive ? 'ON' : 'OFF'"></strong></span>
+                </button>
+
+                <!-- تحديث مهارات جوجل كلاود -->
+                <button @click="syncGoogleCloud()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-500/20 transition">
+                    <i data-lucide="cloud-lightning" class="w-3.5 h-3.5" :class="{'animate-spin': isSyncing}"></i>
+                    <span x-text="isSyncing ? 'جاري تحديث Skills...' : 'Google Cloud Skills'"></span>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- الهيكل الرئيسي والواجهة الزجاجية المركزية -->
-    <main class="w-full max-w-xl px-4 py-2 z-10 my-auto relative flex items-center justify-center">
-        
-        <!-- الأيقونات الجانبية العائمة على يمين الكارت -->
-        <div class="absolute -right-16 md:-right-20 top-1/2 -translate-y-1/2 hidden sm:flex flex-col gap-3 z-20">
-            <button class="side-action-btn p-3 rounded-2xl text-cyan-300 shadow-lg group relative" title="Insights">
-                <i data-lucide="zap" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-            </button>
-            <button class="side-action-btn p-3 rounded-2xl text-amber-400 shadow-lg group relative" title="Pro Studio">
-                <i data-lucide="gem" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-            </button>
-            <button class="side-action-btn p-3 rounded-2xl text-cyan-400 shadow-lg group relative" title="AI Core">
-                <i data-lucide="cpu" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-            </button>
-            <button class="side-action-btn p-3 rounded-2xl text-slate-300 shadow-lg group relative" title="Security">
-                <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-            </button>
-        </div>
+    <!-- المحتوى الرئيسي -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- الكارت الهولوغرامي الرئيسي -->
-        <div class="hologram-card p-6 md:p-8 relative overflow-hidden w-full">
-            
-            <!-- الشعار العلوي داخل الكارت -->
-            <div class="text-center mb-5">
-                <div class="inline-flex flex-col items-center justify-center">
-                    <div class="relative">
-                        <i data-lucide="star" class="w-12 h-12 text-amber-400 fill-amber-400/30 glow-text-gold"></i>
-                        <i data-lucide="sparkle" class="w-5 h-5 text-cyan-400 absolute -top-1 -right-1 animate-pulse"></i>
-                    </div>
-                    <h1 class="brand-title text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 tracking-wider mt-1 glow-text-gold">
-                        FMStar
-                    </h1>
-                    <p class="text-[10px] tracking-[0.35em] font-bold text-amber-300/90 uppercase">AI STUDIO</p>
-                </div>
-                <p class="text-[10px] tracking-[0.2em] text-cyan-300/90 font-medium uppercase mt-1.5 glow-text-cyan">
-                    WHERE CREATIVITY MEETS A HIGHER INTELLIGENCE
-                </p>
-            </div>
-
-            <!-- عبارة الإلهام المركزية -->
-            <div class="text-center mb-6 bg-slate-950/30 py-3 px-4 rounded-2xl border border-cyan-500/20">
-                <h2 class="brand-title text-xs md:text-sm font-bold tracking-wide text-cyan-100 uppercase">
-                    IF YOU CAN IMAGINE IT
-                </h2>
-                <h2 class="brand-title text-xs md:text-sm font-extrabold tracking-wide text-amber-400 uppercase glow-text-gold my-0.5">
-                    AI CAN CREATE IT
-                </h2>
-                <p class="text-[8px] tracking-[0.3em] font-bold text-slate-400 uppercase">ONLY PASSION</p>
-            </div>
-
-            <form id="generationForm" class="space-y-4">
-                
-                <!-- قائمة اختيار الأداة -->
-                <div class="relative">
-                    <label class="block text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between">
-                        <span class="flex items-center gap-2">
-                            <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
-                            Select AI Creation Tool
-                        </span>
-                    </label>
-                    <div class="relative">
-                        <select id="aiTool" class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/60 appearance-none transition-all cursor-pointer">
-                            <option value="video" selected>🎥 Video Generation</option>
-                            <option value="music">🎵 Music Generation</option>
-                            <option value="song">🎙️ Song Creation</option>
-                            <option value="poetry">✍️ Poetry Creation</option>
-                            <option value="melody">🎼 Melody Composer</option>
-                            <option value="director">🎬 AI Director</option>
-                            <option value="image">🖼️ Image Generator</option>
-                            <option value="voice">🗣️ Voice Creator</option>
-                            <option value="story">📖 Story Generator</option>
-                            <option value="assistant">🤖 AI Assistant</option>
-                        </select>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-cyan-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                    </div>
-                </div>
-
-                <!-- صندوق الوصف -->
-                <div class="relative">
-                    <textarea id="promptInput" rows="3" placeholder="Describe your imagination...
-
-Examples: A cinematic video of a girl in a futuristic city... A romantic song... A motivational poem..." 
-                    class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl p-4 text-xs md:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/60 resize-none transition-all dir-auto"></textarea>
-                    
-                    <div class="flex justify-between items-center mt-2 px-1 text-slate-400 text-[11px]">
-                        <button type="button" class="flex items-center gap-1.5 hover:text-cyan-400 transition-colors">
-                            <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
-                            <span>Attach</span>
-                        </button>
-                        <div class="flex items-center gap-2">
-                            <span id="charCount">0/4000</span>
-                            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- زر التوليد السحري -->
-                <div class="pt-1">
-                    <button type="submit" class="btn-generate w-full py-3.5 rounded-full font-bold text-sm tracking-wider text-white flex items-center justify-center gap-3 cursor-pointer group">
-                        <i data-lucide="sparkles" class="w-4 h-4 text-amber-200 group-hover:rotate-12 transition-transform"></i>
-                        <span class="uppercase tracking-widest text-xs md:text-sm">Generate Now</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4 text-white group-hover:translate-x-1 transition-transform"></i>
+        <!-- القائمة الجانبية اليمنى (أدوات الإبداع والبودكاست) -->
+        <aside class="lg:col-span-3 space-y-6">
+            <div class="glass-panel rounded-2xl p-4 space-y-2">
+                <p class="text-xs font-semibold text-amber-400/80 uppercase px-2 mb-3">القائمة الرئيسية</p>
+                <template x-for="item in navItems" :key="item.id">
+                    <button @click="activeTab = item.id" 
+                            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition"
+                            :class="activeTab === item.id ? 'bg-gradient-to-l from-amber-500/30 to-sky-500/20 border border-amber-400/50 text-white shadow-md' : 'text-slate-300 hover:bg-white/5'">
+                        <i :data-lucide="item.icon" class="w-4 h-4 text-amber-400"></i>
+                        <span x-text="item.name"></span>
                     </button>
-                    <div class="flex justify-between items-center text-[9px] tracking-[0.25em] font-semibold text-slate-400 uppercase mt-2 px-4">
-                        <span>FAST</span>
-                        <span>•</span>
-                        <span>POWERFUL</span>
-                        <span>•</span>
-                        <span>LIMITLESS</span>
-                    </div>
+                </template>
+            </div>
+
+            <!-- بطاقة البودكاست FMStar Talks -->
+            <div class="glass-panel rounded-2xl p-5 text-center relative overflow-hidden border-amber-500/40">
+                <div class="w-12 h-12 mx-auto rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center mb-3">
+                    <i data-lucide="mic" class="w-6 h-6 text-amber-400"></i>
                 </div>
+                <h3 class="font-brand text-lg font-bold text-amber-300">PODCAST</h3>
+                <p class="text-sm font-bold text-white mb-1">FMStar TALKS</p>
+                <p class="text-xs text-slate-400 mb-4">حوّل نصوصك وأشعارك إلى بودكاست صوتي متعدد اللهجات</p>
+                <button @click="selectedTool = 'Voice Creator'" class="w-full py-2 rounded-lg bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 transition">
+                    بدء البث الصوتي الذكي
+                </button>
+            </div>
+        </aside>
 
-            </form>
-        </div>
+        <!-- منطقة العمل المركزية (AI Creation Studio) -->
+        <section class="lg:col-span-6 space-y-6">
+            
+            <!-- العنوان الترحيبي -->
+            <div class="text-center space-y-2 py-2">
+                <h2 class="font-brand text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-sky-300">
+                    IF YOU CAN IMAGINE IT, AI CAN CREATE IT
+                </h2>
+                <p class="text-xs text-slate-300">اختر الأداة، اللهجة، المقام الموسيقي، أو نوع الشعر ودع الذكاء الفائق يبدع</p>
+            </div>
 
-    </main>
+            <!-- لوحة التحكم المركزية -->
+            <div class="glass-panel-blue rounded-3xl p-6 space-y-5">
+                
+                <!-- 1. اختيار أداة الذكاء الاصطناعي -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-amber-300 font-semibold mb-1.5">أداة التوليد الذكي (AI Creation Tool)</label>
+                        <select x-model="selectedTool" class="w-full bg-slate-900/90 border border-amber-500/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-400">
+                            <option value="Poetry Creation">تأليف الشعر والأدب (Poetry Creation)</option>
+                            <option value="Song Creation">تأليف وتلحين الأغاني (Song Creation)</option>
+                            <option value="Melody Composer">ملحن المقامات والألحان (Melody Composer)</option>
+                            <option value="Video Generation">صناعة الفيديو السينمائي (Video Generation)</option>
+                            <option value="Music Generation">توليد الموسيقى (Music Generation)</option>
+                            <option value="Voice Creator">المعلق الصوتي واللهجات (Voice Creator)</option>
+                            <option value="Image Generator">توليد الصور الفنية (Image Generator)</option>
+                            <option value="AI Director">المخرج الذكي (AI Director)</option>
+                            <option value="Story Generator">كاتب القصص والروايات (Story Generator)</option>
+                        </select>
+                    </div>
 
-    <!-- الفوتر السفلي -->
-    <footer class="w-full py-4 text-center z-10 border-t border-slate-900/60 bg-slate-950/50 backdrop-blur-md">
-        <p class="brand-title text-[10px] tracking-[0.25em] text-slate-400 uppercase">
-            FMStar AI Studio
-        </p>
-        <p class="text-[9px] text-slate-500 tracking-wider mt-0.5">
-            DUBAI • NEW YORK • TOKYO • FOR A BRIGHTER TOMORROW
-        </p>
-    </footer>
+                    <!-- 2. اختيار اللهجة العربية أو اللغة العالمية -->
+                    <div>
+                        <label class="block text-xs text-sky-300 font-semibold mb-1.5">اللهجة أو اللغة (Dialects & Global Languages)</label>
+                        <select x-model="selectedDialect" class="w-full bg-slate-900/90 border border-sky-500/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
+Use code with caution.
+اللهجة الخليجية
+اللهجة اللبنانية
+اللهجة السورية
+اللهجة العراقية
+اللهجة المصرية
+اللهجة الجزائرية
+اللهجة المغربية
+اللهجة التونسية
+اللهجة الموريتانية
+اللهجة الليبية
+العربية الفصحى (المعلقات)
 
-    <!-- السكربتات ونهاية الملف السليمة -->
-    <script>
-        lucide.createIcons();
 
-        const promptInput = document.getElementById('promptInput');
-        const charCount = document.getElementById('charCount');
+الإنجليزية (English)
+الكورية (한국어)
+الصينية (中文)
+الفرنسية (Français)
+الألمانية (Deutsch)
+التركية (Türkçe)
+الروسية (Русский)
+الهندية (हिन्दी)
+الكردية (Kurdî)
 
-        promptInput.addEventListener('input', (e) => {
-            const count = e.target.value.length;
-            charCount.textContent = `${count}/4000`;
-        });
 
-        document.getElementById('generationForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const tool = document.getElementById('aiTool').value;
-            const prompt = promptInput.value;
 
-            if(!prompt.trim()) {
-                alert('لطفاً اكتبي الوصف الإبداعي أولاً ✨');
-                return;
-            }
+نوع الشعر وبحوره (Poetry Style)
+الشعر النبطي (البدوي / الصحراوي)
+الشعر الخليجي الغنائي
+شعر المعلقات والعمودي الفصيح
+الشعر العامي (موال / زجل / دارمي)
+الشعر الحر والحديث
 
-            alert(`جاري تشغيل محرك FMStar AI بنجاح! 🚀\nالأداة: ${tool}\nالوصف: ${prompt}`);
-        });
-    </script>
-</body>
-                            </html>
+المقام الموسيقي واللحن (Musical Maqam)
+مقام الحجاز (شجن وأصالة)
+مقام الرست (فخامة وطرب شرقي)
+مقام البياتي (عذب وعاطفي)
+مقام الصبا (حزن وشجن عميق)
+مقام النهاوند (رومانسي وعالمي)
+مقام الكرد (أغاني حديثة)
+إيقاع خليجي (سامري / خبيتي)
+
+
+<button @click="generateContent()" :disabled="isGenerating"
+class="w-full gold-glow-btn text-slate-950 font-extrabold py-3.5 rounded-full flex items-center justify-center gap-2 text-base cursor-pointer">
+
+
+
+
+FAST • POWERFUL • LIMITLESS
+النتيجة المولدة ()
+
+<button @click="copyResult()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded-lg flex items-center gap-1">
+نسخ النص
+
+
+
+البنية التحتية الذكية (AI Core)
+Omni-Root Engine
+v4.2 Active
+
+
+سرعة الاستجابة
+
+
+
+Google Cloud Skills
+
+
+
+
+
+نتائج فورية (Instant Results)
+معالجة فائقة السرعة عبر السحابة
+
+
+
+جودة فائقة (Premium Quality)
+دقة لغوية وموسيقية احترافية
+
+
+
+آمن وخاص (Secure & Private)
+تشفير كامل لإبداعاتك وبياناتك
+
+
+FMSTAR AI STUDIO
+DUBAI • NEW YORK • TOKYO • FOR A BRIGHTER TOMORROW
+function fmStarApp() {
+return {
+activeTab: 'studio',
+serverMode: 'global', // 'global' or 'local'
+mcpActive: true,
+isSyncing: false,
+cloudVersion: 'Synced (2026.11)',
+selectedTool: 'Poetry Creation',
+selectedDialect: 'خليجية (سعودية / إماراتية / كويتية)',
+poetryType: 'الشعر النبطي الأصيل',
+musicalMaqam: 'مقام الحجاز (روحاني وشجي)',
+promptText: '',
+attachedFileName: '',
+isGenerating: false,
+generatedResult: '',
+navItems: [
+{ id: 'home', name: 'الرئيسية (Home)', icon: 'home' },
+{ id: 'studio', name: 'استوديو الذكاء (AI Studio)', icon: 'sparkles' },
+{ id: 'explore', name: 'استكشف (Explore)', icon: 'compass' },
+{ id: 'creations', name: 'إبداعاتي (My Creations)', icon: 'folder-heart' },
+{ id: 'community', name: 'المجتمع (Community)', icon: 'users' },
+{ id: 'library', name: 'مكتبة المقامات والشعر', icon: 'book-open' },
+{ id: 'settings', name: 'إعدادات Omni-Root', icon: 'settings' }
+],
+initApp() {
+lucide.createIcons();
+this.connectOmniRoot();
+},
+// محاكاة الاتصال بنواة Omni-Root
+connectOmniRoot() {
+console.log("Omni-Root Core Initialized. MCP Status:", this.mcpActive);
+},
+// التبديل بين الخادم العالمي والمحلي
+toggleServer() {
+this.serverMode = this.serverMode === 'global' ? 'local' : 'global';
+const endpoint = this.serverMode === 'global'
+? 'fmstar-omni-global.cloud'
+: 'http://localhost:8080/omni-root';
+console.log("Switched endpoint to:", endpoint);
+},
+// تحديث مهارات Google Cloud Skills
+syncGoogleCloud() {
+this.isSyncing = true;
+setTimeout(() => {
+this.isSyncing = false;
+this.cloudVersion = 'Updated Just Now';
+alert('تم تحديث مهارات Google Cloud Skills وربط نماذج اللهجات والمقامات بنجاح!');
+}, 1200);
+},
+handleFileUpload(event) {
+const file = event.target.files[0];
+if (file) {
+this.attachedFileName = file.name;
+}
+},
+// توليد المحتوى الذكي
+generateContent() {
+if (!this.promptText.trim()) {
+alert('يرجى كتابة وصف لفكرتك أو مطلع القصيدة أولاً.');
+return;
+}
+this.isGenerating = true;
+this.generatedResult = '';
+// محاكاة المعالجة السحابية السريعة
+setTimeout(() => {
+this.isGenerating = false;
+this.generatedResult = ✨ [تم التوليد عبر محرك FMStar Omni-Root | الخادم: ${this.serverMode.toUpperCase()}]\n +
+• الأداة المستخدمة: ${this.selectedTool}\n +
+• اللهجة / اللغة: ${this.selectedDialect}\n +
+• القالب الفني: ${this.poetryType} | اللحن: ${this.musicalMaqam}\n +
+--------------------------------------------------\n\n +
+يا هاجس الشعر هات القاف من بدري\n +
+على مقام الحجاز اللي يداوينا\n +
+نكتب من الفكر ما يطرب له الساري\n +
+في عالم الإبداع اللي فيه أمانينا\n\n +
+(ملاحظة: لربط هذا النموذج بمفتاح API حقيقي مثل Gemini أو OpenAI، يمكنك وضع رابط الـ Endpoint الخاص بخادمك المحلي أو السحابي داخل دالة generateContent في الكود).;
+}, 1500);
+},
+copyResult() {
+navigator.clipboard.writeText(this.generatedResult);
+alert('تم نسخ النص إلى الحافظة!');
+}
+}
+}
+
+
+
+---
+    
