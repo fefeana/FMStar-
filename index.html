@@ -3,154 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMStar | AI Studio</title>
+    <title>Star FM | AI Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Cairo', sans-serif;
-            margin: 0;
-            padding: 0;
             background-color: #030712;
-            color: #ffffff;
+            color: #f3f4f6;
             overflow-x: hidden;
         }
-        /* خلفية الاستوديو السينمائية الكاملة */
-        .studio-bg {
-            background-image: url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=1200&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.5);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
         }
-        /* اللوح الزجاجي الشفاف النقي */
-        .omni-glass {
-            background: rgba(15, 23, 42, 0.35);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.65);
+        .gold-glow {
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
         }
-        .gold-neon {
-            box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+        .neon-border {
+            border: 1px solid rgba(236, 72, 153, 0.35);
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.15);
         }
     </style>
 </head>
-<body class="min-h-screen studio-bg relative flex flex-col justify-between p-5" x-data="fmStarEngine()">
+<body class="min-h-screen flex flex-col items-center justify-start p-4 relative" x-data="{ prompt: '', charCount: 0, isGenerating: false }">
 
-    <!-- طبقة تظليل سينمائية خفيفة لإبراز وضوح النصوص والزجاج -->
-    <div class="fixed inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/80 pointer-events-none z-0"></div>
-
-    <!-- الهيدر البسيط جداً -->
-    <header class="relative z-10 flex justify-between items-center pt-2">
-        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-[11px] font-semibold tracking-wider text-gray-200">AI STUDIO</span>
-        </div>
-        <h1 class="text-xl font-black tracking-wider text-white">
-            FMStar <span class="text-amber-400">✨</span>
-        </h1>
-    </header>
-
-    <!-- منتصف الشاشة: عنوان البث السينمائي العائم -->
-    <div class="relative z-10 my-auto py-8 text-center">
-        <span class="inline-block text-[11px] bg-pink-600/80 backdrop-blur-md text-white px-3 py-1 rounded-full mb-3 tracking-wide shadow-lg">
-            الآن يُبث عبر الأثير
-        </span>
-        <h2 class="text-3xl font-black text-white drop-shadow-lg mb-2">ليلة من صنعك</h2>
-        <p class="text-xs text-gray-300 max-w-xs mx-auto leading-relaxed">
-            اكتب فكرتك بحرية تامة؛ فيديو سينمائي، أغنية، أو قصيدة... والباقي على الذكاء الفائق
-        </p>
+    <!-- إضاءات خلفية سينمائية ناعمة ومتناسقة -->
+    <div class="absolute inset-0 z-0 overflow-hidden opacity-25 pointer-events-none">
+        <div class="absolute -top-32 -left-32 w-80 h-80 bg-purple-600 rounded-full filter blur-[100px]"></div>
+        <div class="absolute top-1/3 -right-32 w-80 h-80 bg-blue-600 rounded-full filter blur-[100px]"></div>
     </div>
 
-    <!-- الواجهة الزجاجية الشفافة أمام الخلفية: صندوق واحد وزر واحد -->
-    <main class="relative z-10 w-full max-w-md mx-auto omni-glass rounded-3xl p-5 mb-4">
-        
-        <!-- حقل الإدخال الموحد (بدون تبويبات معقدة) -->
-        <div class="relative mb-4">
-            <textarea 
-                x-model="prompt"
-                rows="3"
-                maxlength="2000"
-                class="w-full bg-black/30 border border-white/15 rounded-2xl p-4 text-sm text-white placeholder-gray-300/70 focus:outline-none focus:border-amber-400/70 transition-all resize-none"
-                placeholder="صف خيالك الإبداعي هنا (أغنية، قصيدة، أو مشهد فيديو)..."></textarea>
+    <!-- الهيدر العلوي الأنيق -->
+    <header class="w-full max-w-md flex justify-between items-center mb-5 z-10 px-2">
+        <div class="flex items-center gap-2 bg-white/5 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span class="text-[10px] tracking-wider text-cyan-300 font-semibold uppercase">AI STUDIO</span>
+        </div>
+        <h1 class="text-lg font-black tracking-widest text-white gold-glow">Star <span class="text-pink-500">FM</span></h1>
+    </header>
+
+    <!-- نافذة العرض السينمائية المدمجة (صورة الاستوديو مع مشغل الصوت الزجاجي) -->
+    <div class="w-full max-w-md glass-panel rounded-3xl p-3 mb-4 z-10 neon-border relative overflow-hidden">
+        <div class="relative h-56 rounded-2xl overflow-hidden shadow-inner">
+            <!-- خلفية الاستوديو السينمائية الأصلية -->
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=1000&auto=format&fit=crop');"></div>
+            <!-- تدرج ليلى سينمائي يبرز جمال الصورة -->
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/40 to-transparent"></div>
             
-            <!-- شريط المرفقات والعداد البسيط -->
-            <div class="flex justify-between items-center mt-2 px-1 text-[11px] text-gray-300">
-                <label class="cursor-pointer hover:text-amber-400 transition-colors flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl">
+            <!-- محتوى البث فوق الصورة -->
+            <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] bg-pink-600/90 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">الآن يبث عبر الأثير</span>
+                    <h2 class="text-xl font-bold text-white mt-1.5 gold-glow">ليلة من صنعك</h2>
+                </div>
+                <button class="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-pink-600/40 transform hover:scale-105 transition-all">
+                    <svg class="w-5 h-5 fill-current translate-x-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+            </div>
+        </div>
+        <!-- مؤشر بسيط ودقيق -->
+        <div class="flex justify-center items-center gap-2 mt-2.5">
+            <span class="text-[11px] text-gray-400">1 / 3</span>
+            <div class="w-10 h-1 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
+        </div>
+    </div>
+
+    <!-- صندوق الإدخال الموحد والذكي (Omni-Glassmorphism) -->
+    <div class="w-full max-w-md glass-panel rounded-3xl p-5 z-10 shadow-2xl">
+        
+        <div class="relative mb-3">
+            <textarea 
+                x-model="prompt" 
+                @input="charCount = prompt.length"
+                maxlength="2000"
+                rows="3" 
+                class="w-full bg-gray-950/60 border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-pink-500 transition-all resize-none shadow-inner"
+                placeholder="اكتب فكرتك بحرية تامة: فيديو سينمائي، أغنية، أو قصيدة..."></textarea>
+            
+            <div class="absolute bottom-3 left-3 flex items-center gap-3 text-[11px] text-gray-400">
+                <span x-text="2000 - charCount"></span> / 2000
+                <label class="cursor-pointer hover:text-pink-400 transition-colors flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
+                    <span>إرفاق ملف</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
-                    <span x-text="fileName ? fileName : 'إرفاق ملف'"></span>
-                    <input type="file" class="hidden" @change="handleFile($event)">
+                    <input type="file" class="hidden">
                 </label>
-                <span x-text="prompt.length + ' / 2000'"></span>
             </div>
         </div>
 
-        <!-- الزر الذهبي الواحد للتوليد -->
-        <button 
-            @click="triggerSilentPipeline()"
-            :disabled="isGenerating || !prompt.trim()"
-            class="w-full py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-pink-600 hover:opacity-95 disabled:opacity-50 text-white font-bold text-sm rounded-2xl gold-neon flex items-center justify-center gap-2 transition-all active:scale-95">
-            <span x-show="!isGenerating">✨ توليد بالذكاء الاصطناعي</span>
-            <span x-show="isGenerating" class="flex items-center gap-2">
-                <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                جاري المعالجة في الخلفية...
-            </span>
+        <!-- زر التوليد الذكي البارز -->
+        <button class="w-full py-3.5 bg-gradient-to-r from-amber-500 via-pink-600 to-purple-600 hover:opacity-95 text-white font-bold text-sm rounded-2xl shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 transform active:scale-95 transition-all">
+            <span>✨ توليد بالذكاء الاصطناعي</span>
         </button>
 
-        <!-- نافذة عرض النتيجة (تظهر فقط عند جاهزية المخرج) -->
-        <div x-show="outputReady" x-transition class="mt-4 p-4 bg-black/50 border border-amber-400/30 rounded-2xl text-xs text-gray-100 leading-relaxed">
-            <div class="flex justify-between items-center mb-2 text-amber-400 font-bold">
-                <span>النتيجة الإبداعية جاهزة ✨</span>
-                <button @click="outputReady = false" class="text-gray-400 hover:text-white">✕</button>
-            </div>
-            <p x-text="outputResult"></p>
-        </div>
-    </main>
+    </div>
 
-    <!-- محرك الخلفية الصامت (يعالج كل المهام والتوجيهات دون إزعاج الواجهة) -->
-    <script>
-        function fmStarEngine() {
-            return {
-                prompt: '',
-                fileName: '',
-                isGenerating: false,
-                outputReady: false,
-                outputResult: '',
-                // إعدادات الخلفية المخفية (Security, MCP, Omni-Root, Auto-Detect)
-                backgroundConfig: {
-                    engine: 'Omni-Root-Silent',
-                    sanitizer: true,
-                    endpoint: '/api/v1/generate'
-                },
-                handleFile(e) {
-                    if (e.target.files.length > 0) {
-                        this.fileName = e.target.files[0].name;
-                    }
-                },
-                // كشف نوع الوسائط تلقائياً في الخلفية دون إجبار المستخدم على الاختيار
-                detectIntentInBackground(text) {
-                    if (text.includes('فيديو') || text.includes('مشهد')) return 'video';
-                    if (text.includes('قصيدة') || text.includes('شعر')) return 'poetry';
-                    return 'song';
-                },
-                async triggerSilentPipeline() {
-                    if (!this.prompt.trim()) return;
-                    this.isGenerating = true;
-                    this.outputReady = false;
+    <!-- تذييل فاخر دقيق -->
+    <footer class="mt-6 text-center text-[10px] text-gray-500 z-10 tracking-widest pb-4">
+        DUBAI • NEW YORK • TOKYO • FOR A BRIGHTER TOMORROW
+    </footer>
 
-                    // تنظيف المدخلات وتحديد نوع الوسائط بصمت تام في الخلفية
-                    const cleanPrompt = this.prompt.replace(/<[^>]*>?/gm, '');
-                    const detectedType = this.detectIntentInBackground(cleanPrompt);
-
-                    // محاكاة الاتصال بالسيرفر الخلفي (127.0.0.1:8080)
-                    setTimeout(() => {
-                        this.isGenerating = false;
-                        this.outputReady = true;
-                        this.outputResult = `تمت المعالجة بنجاح في الخلفية (النوع المكتشف تلقائياً: ${detectedType}) للنص: "${cleanPrompt}"`;
-                    }, 1200);
-                }
-            }
-        }
-    </script>
 </body>
-</html>
+        </html>
