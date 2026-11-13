@@ -1,7 +1,25 @@
 services:
+  # 1. خادم الباك-إند الأساسي (FastAPI)
   - type: web
-    name: fmstar-backend
+    name: fmstar-backend-v2
     env: python
-    rootDir: backend
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn ai_service:app --host 0.0.0.0 --port $PORT
+    startCommand: python server_3000.py
+    healthCheckPath: "/"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10
+      - key: SECRET_KEY
+        value: samurai_secret_2026
+      - key: RENDER_EXTERNAL_URL
+        value: https://fmstar-backend-v2.onrender.com
+
+# 2. مهمة الإيقاظ التلقائي (Keep-Alive Cron Job) ليبقى السيرفر مستيقظاً دائماً
+cronJobs:
+  - type: cron
+    name: fmstar-keep-awake
+    schedule: "*/10 * * * *"
+    env: python
+    buildCommand: ""
+    startCommand: python -c "import urllib.request; urllib.request.urlopen('https://fmstar-backend-v2.onrender.com/')"
