@@ -1,34 +1,620 @@
-name: Deploy Star FM Studio to GitHub Pages
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STAR FM AI STUDIO | استوديو جيمي وميرا</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0614;
+            --card-bg: #130c24;
+            --input-bg: #1c1333;
+            --accent-purple: #8b5cf6;
+            --accent-glow: #a855f7;
+            --text-main: #ffffff;
+            --text-muted: #a79bc2;
+            --border-color: rgba(168, 85, 247, 0.25);
+        }
 
-on:
-  push:
-    branches: [ "main" ] # أو master حسب فرعك الأساسي
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at top center, #231147 0%, #0a0614 65%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px 14px;
+        }
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+        .app-container {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            padding: 24px 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(139, 92, 246, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.' # يرفع كل الملفات الموجودة في الجذر (بما فيها index.html)
+        /* Header */
+        .header {
+            text-align: center;
+        }
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        .header h1 {
+            font-size: 1.55rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #fff, #d8b4fe, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 2px;
+        }
+
+        /* Prompt Box */
+        .prompt-box {
+            position: relative;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .prompt-box:focus-within {
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.25);
+        }
+
+        .prompt-box textarea {
+            width: 100%;
+            height: 95px;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+            line-height: 1.6;
+        }
+
+        .prompt-box textarea::placeholder {
+            color: #6e618a;
+        }
+
+        .prompt-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            color: var(--text-muted);
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--accent-purple);
+            color: #fff;
+        }
+
+        /* Controls Grid */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 14px;
+            align-items: stretch;
+        }
+
+        .left-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .badge-selected {
+            color: #c084fc;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            width: 100%;
+            background: var(--input-bg);
+            color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 9px 12px;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* DSP Radio Pills */
+        .dsp-options {
+            display: flex;
+            gap: 8px;
+            background: var(--input-bg);
+            padding: 6px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+        }
+
+        .dsp-options label {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        input[type="radio"] {
+            accent-color: var(--accent-glow);
+        }
+
+        /* Right Cover Card */
+        .photo-card {
+            background: var(--input-bg);
+            border: 1px dashed var(--accent-purple);
+            border-radius: 18px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .cover-preview {
+            width: 82px;
+            height: 82px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2e1065, #4c1d95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 8px 0;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+            object-fit: cover;
+        }
+
+        .cover-preview span {
+            font-size: 1.6rem;
+        }
+
+        .cover-preview small {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #e9d5ff;
+        }
+
+        .file-name {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Generate Button */
+        .generate-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(90deg, #7c3aed, #a855f7, #7c3aed);
+            background-size: 200% auto;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .generate-btn:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(168, 85, 247, 0.65);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            text-align: center;
+            font-size: 0.82rem;
+            color: #d8b4fe;
+            min-height: 20px;
+        }
+
+        /* Result Gallery */
+        .gallery-section {
+            margin-top: 4px;
+        }
+
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .gallery-header h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .gallery-nav {
+            display: flex;
+            gap: 6px;
+        }
+
+        .gallery-nav span {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .gallery-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+            border-color: var(--accent-glow);
+        }
+
+        .thumb {
+            height: 62px;
+            background: linear-gradient(135deg, #1e1b4b, #4c1d95);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-circle {
+            width: 26px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e1b4b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            padding-left: 2px;
+        }
+
+        .duration-tag {
+            position: absolute;
+            bottom: 4px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+        }
+
+        .item-info {
+            padding: 6px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        /* Active Player Modal / Box */
+        #mediaPlayerBox {
+            display: none;
+            background: var(--input-bg);
+            border: 1px solid var(--accent-glow);
+            border-radius: 16px;
+            padding: 10px;
+            margin-top: 6px;
+        }
+
+        #mediaPlayerBox video, #mediaPlayerBox audio {
+            width: 100%;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- العنوان -->
+    <div class="header">
+        <h1>STAR FM AI STUDIO</h1>
+        <p>فكرتك... أغنية، فيديو، كليب!</p>
+    </div>
+
+    <!-- صندوق الوصف -->
+    <div class="prompt-box">
+        <textarea id="promptInput" placeholder="أغنية بوب حزينة عن فراق الأحبة في الشتاء، مع مشهد سينمائي لمطر على نافذة..."></textarea>
+        <div class="prompt-actions">
+            <button class="icon-btn" onclick="document.getElementById('imageInput').click()" title="إرفاق صورة">📷</button>
+            <button class="icon-btn" onclick="alert('ميزة الإدخال الصوتي جاهزة للربط!')" title="إدخال صوتي">🎙️</button>
+        </div>
+    </div>
+
+    <!-- الإعدادات والصورة -->
+    <div class="controls-grid">
+        <div class="left-controls">
+            <div class="control-group">
+                <label>Style <span class="badge-selected">SELECTED</span></label>
+                <select id="styleSelect">
+                    <option value="Arabic Pop, Emotional">Arabic Pop, Emotional</option>
+                    <option value="Classical Oud & Strings">Classical Oud & Strings</option>
+                    <option value="Cinematic Epic">Cinematic Epic</option>
+                    <option value="Lo-Fi Chill Acoustic Guitar">Lo-Fi Acoustic Guitar</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>DSP</label>
+                <div class="dsp-options">
+                    <label><input type="radio" name="dsp" value="hybrid" checked> Hybrid</label>
+                    <label><input type="radio" name="dsp" value="studio"> Studio</label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Voice Preset</label>
+                <select id="voiceSelect">
+                    <option value="Alhan">Alhan (ألحان عربي)</option>
+                    <option value="Tarab_Deep">Tarab Deep (طرب أصيل)</option>
+                    <option value="Soft_Vocal">Soft Vocal (صوت دافئ)</option>
+                    <option value="Cinematic_Choir">Cinematic Choir</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- بطاقة الغلاف / الصورة -->
+        <div class="photo-card" onclick="document.getElementById('imageInput').click()">
+            <div class="photo-header">
+                <span>Photo</span>
+                <span>📷</span>
+            </div>
+            <div id="coverPreviewBox" class="cover-preview">
+                <span>⭐</span>
+                <small>FMStar</small>
+            </div>
+            <img id="uploadedImgPreview" class="cover-preview" style="display:none;" alt="Cover" />
+            <div id="fileNameLabel" class="file-name">star_fm_cover.jpg</div>
+            <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+        </div>
+    </div>
+
+    <!-- زر التوليد -->
+    <button id="generateBtn" class="generate-btn" onclick="generateStudioWork()">
+        🚀 توليد كليب متكامل (جيمي وميرا)
+    </button>
+
+    <div id="statusBar" class="status-bar"></div>
+
+    <!-- مشغل النتيجة الفورية -->
+    <div id="mediaPlayerBox"></div>
+
+    <!-- معرض النتائج -->
+    <div class="gallery-section">
+        <div class="gallery-header">
+            <h3>Result Gallery</h3>
+            <div class="gallery-nav">
+                <span>&lt;</span>
+                <span>&gt;</span>
+            </div>
+        </div>
+        <div class="gallery-grid" id="galleryGrid">
+            <div class="gallery-item">
+                <div class="thumb">
+                    <div class="play-circle">▶</div>
+                    <span class="duration-tag">4:30</span>
+                </div>
+                <div class="item-info">Full Clip:<br>الحزينة (4:30)</div>
+            </div>
+            <div class="gallery-item">
+                <div class="thumb">
+                    <div class="play-circle">▶</div>
+                    <span class="duration-tag">2:15</span>
+                </div>
+                <div class="item-info">Audio Only:<br>الليل (2:15)</div>
+            </div>
+            <div class="gallery-item">
+                <div class="thumb">
+                    <div class="play-circle">▶</div>
+                    <span class="duration-tag">1:10</span>
+                </div>
+                <div class="item-info">Video Only:<br>المطر (1:10)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تم ربط الرابط الفعلي لخادم Render الخاص بكِ بنجاح هنا
+    const BACKEND_API_URL = "https://fmstar-backend-v2.onrender.com/v1/studio/smart-generate";
+    const SECRET_KEY = "samurai_secret_2026";
+    let uploadedImageBase64 = null;
+
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        document.getElementById('fileNameLabel').textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            uploadedImageBase64 = e.target.result;
+            document.getElementById('coverPreviewBox').style.display = 'none';
+            const imgEl = document.getElementById('uploadedImgPreview');
+            imgEl.src = uploadedImageBase64;
+            imgEl.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function generateStudioWork() {
+        const prompt = document.getElementById('promptInput').value.trim();
+        if (!prompt) {
+            alert("يرجى كتابة فكرتك أولاً في مربع النص!");
+            return;
+        }
+
+        const style = document.getElementById('styleSelect').value;
+        const dsp = document.querySelector('input[name="dsp"]:checked').value;
+        const voicePreset = document.getElementById('voiceSelect').value;
+
+        const btn = document.getElementById('generateBtn');
+        const statusBar = document.getElementById('statusBar');
+        const playerBox = document.getElementById('mediaPlayerBox');
+
+        btn.disabled = true;
+        btn.innerHTML = "⏳ جاري الإنتاج في استوديو جيمي وميرا...";
+        statusBar.textContent = "يتم الآن توليد الصوت والمشهد ودمجهما...";
+        playerBox.style.display = "none";
+
+        try {
+            const response = await fetch(BACKEND_API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-FMStar-Key": SECRET_KEY
+                },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    style: style,
+                    dsp_profile: dsp,
+                    voice_preset: voicePreset,
+                    image_base64: uploadedImageBase64
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || "حدث خطأ في الخادم");
+            }
+
+            statusBar.textContent = `✅ تم الإنتاج بنجاح (${data.model_used})`;
+            playerBox.style.display = "block";
+
+            if (data.type === "video") {
+                playerBox.innerHTML = `<video src="${data.media_url}" controls autoplay></video>`;
+            } else {
+                playerBox.innerHTML = `<audio src="${data.media_url}" controls autoplay></audio>`;
+            }
+
+            // إضافة النتيجة إلى معرض النتائج بالأسفل
+            const galleryGrid = document.getElementById('galleryGrid');
+            const newItem = document.createElement('div');
+            newItem.className = 'gallery-item';
+            newItem.onclick = () => {
+                playerBox.style.display = "block";
+                playerBox.innerHTML = data.type === "video"
+                    ? `<video src="${data.media_url}" controls autoplay></video>`
+                    : `<audio src="${data.media_url}" controls autoplay></audio>`;
+            };
+            newItem.innerHTML = `
+                <div class="thumb">
+                    <div class="play-circle">▶</div>
+                    <span class="duration-tag">جديد</span>
+                </div>
+                <div class="item-info">${data.type === 'video' ? 'Clip' : 'Audio'}:<br>${prompt.slice(0, 14)}...</div>
+            `;
+            galleryGrid.prepend(newItem);
+
+        } catch (err) {
+            statusBar.textContent = `❌ ${err.message}`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = "🚀 توليد كليب متكامل (جيمي وميرا)";
+        }
+    }
+</script>
+
+</body>
+</html>
