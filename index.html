@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FMStar AI - The Creative Realm</title>
+    <title>FMStar AI - Cyberpunk Realm</title>
     
     <!-- 🛡️ حماية ميتا -->
     <meta http-equiv="X-Frame-Options" content="DENY">
@@ -11,15 +11,16 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --bg-base: #020205; 
             --glass-bg: rgba(15, 15, 20, 0.65); 
             --primary-blue: #3b82f6;
-            --neon-blue: #00d4ff; 
-            --gold-primary: #D4AF37;
+            --neon-cyan: #00ffff; 
+            --neon-pink: #ff00ff;
+            --neon-yellow: #ffff00;
             --text-main: #f8fafc;
             --text-muted: #a1a1aa;
             --radius-lg: 16px;
@@ -36,7 +37,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-bottom: 110px; /* مساحة للزر السفلي */
+            padding-bottom: 110px;
             position: relative;
             overflow-x: hidden;
         }
@@ -65,38 +66,90 @@
         .dust-particle {
             position: absolute;
             bottom: -10px;
-            background: var(--gold-primary);
+            background: var(--neon-cyan);
             border-radius: 50%;
-            box-shadow: 0 0 10px 2px rgba(212, 175, 55, 0.6);
+            box-shadow: 0 0 10px 2px rgba(0, 255, 255, 0.6);
             animation: floatUp linear infinite;
         }
         @keyframes twinkle { 0% { opacity: 0.2; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
         @keyframes floatUp { 0% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.8; } 100% { transform: translateY(-100vh) translateX(30px); opacity: 0; } }
 
-        /* 🏷️ الهيدر */
+        /* 🏷️ الهيدر والشعار الجديد */
         .header {
             width: 100%;
             max-width: 600px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
+            align-items: flex-start;
+            padding: 20px;
             z-index: 10;
         }
 
-        .logo { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 20px; color: #fff; }
-        .logo-icon { font-size: 16px; color: var(--gold-primary); }
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .logo { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-weight: 900; 
+            font-size: 26px; 
+            letter-spacing: -0.5px;
+            
+            /* تأثير الهولوجرام للشعار */
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan), var(--neon-yellow), var(--neon-pink));
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: hologram 3s linear infinite;
+            
+            /* تأثير الانحراف اللوني */
+            filter: drop-shadow(1px 0px 0px rgba(255, 0, 0, 0.8)) drop-shadow(-1px 0px 0px rgba(0, 255, 255, 0.8));
+        }
+
+        /* النجمة بتلمع وتتنفس */
+        .logo-icon { 
+            font-size: 22px; 
+            color: var(--neon-cyan); 
+            -webkit-text-fill-color: var(--neon-cyan);
+            animation: pulseStar 1.5s infinite alternate;
+        }
+
+        @keyframes pulseStar {
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px var(--neon-cyan)); }
+            100% { transform: scale(1.2); filter: drop-shadow(0 0 15px var(--neon-cyan)); }
+        }
+
+        .brand-subtitle {
+            font-size: 9px;
+            letter-spacing: 4px;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+            margin-right: 30px; /* عشان يظبط تحت الكلمة */
+        }
+
+        @keyframes hologram {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
 
         .login-btn {
             background: rgba(0, 0, 0, 0.5);
             color: var(--text-main);
-            border: 1px solid var(--neon-blue);
+            border: 1px solid var(--neon-cyan);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            transition: 0.3s;
         }
+        .login-btn:hover { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
 
         /* 📦 المحتوى الرئيسي */
         .main-container {
@@ -105,33 +158,43 @@
             padding: 0 16px;
             display: flex;
             flex-direction: column;
-            gap: 12px; /* تقليل المسافة بين المربعات */
+            gap: 12px;
             z-index: 10;
         }
 
-        /* 💎 المربع العلوي (تم تصغيره وضبطه) */
         .glass-card {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 212, 255, 0.15);
+            border: 1px solid rgba(0, 255, 255, 0.3);
             border-radius: var(--radius-lg);
-            padding: 16px; /* مساحة داخلية أقل */
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            padding: 16px;
+            position: relative;
+            animation: neonBorder 3s infinite alternate;
+        }
+
+        @keyframes neonBorder {
+            0% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1); border-color: rgba(0, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(255, 0, 255, 0.3), inset 0 0 10px rgba(255, 0, 255, 0.1); border-color: rgba(255, 0, 255, 0.5); }
+            100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1); border-color: rgba(0, 255, 255, 0.5); }
         }
 
         .hero-title {
-            font-size: 24px; /* خط أصغر شوية */
+            font-size: 26px; 
             font-weight: 800;
             line-height: 1.1;
             margin-bottom: 6px;
             text-align: center;
             letter-spacing: -0.5px;
-            background: linear-gradient(180deg, #ffffff 0%, #fcf6ba 100%);
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan), var(--neon-yellow), var(--neon-pink));
+            background-size: 300% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: hologram 3s linear infinite;
+            filter: drop-shadow(2px 0px 0px rgba(255, 0, 0, 0.7)) drop-shadow(-2px 0px 0px rgba(0, 255, 255, 0.7));
         }
-        .hero-title span { color: var(--gold-primary); -webkit-text-fill-color: var(--gold-primary); }
+
+        .hero-title span { -webkit-text-fill-color: transparent; }
 
         .hero-desc {
             color: var(--text-muted);
@@ -141,87 +204,121 @@
             line-height: 1.4;
         }
 
-        /* 🛠️ نموذج الإدخال */
         .input-group { margin-bottom: 10px; }
-        .input-label { font-size: 11px; font-weight: 600; margin-bottom: 4px; display: block; }
+        
+        .input-label { 
+            font-size: 11px; 
+            font-weight: 600; 
+            margin-bottom: 4px; 
+            display: block;
+            color: #fff;
+            text-shadow: 0 0 5px var(--neon-cyan);
+        }
 
         .select-wrapper { position: relative; width: 100%; }
         .select-wrapper::after {
-            content: '▼'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 8px; pointer-events: none;
+            content: '▼'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--neon-cyan); font-size: 8px; pointer-events: none;
         }
 
         .custom-select, .custom-textarea {
-            width: 100%; background: rgba(0, 0, 0, 0.6); border: 1px solid #27272a; border-radius: var(--radius-md);
+            width: 100%; background: rgba(0, 0, 0, 0.8); border: 1px solid #333; border-radius: var(--radius-md);
             padding: 10px; color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 12px; outline: none; transition: 0.3s; scroll-margin-bottom: 120px;
         }
         .custom-select { appearance: none; -webkit-appearance: none; padding-left: 30px; cursor: pointer; }
-        .custom-select:focus, .custom-textarea:focus { border-color: var(--neon-blue); box-shadow: 0 0 8px rgba(0, 212, 255, 0.2); }
         
-        /* تصغير مساحة الكتابة عشان المربع ميبقاش طويل */
+        .custom-select:focus, .custom-textarea:focus { 
+            border-color: var(--neon-cyan); 
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4), inset 0 0 5px rgba(0, 255, 255, 0.2); 
+        }
+        
         .custom-textarea { resize: none; height: 65px; }
 
-        /* 📱 شبكة الأدوات (المربعات السفلية) */
         .tools-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px; /* مسافة أقل بين المربعات */
+            gap: 8px;
             margin-top: 2px;
         }
 
-        /* تصغير مربعات الأدوات */
         .tool-card {
-            background: rgba(18, 18, 22, 0.8);
+            background: rgba(18, 18, 22, 0.9);
             backdrop-filter: blur(10px);
-            border: 1px solid #27272a;
-            border-radius: var(--radius-md); /* حواف أقل حدة */
-            padding: 10px; /* مساحة داخلية صغيرة */
+            border: 1px solid #333;
+            border-radius: var(--radius-md);
+            padding: 10px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 80px; /* طول صغير وناسق */
+            min-height: 80px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.3s;
         }
-        .tool-card:hover { border-color: var(--gold-primary); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+        
+        .tool-card:hover, .tool-card:active { 
+            border-color: var(--neon-pink); 
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3), inset 0 0 10px rgba(255, 0, 255, 0.1); 
+        }
 
         .tool-icon { font-size: 16px; margin-bottom: 2px; }
-        .tool-title { font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; color: #fff; }
-        .badge { font-size: 7px; background: var(--gold-primary); color: #000; padding: 1px 4px; border-radius: 3px; font-weight: 800; }
-        .badge.blue { background: var(--neon-blue); }
+        
+        .tool-title { 
+            font-weight: 800; 
+            font-size: 11px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            margin-bottom: 2px; 
+            color: #fff;
+            text-shadow: 1px 0px 0px rgba(255,0,0,0.5), -1px 0px 0px rgba(0,255,255,0.5);
+        }
+        
+        .badge { font-size: 7px; background: var(--neon-cyan); color: #000; padding: 1px 4px; border-radius: 3px; font-weight: 800; box-shadow: 0 0 5px var(--neon-cyan); }
+        .badge.blue { background: var(--neon-pink); box-shadow: 0 0 5px var(--neon-pink); }
+        
         .tool-desc { color: var(--text-muted); font-size: 9px; line-height: 1.2; }
 
-        /* 🔵 الزر السفلي الثابت */
         .fixed-bottom {
             position: fixed; bottom: 0; left: 0; right: 0; background: rgba(5, 5, 7, 0.9);
-            backdrop-filter: blur(20px); padding: 10px 16px; border-top: 1px solid rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(20px); padding: 10px 16px; border-top: 1px solid rgba(0, 255, 255, 0.2);
             display: flex; justify-content: center; z-index: 100;
         }
 
         .btn-generate {
-            width: 100%; max-width: 568px; background: var(--primary-blue); color: white; border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px; border-radius: var(--radius-md); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
-            cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            width: 100%; max-width: 568px; 
+            background: linear-gradient(90deg, #2563eb, var(--neon-cyan), #2563eb);
+            background-size: 200% auto;
+            color: #000; border: none;
+            padding: 12px; border-radius: var(--radius-md); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800;
+            cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            animation: btnGlow 2s infinite alternate;
         }
-        .btn-generate:hover { background: #2563eb; }
+        
+        @keyframes btnGlow {
+            0% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); background-position: 0% center; }
+            100% { box-shadow: 0 0 25px rgba(255, 0, 255, 0.5); background-position: 100% center; }
+        }
+        .btn-generate:hover { transform: scale(1.02); }
     </style>
 </head>
 <body>
 
-    <!-- سماء الليل والغبار الذهبي -->
     <div class="star-sky" id="starSky"></div>
     <div class="golden-dust" id="goldenDust"></div>
 
-    <!-- الهيدر -->
+    <!-- الهيدر مع الشعار المحدث -->
     <header class="header">
-        <div class="logo"><span class="logo-icon">✦</span> FMStar</div>
+        <div class="brand-container">
+            <div class="logo">
+                <span class="logo-icon">✦</span> FMStar
+            </div>
+            <div class="brand-subtitle">AI STUDIO</div>
+        </div>
         <button class="login-btn">Log in</button>
     </header>
 
-    <!-- المحتوى -->
     <main class="main-container">
         
-        <!-- المربع العلوي (أصغر وأكثر تناسقاً) -->
         <div class="glass-card">
             <h1 class="hero-title">ENTER THE <span>CREATIVE</span><br>REALM</h1>
             <p class="hero-desc">Every top AI model in one studio. Turn your imagination into reality.</p>
@@ -244,7 +341,6 @@
             </div>
         </div>
 
-        <!-- شبكة الأدوات (المربعات السفلية أصغر حجماً) -->
         <div class="tools-grid">
             <div class="tool-card">
                 <div>
@@ -278,7 +374,6 @@
 
     </main>
 
-    <!-- الزر السفلي الثابت -->
     <div class="fixed-bottom">
         <button class="btn-generate" onclick="generateAI()">
             ✨ Generate Now
@@ -286,7 +381,6 @@
     </div>
 
     <script>
-        // كود النجوم والغبار
         const starSky = document.getElementById('starSky');
         for (let i = 0; i < 40; i++) {
             const star = document.createElement('div'); star.className = 'star';
