@@ -6,18 +6,19 @@ from pydantic import BaseModel, Field
 import requests
 import os
 import uuid
-import bleach # مكتبة الحماية
+import bleach 
 
-# 🛡️ استيراد درع الحماية مدمج هنا عشان نلغي مشكلة secure_brain
+# 🛡️ درع الحماية
 def sanitize_prompt(user_input: str) -> str:
     clean = bleach.clean(user_input, tags=[], attributes={}, strip=True)
     return clean[:4000]
 
-app = FastAPI(title="FMStar AI Engine v1.5", version="1.5.0")
+app = FastAPI(title="FMStar AI Engine v1.6", version="1.6.0")
 
+# 🛡️ إصلاح CORS (السماح لموقعك فقط)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://fefeana.github.io", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,7 +41,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 API_KEY_NAME = "X-FMStar-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=True)
-SECRET_KEY = "samurai_secret_2026"
+SECRET_KEY = os.getenv("FMSTAR_SECRET_KEY", "samurai_secret_2026")
 
 def get_api_key(api_key_header: str = Security(api_key_header)):
     if api_key_header == SECRET_KEY:
@@ -53,7 +54,8 @@ class AudioGenerationRequest(BaseModel):
     dsp_profile: str = Field(default="hybrid", description="ملف تأثير الصوت")
 
 OMNIROUTE_CLOUD_URL = "https://cloud.omniroute.online/v1/chat/completions"
-OMNIROUTE_API_KEY = "sk-omniroute-free-key"
+# 🛡️ قراءة المفتاح من إعدادات Render
+OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "sk-omniroute-free-key")
 
 @app.post("/v1/audio/generations", dependencies=[Depends(get_api_key)])
 async def create_audio_generation(
@@ -79,7 +81,8 @@ async def create_audio_generation(
     }
 
     try:
-        response = requests.post(OMNIROUTE_CLOUD_URL, json=payload, headers=headers, timeout=60)
+        # 🛠️ تقليل الـ Timeout لـ 25 ثانية (لأن Render بيقطع عند 30)
+        response = requests.post(OMNIROUTE_CLOUD_URL, json=payload, headers=headers, timeout=25)
         response.raise_for_status()
         
         ai_data = response.json()
@@ -90,10 +93,16 @@ async def create_audio_generation(
             "id": str(uuid.uuid4()),
             "model_used": ai_data.get('model', 'OmniRoute Auto'),
             "optimized_prompt": optimized_prompt,
-            "video_url": "https://www.w3schools.com/html/mov_bbb.mp4"
+            "video_url": "https://www.w3schools.com/html/mov_bbb.mp4" # فيديو تجريبي للمعاينة
         }
+    except requests.exceptions.Timeout:
+         raise HTTPException(status_code=504, detail="OmniRoute took too long to respond.")
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail=f"Failed to connect to OmniRoute: {str(e)}"
         )
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
