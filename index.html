@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FMStar AI - Cyberpunk Realm</title>
     
-    <!-- 🛡️ حماية ميتا -->
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
@@ -42,7 +41,6 @@
             overflow-x: hidden;
         }
 
-        /* 🌌 خلفية السماء والنجوم */
         .star-sky {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -74,7 +72,6 @@
         @keyframes twinkle { 0% { opacity: 0.2; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
         @keyframes floatUp { 0% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.8; } 100% { transform: translateY(-100vh) translateX(30px); opacity: 0; } }
 
-        /* 🏷️ الهيدر */
         .header {
             width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: flex-start; padding: 20px; z-index: 10;
         }
@@ -96,7 +93,6 @@
         }
         .login-btn:hover { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
 
-        /* 📦 المحتوى الرئيسي */
         .main-container { width: 100%; max-width: 600px; padding: 0 16px; display: flex; flex-direction: column; gap: 12px; z-index: 10; }
 
         .glass-card {
@@ -131,7 +127,6 @@
         .custom-select:focus, .custom-textarea:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 255, 255, 0.4), inset 0 0 5px rgba(0, 255, 255, 0.2); }
         .custom-textarea { resize: none; height: 65px; }
 
-        /* 📱 شبكة الأدوات */
         .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px; }
         .tool-card {
             background: rgba(18, 18, 22, 0.9); backdrop-filter: blur(10px); border: 1px solid #333; border-radius: var(--radius-md); padding: 10px;
@@ -144,7 +139,6 @@
         .badge.blue { background: var(--neon-pink); box-shadow: 0 0 5px var(--neon-pink); }
         .tool-desc { color: var(--text-muted); font-size: 9px; line-height: 1.2; }
 
-        /* 🔵 الزر السفلي الثابت */
         .fixed-bottom { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(5, 5, 7, 0.9); backdrop-filter: blur(20px); padding: 10px 16px; border-top: 1px solid rgba(0, 255, 255, 0.2); display: flex; justify-content: center; z-index: 100; }
         .btn-generate {
             width: 100%; max-width: 568px; background: linear-gradient(90deg, #2563eb, var(--neon-cyan), #2563eb); background-size: 200% auto;
@@ -219,7 +213,6 @@
     </div>
 
     <script>
-        // 🌟 تأثيرات النجوم والغبار
         const starSky = document.getElementById('starSky');
         for (let i = 0; i < 40; i++) {
             const star = document.createElement('div'); star.className = 'star';
@@ -236,7 +229,6 @@
             dust.style.animationDelay = `${Math.random() * 5}s`; goldenDust.appendChild(dust);
         }
 
-        // 🛠️ اختيار الأداة
         function selectTool(tool) {
             document.getElementById('toolSelect').value = tool;
             const cards = document.querySelectorAll('.tool-card');
@@ -244,9 +236,9 @@
             event.currentTarget.style.borderColor = 'var(--neon-pink)';
         }
 
-        // 🎯 رابط السيرفر
+        // 🎯 تم دمج رابط Render الخاص بك هنا
         const SERVER_URL = "https://fmstar-ai-studio.onrender.com";
-        const API_URL = `${SERVER_URL}/v1/audio/generations`;
+        const API_URL = `${SERVER_URL}/v1/audio/generations/`;
 
         // 🔔 دالة "التنبيه" عشان تصحي السيرفر أول ما حد يفتح الموقع
         function wakeUpServer() {
@@ -255,11 +247,8 @@
                 .then(() => console.log("✅ تم إرسال إشارة الصحوة."))
                 .catch(() => console.log("⚠️ السيرفر يستيقظ..."));
         }
-
-        // بنادي على الدالة دي أول ما الصفحة تفتح
         window.addEventListener('load', wakeUpServer);
 
-        // 🚀 دالة التوليد
         async function generateAI() {
             const btn = document.getElementById('generateBtn');
             const promptInput = document.getElementById('promptInput');
@@ -274,7 +263,6 @@
             btn.innerHTML = "⏳ Generating...";
             btn.disabled = true;
 
-            // 💡 دالة داخلية لإرسال الطلب (عشان نقدر نعيد المحاولة لو فشلت)
             const sendRequest = async () => {
                 return await fetch(API_URL, {
                     method: "POST",
@@ -289,14 +277,12 @@
             try {
                 let response;
                 try {
-                    // المحاولة الأولى
                     response = await sendRequest();
                     if (!response.ok) throw new Error("فشل الاتصال");
                 } catch (err) {
-                    // لو فشلت، نستنى 5 ثواني ونجرب تاني (عشان السيرفر يكون صحى)
                     console.log("🔄 المحاولة الأولى فشلت (السيرفر كان نايم)، جاري إعادة المحاولة...");
                     btn.innerHTML = "⏳ Waking Server & Retrying...";
-                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    await new Promise(resolve => setTimeout(resolve, 5000)); // استنى 5 ثواني
                     response = await sendRequest();
                 }
 
@@ -315,4 +301,4 @@
         }
     </script>
 </body>
-    </html>
+                                                                                                                             </html>
