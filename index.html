@@ -3,286 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMStar AI Studio - VIP</title>
+    <title>FMStar AI - The Creative Realm</title>
     
     <!-- 🛡️ حماية ميتا -->
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
-    <!-- خطوط جوجل الفخمة -->
+    <!-- دمج الخطوط -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Inter:wght@400;500;600&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Inter:wght@400;500;600;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-color: #050507;
+            --bg-base: #050507;
+            --glass-bg: rgba(18, 18, 22, 0.65);
+            --glass-border: rgba(212, 175, 55, 0.25);
             --gold-primary: #D4AF37;
             --gold-light: #F3E5AB;
-            --gold-dark: #997A00;
-            --text-muted: #8A8F98;
-            --glass-bg: rgba(20, 20, 25, 0.4);
-            --glass-border: rgba(212, 175, 55, 0.2);
+            --primary-blue: #3b82f6;
+            --primary-blue-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #a1a1aa;
+            --radius-lg: 20px;
+            --radius-md: 12px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-color);
-            color: white;
-            font-family: 'Tajawal', 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', 'Tajawal', sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;
+            padding-bottom: 100px; 
             position: relative;
-            padding: 20px;
+            overflow-x: hidden;
         }
 
-        /* ✨ تأثير الإضاءة والخلفية (محاكاة دبي) */
+        /* ✨ إضاءة الخلفية */
         .ambient-light {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             background: 
-                radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(0, 150, 255, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 50% -10%, rgba(212, 175, 55, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
             z-index: -1;
         }
 
-        /* 🏷️ الترويسة العلوية */
+        /* 🏷️ الهيدر */
         .header {
             width: 100%;
-            max-width: 480px;
-            text-align: center;
-            margin-bottom: 20px;
-            margin-top: 10px;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 20px;
             z-index: 10;
         }
 
-        .logo-text {
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-family: 'Playfair Display', serif;
-            font-size: 38px;
             font-weight: 800;
+            font-size: 24px;
             background: linear-gradient(to right, var(--gold-light), var(--gold-primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
         }
 
-        .logo-subtitle {
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: var(--gold-primary);
-            text-transform: uppercase;
+        .logo-icon { font-size: 22px; color: var(--gold-primary); -webkit-text-fill-color: initial; }
+
+        .login-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+        .login-btn:hover { background: rgba(212, 175, 55, 0.1); border-color: var(--gold-primary); }
+
+        /* 📦 المحتوى الرئيسي */
+        .main-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
         }
 
-        /* 💎 اللوحة الزجاجية الشفافة (Glassmorphism) */
-        .glass-panel {
+        /* 💎 الكارت الزجاجي الشفاف */
+        .glass-card {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 30px 20px;
-            width: 100%;
-            max-width: 480px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
-            position: relative;
-            z-index: 10;
-        }
-
-        /* ✨ لمعة زجاجية علوية */
-        .glass-panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .hero-title {
-            text-align: center;
             font-family: 'Playfair Display', serif;
-            font-size: 22px;
-            line-height: 1.4;
-            margin-bottom: 25px;
-            color: #fff;
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            text-align: center;
         }
-        .hero-title span { color: var(--gold-primary); display: block; }
+        .hero-title span { color: var(--gold-primary); }
 
-        /* 🛠️ القائمة المنسدلة */
-        .input-group {
-            margin-bottom: 20px;
-            position: relative;
+        .hero-desc {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+            text-align: center;
+            line-height: 1.5;
         }
+
+        /* 🛠️ نموذج الإدخال */
+        .input-group { margin-bottom: 16px; }
 
         .input-label {
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: 600;
             color: var(--gold-primary);
             margin-bottom: 8px;
             display: block;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
-        .custom-select {
+        /* ✨ تظبيط السهم هنا */
+        .select-wrapper {
+            position: relative;
             width: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            color: white;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 14px;
-            outline: none;
-            appearance: none;
-            cursor: pointer;
-            transition: 0.3s;
         }
 
-        .custom-select:focus, .custom-select:hover {
-            border-color: var(--gold-primary);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
-        }
-
-        /* سهم القائمة المنسدلة */
-        .input-group::after {
+        .select-wrapper::after {
             content: '▼';
             position: absolute;
             left: 15px;
-            top: 42px;
+            top: 50%;
+            transform: translateY(-50%);
             color: var(--gold-primary);
             font-size: 10px;
-            pointer-events: none;
+            pointer-events: none; /* عشان السهم ميمنعش الضغط على القائمة */
         }
 
-        /* 📝 مساحة الكتابة */
-        .text-area {
+        .custom-select, .custom-textarea {
             width: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 15px;
-            color: white;
-            font-family: 'Tajawal', sans-serif;
+            border-radius: var(--radius-md);
+            padding: 14px;
+            color: var(--text-main);
+            font-family: 'Tajawal', 'Inter', sans-serif;
             font-size: 14px;
-            resize: none;
             outline: none;
-            height: 120px;
             transition: 0.3s;
         }
 
-        .text-area::placeholder { color: rgba(255,255,255,0.3); }
-
-        .text-area:focus {
-            border-color: var(--gold-primary);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+        .custom-select {
+            appearance: none; /* إخفاء سهم المتصفح الافتراضي */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding-left: 35px; /* ترك مساحة للسهم عشان ميتداخلش مع الكلام */
+            cursor: pointer;
         }
 
-        /* 🚀 زر التوليد */
+        .custom-select:focus, .custom-textarea:focus {
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+        }
+
+        .custom-textarea { resize: none; height: 100px; }
+
+        /* 🚀 الزر المدمج */
         .btn-generate {
             width: 100%;
-            background: linear-gradient(90deg, var(--gold-dark), var(--gold-primary), var(--gold-light), var(--gold-primary), var(--gold-dark));
-            background-size: 200% auto;
-            color: #000;
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary-blue), #60a5fa);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
+            transition: 0.3s;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
-            margin-top: 25px;
-            transition: 0.5s;
-            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+            margin-top: 20px;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
         }
 
         .btn-generate:hover {
-            background-position: right center;
+            background: linear-gradient(90deg, var(--primary-blue-hover), var(--primary-blue));
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
             transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(212, 175, 55, 0.4);
         }
-
         .btn-generate:active { transform: translateY(0); }
 
-        /* ⚡ الفوتر */
-        .footer {
-            margin-top: 20px;
-            display: flex;
-            gap: 20px;
-            color: var(--text-muted);
-            font-size: 11px;
-            z-index: 10;
+        /* 📱 شبكة الأدوات */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
         }
-        .footer-item { display: flex; align-items: center; gap: 5px; }
-        .footer-item span { color: var(--gold-primary); }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .tool-card:hover {
+            background: rgba(212, 175, 55, 0.05);
+            border-color: var(--glass-border);
+            transform: translateY(-3px);
+        }
+
+        .tool-icon { font-size: 22px; margin-bottom: 4px; }
+
+        .tool-title {
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .badge {
+            font-size: 9px;
+            background: var(--gold-primary);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .badge.blue { background: var(--primary-blue); color: #fff; }
+
+        .tool-desc { color: var(--text-muted); font-size: 11px; line-height: 1.4; }
+
+        /* 🔵 الزر السفلي الثابت */
+        .fixed-bottom {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(5, 5, 7, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 16px 20px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .fixed-bottom .btn-generate {
+            max-width: 560px;
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
 
     <div class="ambient-light"></div>
 
-    <!-- الترويسة -->
+    <!-- الهيدر -->
     <header class="header">
-        <div class="logo-text">FMStar</div>
-        <div class="logo-subtitle">AI STUDIO · VIP EXPERIENCE</div>
+        <div class="logo">
+            <span class="logo-icon">✦</span> FMStar
+        </div>
+        <button class="login-btn">Log in</button>
     </header>
 
-    <!-- اللوحة الزجاجية -->
-    <main class="glass-panel">
-        <h1 class="hero-title">
-            IF YOU CAN IMAGINE IT <span>AI CAN CREATE IT</span>
-        </h1>
+    <!-- المحتوى -->
+    <main class="main-container">
+        
+        <!-- الكارت الرئيسي الزجاجي -->
+        <div class="glass-card">
+            <h1 class="hero-title">ENTER THE <span>CREATIVE</span> REALM</h1>
+            <p class="hero-desc">Every top AI model in one studio. Turn your imagination into reality.</p>
+            
+            <div class="input-group">
+                <label class="input-label">Select AI Creation Tool</label>
+                <!-- تم تعديل السهم هنا -->
+                <div class="select-wrapper">
+                    <select class="custom-select">
+                        <option>🎬 Video Generation (Seedance 2.5)</option>
+                        <option>🎵 Music Generation (Kling 3.0)</option>
+                        <option>🎙️ Vibe Voice (Microsoft MIT)</option>
+                        <option>📜 Poetry Creation (Gemini)</option>
+                    </select>
+                </div>
+            </div>
 
-        <!-- اختيار الأداة -->
-        <div class="input-group">
-            <label class="input-label">Select AI Creation Tool</label>
-            <select class="custom-select">
-                <option>🎬 Video Generation (توليد فيديو)</option>
-                <option>🎵 Music Generation (توليد موسيقى)</option>
-                <option>🎙️ Vibe Voice (توليد صوت)</option>
-                <option>📜 Poetry Creation (إنشاء شعر)</option>
-                <option>🎨 Image Generator (توليد صور)</option>
-            </select>
+            <div class="input-group">
+                <label class="input-label">Describe your imagination</label>
+                <textarea class="custom-textarea" placeholder="Example: A cinematic video of a poet in the desert with epic music..."></textarea>
+            </div>
         </div>
 
-        <!-- مساحة الوصف -->
-        <div class="input-group">
-            <label class="input-label">Describe your imagination</label>
-            <textarea class="text-area" placeholder="اكتب فكرتك هنا... مثال: مشهد سينمائي لشاعر يلقي قصيدة في الصحراء مع موسيقى ملحمية..."></textarea>
+        <!-- شبكة الأدوات -->
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="tool-icon">🎬</div>
+                <div class="tool-title">Video Gen <span class="badge blue">TOP</span></div>
+                <div class="tool-desc">The most advanced video model</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">🎙️</div>
+                <div class="tool-title">Vibe Voice <span class="badge">NEW</span></div>
+                <div class="tool-desc">Microsoft's open-source voice</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">🎵</div>
+                <div class="tool-title">Music Studio</div>
+                <div class="tool-desc">Create hit songs instantly</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">📜</div>
+                <div class="tool-title">Poetry Engine</div>
+                <div class="tool-desc">Generate poems in 17 dialects</div>
+            </div>
         </div>
 
-        <!-- زر التوليد -->
-        <button class="btn-generate" onclick="generateAI()">
-            <span>✨</span> Generate Now <span>→</span>
-        </button>
     </main>
 
-    <!-- الفوتر -->
-    <footer class="footer">
-        <div class="footer-item"><span>🛡️</span> Encrypted Access</div>
-        <div class="footer-item"><span>∞</span> AI Powered</div>
-    </footer>
+    <!-- الزر السفلي الثابت -->
+    <div class="fixed-bottom">
+        <button class="btn-generate" onclick="generateAI()">
+            ✨ Generate Now
+        </button>
+    </div>
 
-    <!-- ربط الأزرار (سيتم تعديله لاحقاً لربطه بـ OmniRoute) -->
     <script>
         function generateAI() {
             const btn = document.querySelector('.btn-generate');
             const originalText = btn.innerHTML;
-            btn.innerHTML = "⏳ Processing...";
-            btn.style.color = "#fff";
+            btn.innerHTML = "⏳ Generating...";
+            btn.style.opacity = "0.8";
             
             setTimeout(() => {
-                alert("تم استلام طلبك بنجاح! سيتم ربط المحرك السحابي قريباً.");
+                alert("تم استلام طلبك بنجاح! سيتم ربط المحرك (OmniRoute) قريباً.");
                 btn.innerHTML = originalText;
-                btn.style.color = "#000";
+                btn.style.opacity = "1";
             }, 1500);
         }
     </script>
