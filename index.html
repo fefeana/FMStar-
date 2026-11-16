@@ -18,11 +18,10 @@
         :root {
             --bg-base: #050507;
             --glass-bg: rgba(18, 18, 22, 0.65);
-            --glass-border: rgba(212, 175, 55, 0.25);
-            --gold-primary: #D4AF37;
-            --gold-light: #F3E5AB;
             --primary-blue: #3b82f6;
             --primary-blue-hover: #2563eb;
+            --neon-blue: #00d4ff; /* أزرق نيون */
+            --gold-primary: #D4AF37;
             --text-main: #f8fafc;
             --text-muted: #a1a1aa;
             --radius-lg: 20px;
@@ -50,8 +49,8 @@
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             background: 
-                radial-gradient(circle at 50% -10%, rgba(212, 175, 55, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
+                radial-gradient(circle at 50% -10%, rgba(212, 175, 55, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
             z-index: -1;
         }
 
@@ -66,24 +65,35 @@
             z-index: 10;
         }
 
+        /* ✨ لوجو معدني لامع */
         .logo {
             display: flex;
             align-items: center;
             gap: 8px;
             font-family: 'Playfair Display', serif;
             font-weight: 800;
-            font-size: 24px;
-            background: linear-gradient(to right, var(--gold-light), var(--gold-primary));
+            font-size: 26px;
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
         }
 
-        .logo-icon { font-size: 22px; color: var(--gold-primary); -webkit-text-fill-color: initial; }
+        .logo-icon { 
+            font-size: 22px; 
+            -webkit-text-fill-color: initial; 
+            color: var(--gold-primary); 
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
 
         .login-btn {
             background: rgba(255, 255, 255, 0.05);
             color: var(--text-main);
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--neon-blue);
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 13px;
@@ -91,8 +101,12 @@
             cursor: pointer;
             backdrop-filter: blur(10px);
             transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
         }
-        .login-btn:hover { background: rgba(212, 175, 55, 0.1); border-color: var(--gold-primary); }
+        .login-btn:hover { 
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+            background: rgba(0, 212, 255, 0.1);
+        }
 
         /* 📦 المحتوى الرئيسي */
         .main-container {
@@ -105,26 +119,39 @@
             z-index: 10;
         }
 
-        /* 💎 الكارت الزجاجي الشفاف */
+        /* 💎 الكارت الزجاجي الشفاف مع حدود نيون */
         .glass-card {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(0, 212, 255, 0.4);
             border-radius: var(--radius-lg);
             padding: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.15), inset 0 0 15px rgba(0, 212, 255, 0.1);
+            position: relative;
         }
 
+        /* ✨ العنوان المعدني اللامع */
         .hero-title {
             font-family: 'Playfair Display', serif;
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 800;
             line-height: 1.2;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             text-align: center;
+            background: linear-gradient(135deg, #ffffff 0%, #fcf6ba 25%, #D4AF37 50%, #fcf6ba 75%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+            filter: drop-shadow(0px 0px 8px rgba(212, 175, 55, 0.3)); /* ظل خفيف يدي إحساس بالانعكاس */
         }
-        .hero-title span { color: var(--gold-primary); }
+        .hero-title span { 
+            /* إزالة اللون الذهبي القديم عشان ياخد تدرج العنوان */
+            background: inherit;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
         .hero-desc {
             color: var(--text-muted);
@@ -138,34 +165,32 @@
         .input-group { margin-bottom: 16px; }
 
         .input-label {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
-            color: var(--gold-primary);
+            color: var(--neon-blue);
             margin-bottom: 8px;
             display: block;
             letter-spacing: 0.5px;
+            text-shadow: 0 0 5px rgba(0, 212, 255, 0.4);
         }
 
-        /* ✨ تظبيط السهم هنا */
-        .select-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
+        /* تظبيط السهم */
+        .select-wrapper { position: relative; width: 100%; }
         .select-wrapper::after {
             content: '▼';
             position: absolute;
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--gold-primary);
+            color: var(--neon-blue);
             font-size: 10px;
-            pointer-events: none; /* عشان السهم ميمنعش الضغط على القائمة */
+            pointer-events: none;
+            text-shadow: 0 0 5px var(--neon-blue);
         }
 
         .custom-select, .custom-textarea {
             width: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--radius-md);
             padding: 14px;
@@ -177,16 +202,16 @@
         }
 
         .custom-select {
-            appearance: none; /* إخفاء سهم المتصفح الافتراضي */
+            appearance: none;
             -webkit-appearance: none;
-            -moz-appearance: none;
-            padding-left: 35px; /* ترك مساحة للسهم عشان ميتداخلش مع الكلام */
+            padding-left: 35px;
             cursor: pointer;
         }
 
+        /* نيون عند الضغط على المربع */
         .custom-select:focus, .custom-textarea:focus {
-            border-color: var(--gold-primary);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
         }
 
         .custom-textarea { resize: none; height: 100px; }
@@ -194,7 +219,7 @@
         /* 🚀 الزر المدمج */
         .btn-generate {
             width: 100%;
-            background: linear-gradient(90deg, var(--primary-blue), #60a5fa);
+            background: linear-gradient(90deg, var(--primary-blue), var(--neon-blue));
             color: white;
             border: 1px solid rgba(255,255,255,0.2);
             padding: 16px;
@@ -209,12 +234,11 @@
             align-items: center;
             gap: 10px;
             margin-top: 20px;
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
         }
 
         .btn-generate:hover {
-            background: linear-gradient(90deg, var(--primary-blue-hover), var(--primary-blue));
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
             transform: translateY(-2px);
         }
         .btn-generate:active { transform: translateY(0); }
@@ -223,26 +247,29 @@
         .tools-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 15px;
             margin-top: 10px;
         }
 
+        /* 💳 الكروت السفلية بحدود نيون */
         .tool-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(18, 18, 22, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
             border-radius: var(--radius-lg);
             padding: 16px;
             display: flex;
             flex-direction: column;
             gap: 8px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.05);
         }
 
-        .tool-card:hover {
-            background: rgba(212, 175, 55, 0.05);
-            border-color: var(--glass-border);
+        /* نيون أقوى عند اللمس */
+        .tool-card:hover, .tool-card:active {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3), inset 0 0 10px rgba(0, 212, 255, 0.1);
             transform: translateY(-3px);
         }
 
@@ -264,8 +291,13 @@
             border-radius: 4px;
             font-weight: 800;
             letter-spacing: 0.5px;
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
         }
-        .badge.blue { background: var(--primary-blue); color: #fff; }
+        .badge.blue { 
+            background: var(--neon-blue); 
+            color: #000; 
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.5); 
+        }
 
         .tool-desc { color: var(--text-muted); font-size: 11px; line-height: 1.4; }
 
@@ -276,10 +308,11 @@
             background: rgba(5, 5, 7, 0.85);
             backdrop-filter: blur(20px);
             padding: 16px 20px;
-            border-top: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
             display: flex;
             justify-content: center;
             z-index: 100;
+            box-shadow: 0 -5px 20px rgba(0, 212, 255, 0.05);
         }
 
         .fixed-bottom .btn-generate {
