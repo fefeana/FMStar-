@@ -244,7 +244,22 @@
             event.currentTarget.style.borderColor = 'var(--neon-pink)';
         }
 
-        // 🚀 ربط زر التوليد بالـ Backend (Render)
+        // 🎯 رابط السيرفر
+        const SERVER_URL = "https://fmstar-ai-studio.onrender.com";
+        const API_URL = `${SERVER_URL}/v1/audio/generations`;
+
+        // 🔔 دالة "التنبيه" عشان تصحي السيرفر أول ما حد يفتح الموقع
+        function wakeUpServer() {
+            console.log("⏰ جاري إرسال إشارة صحوة للسيرفر...");
+            fetch(SERVER_URL, { mode: 'no-cors' })
+                .then(() => console.log("✅ تم إرسال إشارة الصحوة."))
+                .catch(() => console.log("⚠️ السيرفر يستيقظ..."));
+        }
+
+        // بنادي على الدالة دي أول ما الصفحة تفتح
+        window.addEventListener('load', wakeUpServer);
+
+        // 🚀 دالة التوليد
         async function generateAI() {
             const btn = document.getElementById('generateBtn');
             const promptInput = document.getElementById('promptInput');
@@ -256,31 +271,39 @@
             }
 
             const originalText = btn.innerHTML;
-            btn.innerHTML = "⏳ Connecting & Generating...";
+            btn.innerHTML = "⏳ Generating...";
             btn.disabled = true;
 
-            // 🎯 الرابط الخاص بك على Render (تم دمجه تلقائياً)
-            const RENDER_URL = "https://fmstar-ai-studio.onrender.com/v1/audio/generations";
-
-            try {
-                const response = await fetch(RENDER_URL, {
+            // 💡 دالة داخلية لإرسال الطلب (عشان نقدر نعيد المحاولة لو فشلت)
+            const sendRequest = async () => {
+                return await fetch(API_URL, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "X-FMStar-Key": "samurai_secret_2026"
                     },
-                    body: JSON.stringify({
-                        prompt: promptText,
-                        ratio: "16:9",
-                        dsp_profile: "hybrid"
-                    })
+                    body: JSON.stringify({ prompt: promptText, ratio: "16:9", dsp_profile: "hybrid" })
                 });
+            };
+
+            try {
+                let response;
+                try {
+                    // المحاولة الأولى
+                    response = await sendRequest();
+                    if (!response.ok) throw new Error("فشل الاتصال");
+                } catch (err) {
+                    // لو فشلت، نستنى 5 ثواني ونجرب تاني (عشان السيرفر يكون صحى)
+                    console.log("🔄 المحاولة الأولى فشلت (السيرفر كان نايم)، جاري إعادة المحاولة...");
+                    btn.innerHTML = "⏳ Waking Server & Retrying...";
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    response = await sendRequest();
+                }
 
                 if (!response.ok) throw new Error("السيرفر رفض الطلب.");
 
                 const data = await response.json();
-                
-                alert(`🎉 تم التوليد بنجاح!\n\nالنموذج: ${data.model_used}\nالنص المحسن: ${data.optimized_prompt}`);
+                alert(`🎉 تم التوليد بنجاح!\n\nالنموذج: ${data.model_used}\nالنص: ${data.optimized_prompt}`);
 
             } catch (error) {
                 console.error(error);
@@ -292,4 +315,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
