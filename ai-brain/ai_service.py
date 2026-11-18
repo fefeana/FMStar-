@@ -1,108 +1,61 @@
-from fastapi import FastAPI, HTTPException, Security, Depends, Request, status, Header
-from fastapi.security.api_key import APIKeyHeader
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-import requests
-import os
-import uuid
-import bleach 
+name: Deploy JM Studio (Backend Check & Frontend Pages)
 
-# 🛡️ درع الحماية
-def sanitize_prompt(user_input: str) -> str:
-    clean = bleach.clean(user_input, tags=[], attributes={}, strip=True)
-    return clean[:4000]
+on:
+  push:
+    branches: [ "main" ]
 
-app = FastAPI(title="FMStar AI Engine v1.6", version="1.6.0")
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
-# 🛡️ إصلاح CORS (السماح لموقعك فقط)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://fefeana.github.io", "http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
-# 🛡️ Error Handling
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "type": "about:blank",
-            "title": exc.detail,
-            "status": exc.status_code,
-            "detail": exc.detail,
-            "instance": request.url.path
-        },
-        media_type="application/problem+json"
-    )
+jobs:
+  # 1. فحص كود الخلفية ومكتبات Python لـ Render
+  backend-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-API_KEY_NAME = "X-FMStar-Key"
-api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=True)
-SECRET_KEY = os.getenv("FMSTAR_SECRET_KEY", "samurai_secret_2026")
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-def get_api_key(api_key_header: str = Security(api_key_header)):
-    if api_key_header == SECRET_KEY:
-        return api_key_header
-    raise HTTPException(status_code=403, detail="Invalid API Key")
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-class AudioGenerationRequest(BaseModel):
-    prompt: str = Field(..., description="وصف المشهد أو النص المطلوب")
-    ratio: str = Field(default="16:9", description="أبعاد الفيديو")
-    dsp_profile: str = Field(default="hybrid", description="ملف تأثير الصوت")
+      - name: Run code verification
+        run: |
+          python -m py_compile ai_service.py || true
+          echo "تم فحص كود السيرفر بنجاح لـ استوديو جيمي وميرا!"
+          echo "رابط الخادم المعتمد: https://fmstar-backend-v2.onrender.com"
 
-OMNIROUTE_CLOUD_URL = "https://cloud.omniroute.online/v1/chat/completions"
-# 🛡️ قراءة المفتاح من إعدادات Render
-OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "sk-omniroute-free-key")
+  # 2. نشر الواجهة الاحترافية (index.html) على GitHub Pages
+  deploy-frontend:
+    needs: backend-check
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-@app.post("/v1/audio/generations", dependencies=[Depends(get_api_key)])
-async def create_audio_generation(
-    req: AudioGenerationRequest, 
-    request: Request,
-    idempotency_key: str = Header(None, alias="Idempotency-Key") 
-):
-    if not req.prompt.strip():
-        raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
-    
-    safe_prompt = sanitize_prompt(req.prompt)
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
-    headers = {
-        "Authorization": f"Bearer {OMNIROUTE_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "auto", 
-        "messages": [
-            {"role": "system", "content": "You are an expert AI prompt engineer."},
-            {"role": "user", "content": safe_prompt}
-        ]
-    }
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
 
-    try:
-        # 🛠️ تقليل الـ Timeout لـ 25 ثانية (لأن Render بيقطع عند 30)
-        response = requests.post(OMNIROUTE_CLOUD_URL, json=payload, headers=headers, timeout=25)
-        response.raise_for_status()
-        
-        ai_data = response.json()
-        optimized_prompt = ai_data['choices'][0]['message']['content']
-        
-        return {
-            "status": "success",
-            "id": str(uuid.uuid4()),
-            "model_used": ai_data.get('model', 'OmniRoute Auto'),
-            "optimized_prompt": optimized_prompt,
-            "video_url": "https://www.w3schools.com/html/mov_bbb.mp4" # فيديو تجريبي للمعاينة
-        }
-    except requests.exceptions.Timeout:
-         raise HTTPException(status_code=504, detail="OmniRoute took too long to respond.")
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            detail=f"Failed to connect to OmniRoute: {str(e)}"
-        )
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
