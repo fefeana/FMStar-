@@ -55,7 +55,7 @@ def generate_shareable_creation(track_title: str, audio_url: str) -> dict:
         "social_links": social_links
     }
 
-PORT = 3000
+PORT = int(os.getenv("PORT", "3000"))
 REMOTE_MODEL_URL = os.getenv("REMOTE_MODEL_URL", "https://api.ltx.io/v1/generate")
 
 class ThreadingSimpleServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
@@ -75,6 +75,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
             origin == allowed_origin
             or origin.endswith(".run.app")
             or origin.endswith(".trycloudflare.com")
+            or origin.endswith(".onrender.com")
             or origin.startswith("http://localhost:")
             or origin.startswith("http://127.0.0.1:")
         ):
