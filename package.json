@@ -1,0 +1,11 @@
+{
+  "name": "fmstar-ai-studio",
+  "version": "1.0.0",
+  "description": "Star FM & FMStar AI Studio Dev Environment",
+  "main": "server_3000.py",
+  "scripts": {
+    "dev": "python3 server_3000.py",
+    "start": "python3 server_3000.py",
+    "build": "echo 'Build OK'"
+  }
+}

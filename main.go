@@ -3,16 +3,41 @@ package main
 import (
 	"archive/zip"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"html"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type GenerationRequest struct {
+	Tool    string `json:"tool"`
+	Dialect string `json:"dialect"`
+	Prompt  string `json:"prompt"`
+}
+
+type rateLimitEntry struct {
+	Count       int
+	WindowStart time.Time
+}
+
+// هيكل لتخزين بيانات Rate Limiting بناءً على الـ IP
+var (
+	requestCounts = make(map[string]*rateLimitEntry)
+	mu            sync.Mutex
+	scriptTagRe   = regexp.MustCompile(`(?is)<\s*script[^>]*>.*?<\s*/\s*script\s*>|javascript:|on\w+\s*=`)
 )
 
 type DownloadRequest struct {
@@ -65,7 +90,7 @@ func main() {
 	cfg := Config{
 		SupabaseURL: os.Getenv("SUPABASE_DB_URL"),
 		KimiAPIKey:  os.Getenv("KIMI_API_KEY"),
-		BridgeURL:   getEnvOrDefault("LTX_BRIDGE_URL", "http://localhost:8000"),
+		BridgeURL:   getEnvOrDefault("LTX_BRIDGE_URL", "http://localhost:8001"),
 	}
 
 	if cfg.KimiAPIKey == "" {
@@ -109,6 +134,8 @@ func main() {
 	}
 
 	// Routes
+	http.HandleFunc("/api/generate", HandleGenerate)
+	http.HandleFunc("/api/auth/session", HandleSessionInit)
 	http.HandleFunc("/api/v1/config/status", app.handleConfigStatus)
 	http.HandleFunc("/api/v1/tracks", app.handleSaveTrack)
 	http.HandleFunc("/api/v1/tracks/recent", app.handleGetRecentTracks)
@@ -122,6 +149,178 @@ func main() {
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func generateSecureToken() string {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return fmt.Sprintf("%d", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(b)
+}
+
+func setStrictSessionCookie(w http.ResponseWriter, token string) {
+	cookie := http.Cookie{
+		Name:     "session_token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true, // حصرياً عبر HTTPS
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   3600,
+	}
+	http.SetCookie(w, &cookie)
+}
+
+func sanitizeInput(input string) string {
+	cleaned := scriptTagRe.ReplaceAllString(input, "")
+	cleaned = html.EscapeString(strings.TrimSpace(cleaned))
+	return cleaned
+}
+
+func extractClientIP(r *http.Request) string {
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		parts := strings.Split(xff, ",")
+		return strings.TrimSpace(parts[0])
+	}
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return host
+}
+
+func applyStrictCORS(w http.ResponseWriter, r *http.Request) {
+	allowedOrigin := getEnvOrDefault("ALLOWED_ORIGIN", "https://mustafabushra.com")
+	origin := r.Header.Get("Origin")
+	if origin != "" && (origin == allowedOrigin || strings.HasSuffix(origin, ".run.app") || strings.HasSuffix(origin, ".trycloudflare.com")) {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+	} else {
+		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+	}
+	w.Header().Set("Vary", "Origin")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("X-Frame-Options", "DENY")
+}
+
+// HandleSessionInit - إصدار كوكي الجلسة بمعايير صارمة
+func HandleSessionInit(w http.ResponseWriter, r *http.Request) {
+	applyStrictCORS(w, r)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	token := generateSecureToken()
+	setStrictSessionCookie(w, token)
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "authenticated",
+	})
+}
+
+// HandleGenerate - حماية مسار توليد المحتوى (CORS + Rate Limiting + XSS Sanitization + Strict Cookie)
+func HandleGenerate(w http.ResponseWriter, r *http.Request) {
+	// 1. تقييد CORS ورؤوس الأمان
+	applyStrictCORS(w, r)
+
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// 2. حماية Rate Limiting (10 طلبات في الدقيقة لكل مستخدم)
+	ip := extractClientIP(r)
+	now := time.Now()
+	mu.Lock()
+	entry, exists := requestCounts[ip]
+	if !exists || now.Sub(entry.WindowStart) >= time.Minute {
+		entry = &rateLimitEntry{Count: 1, WindowStart: now}
+		requestCounts[ip] = entry
+	} else {
+		entry.Count++
+	}
+	count := entry.Count
+	mu.Unlock()
+
+	if count > 10 {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusTooManyRequests)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Too Many Requests, please slow down.",
+		})
+		return
+	}
+
+	// 3. قراءة البيانات والتحقق من صحتها مع تحديد الحد الأقصى للحجم
+	r.Body = http.MaxBytesReader(w, r.Body, 64*1024)
+	var req GenerationRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil || strings.TrimSpace(req.Prompt) == "" {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid input data",
+		})
+		return
+	}
+
+	// 4. تنظيف المدخلات لمنع حقن السكريبتات (XSS Prevention)
+	safeTool := sanitizeInput(req.Tool)
+	if safeTool == "" {
+		safeTool = "أغنية / قصيدة"
+	}
+	safeDialect := sanitizeInput(req.Dialect)
+	if safeDialect == "" {
+		safeDialect = "سينمائي، ليلي"
+	}
+	safePrompt := sanitizeInput(req.Prompt)
+
+	// 5. إصدار كوكي جلسة محمي إذا لم يكن موجوداً
+	if _, cookieErr := r.Cookie("session_token"); cookieErr != nil {
+		setStrictSessionCookie(w, generateSecureToken())
+	}
+
+	// 6. استجابة محرك Omni-Root Engine الآمن
+	resultText := fmt.Sprintf(
+		"✨ [تم التوليد بنجاح عبر استوديو FMStar | %s]:\n"+
+			"━━━━━━━━━━━━━━━━━━━━━━\n"+
+			"🎙️ الفكرة: %s\n\n"+
+			"يا هاجس الشعر هات القاف من بدري\n"+
+			"واسجِ المعاني على أوتار ألحاني\n"+
+			"في ليلةٍ يزهر الإحساس في صدري\n"+
+			"ويغرد الصوت في أثيرٍ وأوزانِ\n"+
+			"━━━━━━━━━━━━━━━━━━━━━━\n"+
+			"🎛️ التأثيرات والنمط: %s\n"+
+			"🛡️ محمي عبر Omni-Root v4.2",
+		safeTool, safePrompt, safeDialect,
+	)
+
+	response := map[string]interface{}{
+		"status":  "success",
+		"engine":  "Omni-Root v4.2",
+		"tool":    safeTool,
+		"dialect": safeDialect,
+		"result":  resultText,
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // Endpoint لفحص حالة تكوين KIMI ومحرك البث

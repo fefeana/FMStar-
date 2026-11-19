@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev": "python3 ../server_3000.py",
+    "start": "python3 ../server_3000.py",
     "build": "echo 'Frontend build completed successfully'"
   },
   "dependencies": {

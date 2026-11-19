@@ -6,7 +6,10 @@ export default function RealtimeStudioNotifier() {
 
   useEffect(() => {
     // الاتصال بمقبض الإشعارات المباشرة (WebSocket)
-    const ws = new WebSocket('ws://localhost:8000/ws/notifications');
+    const wsUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+      ? `wss://${window.location.host}/ws/notifications`
+      : 'ws://localhost:8001/ws/notifications';
+    const ws = new WebSocket(wsUrl);
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);

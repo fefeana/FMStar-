@@ -154,10 +154,11 @@
         <div class="generator-border relative z-20">
             <div class="glass-panel rounded-[27px] p-5">
                 
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#8B5CF6]/40 bg-[#8B5CF6]/10">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#8B5CF6] shadow-[0_0_8px_#8B5CF6]"></div>
-                        <span class="text-[11px] font-medium text-gray-300">توليد الأغنية • الشعر • الفيديو</span>
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-1.5" id="toolSelector">
+                        <button type="button" data-tool="أغنية" class="tool-chip chip active px-3 py-1 rounded-full text-[11px] font-medium">أغنية</button>
+                        <button type="button" data-tool="قصيدة" class="tool-chip chip px-3 py-1 rounded-full text-[11px] font-medium">قصيدة</button>
+                        <button type="button" data-tool="فيديو" class="tool-chip chip px-3 py-1 rounded-full text-[11px] font-medium">فيديو</button>
                     </div>
                     <span id="charCount" class="text-xs font-mono text-gray-400 px-3 py-1 rounded-full border border-white/5 bg-white/5">0 / 280</span>
                 </div>
@@ -187,7 +188,7 @@
                     </div>
                 </div>
 
-                <button id="generateBtn" onclick="generateAI()" class="w-full mt-4 py-3.5 rounded-full border border-[#8B5CF6]/60 bg-[#8B5CF6]/10 text-white font-bold text-sm flex justify-center items-center gap-2 hover:bg-[#8B5CF6]/20 transition-all shadow-[0_0_20px_rgba(139,92,246,0.15)] active:scale-[0.98]">
+                <button id="generateBtn" onclick="generateContent()" class="w-full mt-4 py-3.5 rounded-full border border-[#8B5CF6]/60 bg-[#8B5CF6]/10 text-white font-bold text-sm flex justify-center items-center gap-2 hover:bg-[#8B5CF6]/20 transition-all shadow-[0_0_20px_rgba(139,92,246,0.15)] active:scale-[0.98]">
                     <span id="btnText">توليد بالذكاء الاصطناعي ✨</span>
                 </button>
 
@@ -199,9 +200,9 @@
     </div>
 
     <script>
-        // Configuration: Use existing Gemini API or fallback
-        const API_KEY = "YOUR_GEMINI_API_KEY"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+        // Secure Backend Endpoint Configuration
+        const SECURE_GENERATE_API = "/api/generate";
+        let selectedTool = "أغنية";
 
         // Playlist State
         const playlist = [
@@ -238,11 +239,20 @@
             charCount.innerText = `${promptInput.value.length} / 280`;
         });
 
-        // Chips Selection
-        document.querySelectorAll('.chip').forEach(chip => {
+        // Tool Selector
+        document.querySelectorAll('.tool-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tool-chip').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedTool = btn.getAttribute('data-tool') || 'أغنية';
+            });
+        });
+
+        // Chips Selection (Effects / Dialect)
+        document.querySelectorAll('#effectsPanel .chip').forEach(chip => {
             chip.addEventListener('click', () => {
                 chip.classList.toggle('active');
-                const count = document.querySelectorAll('.chip.active').length;
+                const count = document.querySelectorAll('#effectsPanel .chip.active').length;
                 effectsSelectedCount.innerText = `مختار ${count}`;
             });
         });
@@ -316,87 +326,86 @@
         // Initialize state
         audioBarsContainer.classList.add('audio-bars-paused');
 
-        // --- Creative Fallback Generation Engine ---
-        function getCreativePoem(text, activeEffects) {
-            const safeText = text || "ليلة من صنعك";
-            return `🎙️ [Star FM | بث حي لـ: ${safeText}]
-━━━━━━━━━━━━━━━━━━━━━━
-الليل أرخى سدوله والنجوم شهود..
-على لحنٍ من صُنعك يروي الوجود..
-في هدوء السكون تعزف الألحان نغمة..
-تلامس أوتار الفؤاد وتزهر ببسمة..
+        // --- Secure Backend API Generation ---
+        async function generateContent() {
+            const promptText = promptInput.value.trim();
+            if (!promptText) {
+                alert('يرجى كتابة وصف لفكرتك أو مطلع القصيدة أولاً.');
+                return;
+            }
 
-بين وميض النيون وأثير الأماني..
-صوتك يسافر في فضاء المعاني..
-ليلةٌ من صُنعك أنت، لا تشبه ليلة..
-كل نغمة فيها حكاية.. وكل همسة أصيلة!
-━━━━━━━━━━━━━━━━━━━━━━
-✨ التأثيرات المطبقة: ${activeEffects}
-📻 استوديو Star FM • تم الإنتاج بنجاح`;
-        }
-
-        async function generateAI() {
-            const text = promptInput.value.trim();
-            if (!text) return alert("اكتب فكرتك أولاً!");
-            
-            const activeEffects = Array.from(document.querySelectorAll('.chip.active')).map(c => c.innerText).join(', ') || 'سينمائي, ليلي';
-            const finalPrompt = `أنت شاعر وملحن محترف في استوديو Star FM. اكتب كلمات أغنية أو قصيدة بناءً على: ${text}. التأثير: ${activeEffects}. لا تكتب مقدمات.`;
+            const selectedDialect = Array.from(document.querySelectorAll('#effectsPanel .chip.active'))
+                .map(c => c.innerText)
+                .join('، ') || 'سينمائي، ليلي';
 
             const btn = document.getElementById('generateBtn');
             const btnText = document.getElementById('btnText');
             const resultBox = document.getElementById('resultBox');
 
             btn.disabled = true;
-            btnText.innerHTML = 'جاري التوليد <div class="spinner"></div>';
+            btnText.innerHTML = 'جاري التوليد الآمن <div class="spinner"></div>';
             resultBox.classList.add('hidden');
-            window.speechSynthesis.cancel();
-
-            let aiText = "";
-
-            // Attempt direct Gemini API call if user set a key
-            if (API_KEY && API_KEY !== "YOUR_GEMINI_API_KEY") {
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
-                    });
-                    const data = await response.json();
-                    if (data.candidates && data.candidates[0].content.parts[0].text) {
-                        aiText = data.candidates[0].content.parts[0].text;
-                    }
-                } catch (e) {
-                    console.log("Direct API error, using creative engine...");
-                }
-            }
-
-            // If no key or direct API returned empty, use creative engine
-            if (!aiText) {
-                // Simulate intelligent processing delay
-                await new Promise(r => setTimeout(r, 650));
-                aiText = getCreativePoem(text, activeEffects);
-            }
-
-            resultBox.classList.remove('hidden');
-            resultBox.innerText = aiText;
-
-            // Recite with speech synthesis
             if ('speechSynthesis' in window) {
-                const cleanSpeechText = aiText.replace(/[━•✨📻🎙️\[\]]/g, '');
-                const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
-                utterance.lang = 'ar-SA';
-                utterance.rate = 0.95;
-                window.speechSynthesis.speak(utterance);
+                window.speechSynthesis.cancel();
             }
 
-            // Trigger music preview
-            if (!isMusicPlaying) {
-                togglePlayMusic();
-            }
+            try {
+                const response = await fetch(SECURE_GENERATE_API, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tool: selectedTool,
+                        dialect: selectedDialect,
+                        prompt: promptText
+                    })
+                });
 
-            btn.disabled = false;
-            btnText.innerText = 'توليد بالذكاء الاصطناعي ✨';
+                if (!response.ok) {
+                    let serverErr = 'حدث خطأ في الخادم أو تجاوزت الحد المسموح للطلبات.';
+                    try {
+                        const errPayload = await response.json();
+                        if (errPayload && errPayload.error) {
+                            serverErr = response.status === 429
+                                ? 'تجاوزت الحد المسموح للطلبات (10 طلبات في الدقيقة). يرجى الانتظار قليلاً.'
+                                : errPayload.error;
+                        }
+                    } catch (_) {}
+                    throw new Error(serverErr);
+                }
+
+                const data = await response.json();
+                const generatedResult = data.result || data.lyrics || '';
+
+                resultBox.classList.remove('hidden');
+                resultBox.innerText = generatedResult;
+
+                // Recite with speech synthesis
+                if ('speechSynthesis' in window && generatedResult) {
+                    const cleanSpeechText = generatedResult.replace(/[━•✨📻🎙️🎛️🛡️\[\]]/g, '');
+                    const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.95;
+                    window.speechSynthesis.speak(utterance);
+                }
+
+                // Trigger music preview
+                if (!isMusicPlaying) {
+                    togglePlayMusic();
+                }
+            } catch (error) {
+                resultBox.classList.remove('hidden');
+                resultBox.innerText = `⚠️ عذراً يا FMStar ✨، حصل خطأ أثناء الاتصال بالخادم الآمن: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = 'توليد بالذكاء الاصطناعي ✨';
+            }
         }
+
+        // Alias for backward compatibility
+        const generateAI = generateContent;
     </script>
 </body>
 </html>

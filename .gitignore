@@ -22,3 +22,7 @@ __pycache__/
 *.pyo
 *.py[cod]
 *$py.class
+build/
+app/build/
+.build-outputs/
+node_modules/
