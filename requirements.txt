@@ -1,4 +1,10 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
+pydantic-settings
+httpx
 requests
+bleach
+sqlalchemy
+aiosqlite
+python-dotenv
