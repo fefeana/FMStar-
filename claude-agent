@@ -3,14 +3,20 @@ services:
     name: fmstar-claude-agent
     runtime: python
     plan: free
-    rootDir: claude-agent-server
-    buildCommand: pip install -r requirements.txt
-    startCommand: python server_3000.py
     autoDeploy: true
+
+    buildCommand: |
+      pip install -r backend/requirements.txt
+
+    startCommand: |
+      cd backend && uvicorn fmstar_cloud:app --host 0.0.0.0 --port $PORT
+
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+
       - key: ENVIRONMENT
         value: production
-      - key: AGENT_MODE
-        value: claude
-      - key: PORT
-        value: 3000
+
+      - key: AGENT_NAME
+        value: Claude
