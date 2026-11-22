@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: claude-code-agent
+
+    env: python
+
+    plan: free
+
+    buildCommand: |
+      pip install -r requirements.txt
+
+    startCommand: |
+      python server_3000.py
+
+    autoDeploy: true
+
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+
+      - key: AGENT_MODE
+        value: claude
+
+      - key: SECRET_KEY
+        sync: false
+
+      - key: GITHUB_TOKEN
+        sync: false
+
+      - key: OMNIROUTE_API_KEY
+        sync: false
+
+      - key: OMNIROUTE_BASE_URL
+        sync: false
