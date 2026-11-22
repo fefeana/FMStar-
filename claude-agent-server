@@ -2,6 +2,7 @@ services:
   - type: web
     name: claude-agent-server
     runtime: python
+    plan: free
 
     buildCommand: |
       pip install -r backend/requirements.txt
