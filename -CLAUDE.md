@@ -1,27 +1,12 @@
-# FMStar AI Studio Agent Instructions
-
-IMPORTANT:
-
-Before making any code changes:
-
-1. Read the entire repository.
-2. Generate FMSTAR_AUDIT.md first.
-3. Do not modify or delete source files during Phase A.
-4. Do not create placeholder implementations unless explicitly marked as placeholders.
-5. Do not claim tests passed unless actually executed.
-6. Do not claim deployment succeeded unless actually deployed.
-7. Preserve all existing FMStar functionality.
-8. Create a new branch before major modifications.
-9. Stop after Phase A and report findings before continuing.
 المهمة الهندسية: تطوير FMStar AI Studio إلى نظام هجين متكامل
 
 أنت Claude Code، وتعمل كمهندس برمجيات خبير في الأنظمة السحابية، وواجهات API، وتكامل نماذج الذكاء الاصطناعي، وأمن التطبيقات، والنشر المجاني.
 
 أريد منك تطوير المستودع الحالي:
 
-GitHub: https:github.comfefeanaFMStar-
+GitHub: https://github.com/fefeana/FMStar-
 
-التطبيق المنشور: https:fefeana.github.ioFMStar-
+التطبيق المنشور: https://fefeana.github.io/FMStar-/
 
 1. الهدف الرئيسي
 
@@ -90,7 +75,7 @@ GitHub: https:github.comfefeanaFMStar-
 
 اعتمد البنية التالية، مع تعديلها حسب ما يكشفه فحص المستودع:
 
-FMStar Web Android App
+FMStar Web / Android App
           |
           v
       API Gateway
@@ -120,7 +105,7 @@ A. API Gateway
 
 أنشئ نقطة اتصال موحدة للتطبيق، مثل:
 
-"apiv1"
+"/api/v1/"
 
 تكون مسؤولة عن:
 
@@ -159,7 +144,7 @@ C. موصلات النماذج
 
 أنشئ واجهات موحدة للمزودين:
 
-- Chat Text.
+- Chat / Text.
 - Code Generation.
 - Image Generation.
 - Video Generation.
@@ -199,12 +184,12 @@ C. موصلات النماذج
 
 اقترح نقاط API مثل:
 
-POSTapiv1jobs
-GET apiv1jobs{job_id}
-POSTapiv1jobs{job_id}cancel
-GET apiv1health
-GET apiv1providers
-GET apiv1models
+POST /api/v1/jobs
+GET  /api/v1/jobs/{job_id}
+POST /api/v1/jobs/{job_id}/cancel
+GET  /api/v1/health
+GET  /api/v1/providers
+GET  /api/v1/models
 
 استخدم طابور مهام بسيطاً يتناسب مع موارد الخطة المجانية. لا تضف Redis أو قاعدة بيانات ثقيلة إلا إذا كانت هناك حاجة مثبتة وخيار استضافة مجاني مناسب.
 
@@ -232,7 +217,7 @@ GET apiv1models
 افحص  الان الخيارات المتاحة وقت التنفيذ، وقارن بينها من حيث:
 
 - هل تتطلب بطاقة بنكية؟
-- هل تسمح بتشغيل PythonFastAPI؟
+- هل تسمح بتشغيل Python/FastAPI؟
 - هل تدعم Docker إذا احتجنا إليه؟
 - هل تسمح بتشغيل OmniRoute نفسه؟
 - مقدار الذاكرة والمعالج.
@@ -304,7 +289,7 @@ GET apiv1models
 
 9. المرحلة الثامنة: التخزين والوسائط
 
-لا تعتمد على مجلد مؤقت مثل "tmp" لتخزين ملفات يجب أن تبقى بعد إعادة تشغيل الخادم.
+لا تعتمد على مجلد مؤقت مثل "/tmp" لتخزين ملفات يجب أن تبقى بعد إعادة تشغيل الخادم.
 
 صمم طبقة تخزين قابلة للتبديل:
 
@@ -466,22 +451,3 @@ PORT| منفذ الخادم| حسب منصة الاستضافة
 أريد مشروع FMStar حقيقياً قابلاً للتشغيل والتطوير، وليس مجرد نموذج واجهة أو ملفات إعداد شكلية.
 
 ابدأ الآن بالمرحلة A: افحص المستودع بالكامل، ثم أنشئ تقرير التدقيق قبل إجراء أي تعديل مدمر.
-## Repository Entry Points
-
-Primary Instructions:
-CLAUDE.md
-
-Preferred Backend:
-backend/fmstar_cloud.py
-
-Configuration:
-backend/server_config.py
-
-Deployment:
-render.yaml
-
-Frontend:
-Do not redesign existing UI.
-
-GitHub Pages:
-https://fefeana.github.io/FMStar-/
