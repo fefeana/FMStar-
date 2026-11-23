@@ -18,6 +18,6 @@ jobs:
       - name: Run Claude Code
         uses: anthropics/claude-code-action@v1
         env:
-          ANTHROPIC_BASE_URL: "ضع_هنا_رابط_خادم_OmniRoute_الخاص_بك"
+          ANTHROPIC_BASE_URL: "https://رابط-خادم-omniroute-الخاص-بك"
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
