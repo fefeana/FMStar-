@@ -491,5 +491,108 @@
   };
 })();
 </script>
+<script>
+(function() {
+  if (window.fmstarStudioEngine) return;
+
+  const CACHE_PREFIX = "fmstar_studio_cache_v1:";
+
+  function getCache(key) {
+    try {
+      const raw = localStorage.getItem(CACHE_PREFIX + key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (Date.now() - parsed.ts > 1000 * 60 * 30) {
+        localStorage.removeItem(CACHE_PREFIX + key);
+        return null;
+      }
+      return parsed.value;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function setCache(key, value) {
+    try {
+      localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ ts: Date.now(), value }));
+    } catch (_) {}
+  }
+
+  function recordTelemetry(eventType, detail) {
+    try {
+      const logKey = "fmstar_studio_telemetry";
+      const current = JSON.parse(localStorage.getItem(logKey) || "[]");
+      current.push({ at: new Date().toISOString(), eventType, detail });
+      localStorage.setItem(logKey, JSON.stringify(current.slice(-40)));
+    } catch (_) {}
+  }
+
+  async function fetchWithSelfHeal(url, payload, retries = 1, timeoutMs = 20000) {
+    let lastErr = null;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: controller ? controller.signal : undefined
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+        lastErr = new Error("HTTP " + res.status);
+        recordTelemetry("retry_http", { url, attempt, status: res.status });
+      } catch (err) {
+        lastErr = err;
+        recordTelemetry("retry_network", { url, attempt, error: String(err) });
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    }
+    throw lastErr || new Error("Request failed");
+  }
+
+  window.fmstarStudioEngine = {
+    async run(payload, options = {}) {
+      const endpoints = options.endpoints || ["/api/v1/audio/architect", "/api/fmstar/generate", "/api/generate"];
+      const cacheKey = JSON.stringify({ endpoints, payload });
+      const cached = getCache(cacheKey);
+      if (cached && !options.bypassCache) {
+        recordTelemetry("cache_hit", { endpoints: endpoints[0] });
+        return Object.assign({ _fromCache: true }, cached);
+      }
+
+      for (const ep of endpoints) {
+        try {
+          const baseUrl = typeof window.fmstarApiUrl === "function" ? window.fmstarApiUrl(ep) : ep;
+          const data = await fetchWithSelfHeal(baseUrl, payload, 1, options.timeoutMs || 20000);
+          setCache(cacheKey, data);
+          recordTelemetry("success", { endpoint: ep });
+          return data;
+        } catch (err) {
+          recordTelemetry("endpoint_fallback", { endpoint: ep, error: String(err) });
+        }
+      }
+
+      const fallbackResult = {
+        ok: false,
+        selfHealed: true,
+        preview: "تم تفعيل وضع الشفاء الذاتي مؤقتاً: تعذر الوصول إلى نقاط التوليد الحالية، يُرجى التحقق من اتصال السيرفر أو إعادة المحاولة."
+      };
+      recordTelemetry("all_endpoints_failed", {});
+      return fallbackResult;
+    },
+    getTelemetry() {
+      try {
+        return JSON.parse(localStorage.getItem("fmstar_studio_telemetry") || "[]");
+      } catch (_) {
+        return [];
+      }
+    }
+  };
+})();
+</script>
 </body>
 </html>
