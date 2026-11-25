@@ -1,5 +1,4 @@
 services:
-  # 1. خادم الباك-إند الأساسي
   - type: web
     name: fmstar-backend-v2
     runtime: python
@@ -12,13 +11,9 @@ services:
         value: 3.10
       - key: SECRET_KEY
         sync: false
-      - key: RENDER_EXTERNAL_URL
-        value: https://fmstar-backend-v2.onrender.com
-  # 2. مهمة الإيقاظ التلقائي (Keep-Alive)
-  - type: cron
-    name: fmstar-keep-awake
-    runtime: python
-    plan: free
-    schedule: "*/10 * * * *"
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -c "import urllib.request; urllib.request.urlopen('https://fmstar-backend-v2.onrender.com/')"
+      - key: FMSTAR_SECRET_KEY
+        sync: false
+      - key: OMNIROUTE_API_KEY
+        sync: false
+      - key: OMNIROUTE_BASE_URL
+        sync: false
