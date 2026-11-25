@@ -672,5 +672,43 @@
   window.fmstarWireStudioUI();
 })();
 </script>
+<script>
+(function() {
+  if (window.fmstarBindAllStudioButtons) return;
+
+  window.fmstarBindAllStudioButtons = function() {
+    const buttons = Array.from(document.querySelectorAll("button, [role='button']"));
+    buttons.forEach((btn) => {
+      if (btn.id === "fmstar-live-gen-btn" || btn.id === "fmstar-live-dl-btn") return;
+      if (btn.dataset.fmstarBound === "1") return;
+      const label = (btn.innerText || btn.textContent || "").trim();
+      const isGenerateBtn = /(توليد|إنشاء|generate|معاينة|preview|شعر|أغنية|audio|song|poem)/i.test(label);
+      if (!isGenerateBtn) return;
+
+      btn.dataset.fmstarBound = "1";
+      btn.addEventListener("click", async () => {
+        const inputEl = document.getElementById("fmstar-live-prompt");
+        const promptText = (inputEl && inputEl.value ? inputEl.value : "").trim() || label || "توليد إبداعي في FMStar AI Studio";
+        if (typeof window.fmstarGenerateAndPreview === "function") {
+          await window.fmstarGenerateAndPreview(
+            { prompt: promptText, action: label },
+            {
+              endpoints: ["/api/v1/studio/generate", "/api/v1/audio/architect", "/api/fmstar/generate", "/api/generate"],
+              previewSelector: "#fmstar-live-preview",
+              downloadSelector: "#fmstar-live-dl-btn"
+            }
+          );
+        }
+      });
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(window.fmstarBindAllStudioButtons, 300), { once: true });
+  } else {
+    setTimeout(window.fmstarBindAllStudioButtons, 300);
+  }
+})();
+</script>
 </body>
 </html>

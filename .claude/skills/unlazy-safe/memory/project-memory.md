@@ -39,3 +39,6 @@
 
 ## تحديث مسجل (2026-11-24)
 - **الحالة:** تم تفعيل القضية `#3` (`FMStar Remote Control`) في `fefeana/FMStar-` وربطها بـ `.github/workflows/fmstar-remote.yml` (المرجع: `e3eb3b4`)، واكتمل تشغيل `/fmstar` عبر GitHub Actions بنجاح (`conclusion: success`، رقم التشغيل `45532803950`).
+
+## تحديث ختامي (2026-11-24)
+- **الحالة:** تم توحيد نشر GitHub Pages عبر `.github/workflows/pages.yml` (مع إزالة `deploy.yml` المكرر)، وربط أزرار التوليد الإضافية في `index.html` بـ `fmstarGenerateAndPreview` عبر `fmstarBindAllStudioButtons`، والتحقق الحي عبر `scripts/check_omniroute_live.py` واختبارات الوحدة.
