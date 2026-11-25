@@ -581,5 +581,96 @@
   };
 })();
 </script>
+<script>
+(function() {
+  if (window.fmstarWireStudioUI) return;
+
+  function ensureStudioBar() {
+    if (document.getElementById("fmstar-live-studio-dock")) return;
+    const dock = document.createElement("section");
+    dock.id = "fmstar-live-studio-dock";
+    dock.setAttribute("aria-label", "معاينة وتوليد الاستوديو");
+    dock.style.cssText = [
+      "position:fixed",
+      "bottom:14px",
+      "left:14px",
+      "right:14px",
+      "z-index:9999",
+      "background:rgba(15,18,28,0.94)",
+      "color:#f8fafc",
+      "border:1px solid rgba(255,255,255,0.14)",
+      "border-radius:14px",
+      "padding:10px 12px",
+      "box-shadow:0 10px 30px rgba(0,0,0,0.35)",
+      "backdrop-filter:blur(8px)",
+      "font-family:inherit"
+    ].join(";");
+
+    dock.innerHTML = `
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <input id="fmstar-live-prompt" type="text" placeholder="اكتبي فكرة قصيدة أو أغنية أو مقطع للمعاينة السريعة..."
+          style="flex:1;min-width:190px;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:#090b12;color:#fff;font-size:13px;" />
+        <button id="fmstar-live-gen-btn" type="button"
+          style="padding:8px 14px;border-radius:10px;border:none;background:#6366f1;color:#fff;font-weight:700;cursor:pointer;font-size:13px;">
+          توليد ومعاينة
+        </button>
+        <button id="fmstar-live-dl-btn" type="button" disabled data-ready="0"
+          style="padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:#1e293b;color:#cbd5e1;cursor:pointer;font-size:13px;">
+          تنزيل النتيجة
+        </button>
+      </div>
+      <pre id="fmstar-live-preview"
+        style="margin:8px 0 0;max-height:130px;overflow:auto;white-space:pre-wrap;background:#07090f;padding:8px 10px;border-radius:10px;font-size:12px;color:#e2e8f0;">جاهز للمعاينة داخل الاستوديو قبل التنزيل.</pre>
+    `;
+
+    document.body.appendChild(dock);
+
+    const inputEl = document.getElementById("fmstar-live-prompt");
+    const genBtn = document.getElementById("fmstar-live-gen-btn");
+    const dlBtn = document.getElementById("fmstar-live-dl-btn");
+
+    if (genBtn) {
+      genBtn.addEventListener("click", async () => {
+        const promptVal = (inputEl && inputEl.value ? inputEl.value : "").trim() || "مقطع شعري قصير عن الإبداع والضوء";
+        if (typeof window.fmstarGenerateAndPreview === "function") {
+          await window.fmstarGenerateAndPreview(
+            { prompt: promptVal },
+            {
+              endpoints: ["/api/v1/studio/generate", "/api/v1/audio/architect", "/api/fmstar/generate", "/api/generate"],
+              previewSelector: "#fmstar-live-preview",
+              downloadSelector: "#fmstar-live-dl-btn"
+            }
+          );
+        }
+      });
+    }
+
+    if (dlBtn) {
+      dlBtn.addEventListener("click", () => {
+        if (dlBtn.dataset.ready !== "1" || !dlBtn.dataset.previewText) return;
+        const blob = new Blob([dlBtn.dataset.previewText], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "fmstar-studio-preview.txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+  }
+
+  window.fmstarWireStudioUI = function() {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", ensureStudioBar, { once: true });
+    } else {
+      ensureStudioBar();
+    }
+  };
+
+  window.fmstarWireStudioUI();
+})();
+</script>
 </body>
 </html>

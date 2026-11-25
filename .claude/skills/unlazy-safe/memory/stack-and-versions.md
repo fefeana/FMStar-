@@ -9,3 +9,4 @@
 | :--- | :--- | :--- | :--- |
 | Node.js | LTS | 2026-11-24 | تفضيل `execFileSync` مع `shell: false` عند تنفيذ الأوامر |
 | ai_service | 1.7 (commit: `8741bbe`) | 2026-11-24 | تحديث إلى الإصدار 1.7 مع ملفات ذاكرة مهارة unlazy-safe |
+| studio_gateway_and_engine | v1.7+ (dd16e59) | 2026-11-24 | بوابة /api/v1/ وCORS واختبارات 5/5 ومعاينة قبل التنزيل |

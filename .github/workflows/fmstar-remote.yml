@@ -6,14 +6,19 @@ on:
 
 jobs:
   dispatch-to-server:
-    if: github.event.issue.number == 5 && startsWith(github.event.comment.body, '/fmstar')
+    if: startsWith(github.event.comment.body, '/fmstar')
     runs-on: ubuntu-latest
     steps:
       - name: Forward command to FMStar server
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
-          PAYLOAD=$(jq -nc --arg repo "fefeana/FMStar-" --argjson issue 5 --arg command "$COMMENT_BODY" '{repo:$repo,issue:$issue,command:$command}')
-          curl -fsS -X POST "https://fmstar-backend-v2.onrender.com/api/fmstar/command" \
+          PAYLOAD=$(jq -nc \
+            --arg prompt "$COMMENT_BODY" \
+            --arg repo "fefeana/FMStar-" \
+            --argjson issue "$ISSUE_NUMBER" \
+            '{prompt:$prompt,repo:$repo,issue:$issue}')
+          curl -sS -m 20 -X POST "https://fmstar-backend-v2.onrender.com/api/v1/studio/generate" \
             -H "Content-Type: application/json" \
-            -d "$PAYLOAD"
+            -d "$PAYLOAD" || true
