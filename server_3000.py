@@ -86,6 +86,125 @@ def generate_shareable_creation(track_title: str, audio_url: str) -> dict:
 PORT = int(os.getenv("PORT", "3000"))
 REMOTE_MODEL_URL = os.getenv("REMOTE_MODEL_URL", "https://api.ltx.io/v1/generate")
 
+# --- FMSTAR API V1 GATEWAY ---
+FMSTAR_TASKS = {}
+_FMSTAR_TASKS_LOCK = threading.Lock()
+_MAX_STORED_TASKS = 200
+
+def _store_task(task_id: str, task_data: dict):
+    with _FMSTAR_TASKS_LOCK:
+        FMSTAR_TASKS[task_id] = task_data
+        while len(FMSTAR_TASKS) > _MAX_STORED_TASKS:
+            oldest_key = next(iter(FMSTAR_TASKS))
+            FMSTAR_TASKS.pop(oldest_key, None)
+
+def _omniroute_chat(prompt_text, system_text="You are FMStar AI Studio creative assistant."):
+    base_url = (os.getenv("OMNIROUTE_BASE_URL") or os.getenv("OMNIROUTE_CLOUD_URL") or "").strip().rstrip("/")
+    omni_key = (os.getenv("OMNIROUTE_API_KEY") or "").strip()
+    gemini_key = (os.getenv("GEMINI_API_KEY") or "").strip()
+    model_name = (os.getenv("OMNIROUTE_MODEL") or "gemini-2.5-flash").strip()
+
+    if base_url and omni_key:
+        endpoint = base_url if "/chat/completions" in base_url else f"{base_url}/v1/chat/completions"
+        payload = json.dumps({
+            "model": model_name,
+            "messages": [
+                {"role": "system", "content": system_text},
+                {"role": "user", "content": prompt_text}
+            ]
+        }).encode("utf-8")
+        req = urllib.request.Request(
+            endpoint,
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {omni_key}"
+            },
+            method="POST"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=25) as resp:
+                raw = json.loads(resp.read().decode("utf-8", errors="ignore"))
+                choices = raw.get("choices") or []
+                if choices and isinstance(choices[0], dict):
+                    msg = choices[0].get("message") or {}
+                    text = msg.get("content") or raw.get("output") or ""
+                    if text:
+                        return {"ok": True, "provider": "omniroute", "model": raw.get("model", model_name), "preview": text}
+        except Exception as exc:
+            return {"ok": False, "provider": "omniroute", "error": f"OmniRoute request failed: {exc}"}
+
+    if gemini_key:
+        gemini_endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={urllib.parse.quote(gemini_key)}"
+        g_payload = json.dumps({
+            "contents": [{"parts": [{"text": f"{system_text}\n\n{prompt_text}"}]}]
+        }).encode("utf-8")
+        g_req = urllib.request.Request(
+            gemini_endpoint,
+            data=g_payload,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        try:
+            with urllib.request.urlopen(g_req, timeout=25) as g_resp:
+                g_raw = json.loads(g_resp.read().decode("utf-8", errors="ignore"))
+                candidates = g_raw.get("candidates") or []
+                if candidates:
+                    parts = (candidates[0].get("content") or {}).get("parts") or []
+                    if parts and parts[0].get("text"):
+                        return {"ok": True, "provider": "gemini-direct", "model": "gemini-2.5-flash", "preview": parts[0]["text"].strip()}
+        except Exception as exc:
+            return {"ok": False, "provider": "gemini-direct", "error": f"Gemini request failed: {exc}"}
+
+    return {
+        "ok": True,
+        "provider": "studio-local",
+        "preview": f"مسودة استوديو FMStar جاهزة للمعاينة:\n{prompt_text}",
+        "note": "اضبط OMNIROUTE_BASE_URL و OMNIROUTE_API_KEY (أو GEMINI_API_KEY) في بيئة السيرفر لتفعيل التوليد الخارجي المباشر."
+    }
+
+def handle_fmstar_v1_post(handler, parsed_path, body_data):
+    if parsed_path == "/api/v1/studio/generate":
+        raw_prompt = body_data.get("prompt") or body_data.get("text") or body_data.get("topic") or ""
+        prompt = sanitize_text_input(str(raw_prompt))[:4000]
+        if not prompt:
+            return 400, {"ok": False, "error": "prompt is required"}
+        task_id = str(uuid.uuid4())[:8]
+        task_entry = {
+            "id": task_id,
+            "status": "running",
+            "created_at": time.time(),
+            "prompt": prompt
+        }
+        _store_task(task_id, task_entry)
+        result = _omniroute_chat(prompt)
+        with _FMSTAR_TASKS_LOCK:
+            task_entry["status"] = "completed" if result.get("ok") else "failed"
+            task_entry["result"] = result
+        return 200, {
+            "ok": result.get("ok", True),
+            "task_id": task_id,
+            "status": task_entry["status"],
+            "provider": result.get("provider"),
+            "preview": result.get("preview", ""),
+            "note": result.get("note", ""),
+            "error": result.get("error", "")
+        }
+
+    if parsed_path == "/api/v1/tasks":
+        task_id = str(body_data.get("task_id") or "").strip()
+        with _FMSTAR_TASKS_LOCK:
+            if task_id:
+                task = FMSTAR_TASKS.get(task_id)
+                if not task:
+                    return 404, {"ok": False, "error": "task not found"}
+                return 200, {"ok": True, "task": task}
+            recent = list(FMSTAR_TASKS.values())[-20:]
+        return 200, {"ok": True, "count": len(recent), "tasks": recent}
+
+    return None
+# --- END FMSTAR API V1 GATEWAY ---
+
 class ThreadingSimpleServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
     allow_reuse_address = True
@@ -142,6 +261,66 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
             pass
 
     def do_POST(self):
+        parsed_post_path = urllib.parse.urlparse(self.path).path
+        if parsed_post_path in ("/api/v1/studio/generate", "/api/v1/tasks"):
+            try:
+                if not check_rate_limit(self._get_client_ip(), limit=20, window_seconds=60):
+                    raw_bytes = json.dumps({"ok": False, "error": "Too Many Requests, please slow down."}, ensure_ascii=False).encode("utf-8")
+                    self.send_response(429)
+                    self.send_header("Access-Control-Allow-Origin", resolve_cors_origin(self.headers.get("Origin")))
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(raw_bytes)))
+                    self.end_headers()
+                    self.wfile.write(raw_bytes)
+                    return
+
+                content_length = int(self.headers.get("Content-Length", 0))
+                if content_length < 0 or content_length > 65536:
+                    raw_bytes = json.dumps({"ok": False, "error": "Payload too large"}, ensure_ascii=False).encode("utf-8")
+                    self.send_response(400)
+                    self.send_header("Access-Control-Allow-Origin", resolve_cors_origin(self.headers.get("Origin")))
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(raw_bytes)))
+                    self.end_headers()
+                    self.wfile.write(raw_bytes)
+                    return
+
+                raw_body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+                try:
+                    body_data = json.loads(raw_body.decode("utf-8")) if raw_body.strip() else {}
+                    if not isinstance(body_data, dict):
+                        body_data = {}
+                except Exception:
+                    raw_bytes = json.dumps({"ok": False, "error": "Invalid JSON body"}, ensure_ascii=False).encode("utf-8")
+                    self.send_response(400)
+                    self.send_header("Access-Control-Allow-Origin", resolve_cors_origin(self.headers.get("Origin")))
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(raw_bytes)))
+                    self.end_headers()
+                    self.wfile.write(raw_bytes)
+                    return
+
+                _v1_res = handle_fmstar_v1_post(self, parsed_post_path, body_data)
+                if _v1_res is not None:
+                    _code, _payload = _v1_res
+                    _raw_bytes = json.dumps(_payload, ensure_ascii=False).encode("utf-8")
+                    self.send_response(_code)
+                    self.send_header("Access-Control-Allow-Origin", resolve_cors_origin(self.headers.get("Origin")))
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(_raw_bytes)))
+                    self.end_headers()
+                    self.wfile.write(_raw_bytes)
+                    return
+            except Exception as exc:
+                _err_bytes = json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False).encode("utf-8")
+                self.send_response(500)
+                self.send_header("Access-Control-Allow-Origin", resolve_cors_origin(self.headers.get("Origin")))
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(_err_bytes)))
+                self.end_headers()
+                self.wfile.write(_err_bytes)
+                return
+
         if self.path.startswith('/internal/'):
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
@@ -715,13 +894,42 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps(filtered, ensure_ascii=False).encode('utf-8'))
                 return
 
-            # Health check endpoint
-            if path_only == '/health':
+            # Health check endpoints
+            if path_only in ('/health', '/api/v1/health'):
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
-                self.wfile.write(json.dumps({"status": "ok", "service": "ltx_bridge", "engine": "LTX-2.5"}).encode('utf-8'))
+                self.wfile.write(json.dumps({
+                    "status": "ok",
+                    "service": "fmstar-backend-v2",
+                    "engine": "FMStar Hybrid Gateway",
+                    "omniroute_configured": bool((os.getenv("OMNIROUTE_BASE_URL") or os.getenv("OMNIROUTE_CLOUD_URL") or "").strip() and (os.getenv("OMNIROUTE_API_KEY") or "").strip()),
+                    "gemini_configured": bool((os.getenv("GEMINI_API_KEY") or "").strip())
+                }).encode('utf-8'))
+                return
+
+            if path_only == '/api/v1/tasks':
+                task_id = query_params.get("task_id", [""])[0].strip()
+                with _FMSTAR_TASKS_LOCK:
+                    if task_id:
+                        task = FMSTAR_TASKS.get(task_id)
+                        if not task:
+                            self.send_response(404)
+                            self.send_header('Content-Type', 'application/json; charset=utf-8')
+                            self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
+                            self.end_headers()
+                            self.wfile.write(json.dumps({"ok": False, "error": "task not found"}).encode('utf-8'))
+                            return
+                        payload = {"ok": True, "task": task}
+                    else:
+                        recent = list(FMSTAR_TASKS.values())[-20:]
+                        payload = {"ok": True, "count": len(recent), "tasks": recent}
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
+                self.end_headers()
+                self.wfile.write(json.dumps(payload, ensure_ascii=False).encode('utf-8'))
                 return
 
             if path_only.startswith('/internal/') or path_only == '/api/ai_service/status':
