@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<script>
+(function() {
+  const saved = (window.localStorage && localStorage.getItem("FMSTAR_API_BASE_URL")) || "";
+  const isLocalOrSameHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  window.FMSTAR_API_BASE_URL = window.FMSTAR_API_BASE_URL || saved || (isLocalOrSameHost ? "" : "https://fmstar-backend-v2.onrender.com");
+  window.fmstarApiUrl = function(endpointPath) {
+    const cleanPath = endpointPath.startsWith("/") ? endpointPath : "/" + endpointPath;
+    return (window.FMSTAR_API_BASE_URL || "").replace(/\/+$/, "") + cleanPath;
+  };
+})();
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Star FM | AI Studio</title>
@@ -201,7 +212,7 @@
 
     <script>
         // Secure Backend Endpoint Configuration
-        const SECURE_GENERATE_API = "/api/generate";
+        const SECURE_GENERATE_API = window.fmstarApiUrl("/api/generate");
         let selectedTool = "أغنية";
 
         // Playlist State
