@@ -420,79 +420,6 @@
     </script>
 <script>
 (function() {
-  if (window.fmstarGenerateAndPreview) return;
-
-  function isSafeMediaUrl(url) {
-    return typeof url === "string" && (/^https?:\/\//i.test(url) || url.startsWith("/") || url.startsWith("blob:"));
-  }
-
-  window.fmstarGenerateAndPreview = async function(payload, options = {}) {
-    const endpoint = options.endpoint || "/api/v1/audio/architect";
-    const fallbackEndpoint = options.fallbackEndpoint || "/api/fmstar/generate";
-    const previewEl = document.getElementById(options.previewId || "fmstar-studio-preview");
-    const downloadBtn = document.getElementById(options.downloadBtnId || "fmstar-download-btn");
-
-    if (downloadBtn) {
-      downloadBtn.disabled = true;
-      downloadBtn.dataset.ready = "false";
-    }
-    if (previewEl) {
-      previewEl.textContent = "⏳ جاري التوليد عبر OmniRoute وتجهيز المعاينة...";
-    }
-
-    const body = Object.assign({ source: "fmstar-studio", preview_first: true }, payload || {});
-    let res = await fetch(window.fmstarApiUrl(endpoint), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-
-    if (!res.ok && fallbackEndpoint) {
-      res = await fetch(window.fmstarApiUrl(fallbackEndpoint), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-    }
-
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      if (previewEl) {
-        previewEl.textContent = "❌ تعذر التوليد: " + (data.error || data.message || res.status);
-      }
-      return data;
-    }
-
-    const previewText = data.preview || data.poem || data.result || data.structured_script || data.text || data.output || JSON.stringify(data, null, 2);
-    if (previewEl) {
-      previewEl.textContent = "";
-      const textNode = document.createElement("div");
-      textNode.textContent = String(previewText);
-      previewEl.appendChild(textNode);
-
-      const mediaUrl = data.audio_url || data.url;
-      if (isSafeMediaUrl(mediaUrl)) {
-        const audioEl = document.createElement("audio");
-        audioEl.controls = true;
-        audioEl.src = mediaUrl;
-        audioEl.style.marginTop = "8px";
-        audioEl.style.width = "100%";
-        previewEl.appendChild(audioEl);
-      }
-    }
-
-    if (downloadBtn) {
-      downloadBtn.disabled = false;
-      downloadBtn.dataset.ready = "true";
-      downloadBtn.dataset.payload = JSON.stringify(data);
-    }
-
-    return data;
-  };
-})();
-</script>
-<script>
-(function() {
   if (window.fmstarStudioEngine) return;
 
   const CACHE_PREFIX = "fmstar_studio_cache_v1:";
@@ -556,7 +483,7 @@
 
   window.fmstarStudioEngine = {
     async run(payload, options = {}) {
-      const endpoints = options.endpoints || ["/api/v1/audio/architect", "/api/fmstar/generate", "/api/generate"];
+      const endpoints = options.endpoints || ["/api/v1/studio/generate", "/api/generate"];
       const cacheKey = JSON.stringify({ endpoints, payload });
       const cached = getCache(cacheKey);
       if (cached && !options.bypassCache) {
@@ -591,6 +518,66 @@
         return [];
       }
     }
+  };
+})();
+</script>
+<script>
+(function() {
+  function isSafeMediaUrl(url) {
+    return typeof url === "string" && (/^https?:\/\//i.test(url) || url.startsWith("/") || url.startsWith("blob:"));
+  }
+
+  window.fmstarGenerateAndPreview = async function(payload = {}, options = {}) {
+    const previewEl = options.previewSelector
+      ? document.querySelector(options.previewSelector)
+      : document.getElementById(options.previewId || "fmstar-studio-preview");
+    const downloadEl = options.downloadSelector
+      ? document.querySelector(options.downloadSelector)
+      : document.getElementById(options.downloadBtnId || "fmstar-download-btn");
+
+    if (downloadEl) {
+      downloadEl.setAttribute("disabled", "disabled");
+      downloadEl.disabled = true;
+      downloadEl.dataset.ready = "0";
+    }
+    if (previewEl) {
+      previewEl.textContent = "⏳ جاري التوليد وتجهيز المعاينة داخل الاستوديو...";
+    }
+
+    const body = Object.assign({ source: "fmstar-studio", preview_first: true }, payload || {});
+    const engine = window.fmstarStudioEngine;
+    const result = engine
+      ? await engine.run(body, options)
+      : { ok: false, selfHealed: true, preview: "محرك الاستوديو غير مهيأ بعد." };
+
+    const previewText = result.preview || result.poem || result.result || result.structured_script || result.text || result.output || JSON.stringify(result, null, 2);
+    if (previewEl) {
+      previewEl.textContent = "";
+      const textNode = document.createElement("div");
+      textNode.textContent = String(previewText);
+      previewEl.appendChild(textNode);
+
+      const mediaUrl = result.audio_url || result.url;
+      if (isSafeMediaUrl(mediaUrl)) {
+        const audioEl = document.createElement("audio");
+        audioEl.controls = true;
+        audioEl.src = mediaUrl;
+        audioEl.style.marginTop = "8px";
+        audioEl.style.width = "100%";
+        previewEl.appendChild(audioEl);
+      }
+    }
+
+    const hasPreview = Boolean(previewText && !result.selfHealed && result.ok !== false);
+    if (downloadEl && hasPreview) {
+      downloadEl.removeAttribute("disabled");
+      downloadEl.disabled = false;
+      downloadEl.dataset.ready = "1";
+      downloadEl.dataset.previewText = String(previewText);
+      downloadEl.dataset.payload = JSON.stringify(result);
+    }
+
+    return result;
   };
 })();
 </script>
