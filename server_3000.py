@@ -14,6 +14,34 @@ import html
 import re
 import secrets
 
+# --- FMSTAR CORS HELPER ---
+ALLOWED_ORIGINS = {
+    "https://fefeana.github.io",
+    "https://fmstar-backend-v2.onrender.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+}
+
+def resolve_cors_origin(request_origin):
+    extra_origin = os.getenv("ALLOWED_ORIGIN", "").strip().rstrip("/")
+    if not request_origin:
+        return extra_origin or "https://fefeana.github.io"
+    cleaned = request_origin.strip().rstrip("/")
+    if (
+        cleaned in ALLOWED_ORIGINS
+        or (extra_origin and cleaned == extra_origin)
+        or cleaned.endswith(".run.app")
+        or cleaned.endswith(".trycloudflare.com")
+        or cleaned.endswith(".onrender.com")
+        or cleaned.startswith("http://localhost:")
+        or cleaned.startswith("http://127.0.0.1:")
+    ):
+        return cleaned
+    return extra_origin or "https://fefeana.github.io"
+# --- END FMSTAR CORS HELPER ---
+
 _RATE_LIMIT_STORE = {}
 _RATE_LIMIT_LOCK = threading.Lock()
 _SCRIPT_RE = re.compile(r'(?is)<\s*script[^>]*>.*?<\s*/\s*script\s*>|javascript:|on\w+\s*=')
@@ -69,22 +97,11 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
 
     def _apply_strict_security_headers(self):
         self._custom_cors_applied = True
-        allowed_origin = os.getenv("ALLOWED_ORIGIN", "https://mustafabushra.com")
-        origin = self.headers.get("Origin", "")
-        if origin and (
-            origin == allowed_origin
-            or origin.endswith(".run.app")
-            or origin.endswith(".trycloudflare.com")
-            or origin.endswith(".onrender.com")
-            or origin.startswith("http://localhost:")
-            or origin.startswith("http://127.0.0.1:")
-        ):
-            self.send_header("Access-Control-Allow-Origin", origin)
-        else:
-            self.send_header("Access-Control-Allow-Origin", allowed_origin)
+        resolved_origin = resolve_cors_origin(self.headers.get("Origin", ""))
+        self.send_header("Access-Control-Allow-Origin", resolved_origin)
         self.send_header("Vary", "Origin")
-        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
         self.send_header("Access-Control-Allow-Credentials", "true")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("X-Frame-Options", "DENY")
@@ -96,20 +113,30 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
         return self.client_address[0] if self.client_address else "unknown"
 
     def end_headers(self):
-        if not getattr(self, "_custom_cors_applied", False):
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        has_conn = any(b'connection:' in h.lower() for h in getattr(self, '_headers_buffer', []))
+        headers_buf = getattr(self, '_headers_buffer', [])
+        has_acao = any(b'access-control-allow-origin:' in h.lower() for h in headers_buf)
+        if not getattr(self, "_custom_cors_applied", False) and not has_acao:
+            self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
+            self.send_header('Vary', 'Origin')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+        has_conn = any(b'connection:' in h.lower() for h in headers_buf)
         if not has_conn:
             self.send_header('Connection', 'close')
         super().end_headers()
 
     def do_OPTIONS(self):
         try:
-            self.send_response(200)
+            self.send_response(204)
             if self.path == '/api/generate':
                 self._apply_strict_security_headers()
+            else:
+                self._custom_cors_applied = True
+                self.send_header("Access-Control-Allow-Origin", resolve_cors_origin(self.headers.get("Origin")))
+                self.send_header("Vary", "Origin")
+                self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+                self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+            self.send_header("Access-Control-Max-Age", "86400")
             self.end_headers()
         except Exception:
             pass
@@ -132,19 +159,19 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                     resp_data = resp.read()
                     self.send_response(resp.status)
                     self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                     self.end_headers()
                     self.wfile.write(resp_data)
             except urllib.error.HTTPError as he:
                 self.send_response(he.code)
                 self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(he.read())
             except Exception as e:
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
             return
@@ -177,13 +204,13 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 }
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
             except Exception as e:
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
             return
@@ -247,7 +274,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Content-Type', 'text/event-stream; charset=utf-8')
                 self.send_header('Cache-Control', 'no-cache')
                 self.send_header('Connection', 'keep-alive')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
 
                 from ether_streaming_service import omni_route_intent, generate_stream_engine
@@ -442,7 +469,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
 
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(json.dumps(eval_result, ensure_ascii=False).encode('utf-8'))
             except Exception as e:
@@ -558,7 +585,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/pdf')
                 self.send_header('Content-Disposition', 'attachment; filename="creation_metadata.pdf"')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(pdf_bytes)
             except Exception as e:
@@ -598,7 +625,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/zip')
                 self.send_header('Content-Disposition', 'attachment; filename="Gemini_Mira_Creations.zip"')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(zip_bytes)
             except Exception as e:
@@ -683,7 +710,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
 
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(json.dumps(filtered, ensure_ascii=False).encode('utf-8'))
                 return
@@ -692,7 +719,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
             if path_only == '/health':
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "ok", "service": "ltx_bridge", "engine": "LTX-2.5"}).encode('utf-8'))
                 return
@@ -709,7 +736,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                         resp_data = resp.read()
                         self.send_response(resp.status)
                         self.send_header('Content-Type', 'application/json; charset=utf-8')
-                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                         self.end_headers()
                         self.wfile.write(resp_data)
                         return
@@ -724,7 +751,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 bridge_url = os.getenv("LTX_BRIDGE_URL", "http://localhost:8001")
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
                 self.wfile.write(json.dumps({
                     "kimi_configured": bool(kimi_key),
@@ -746,7 +773,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Connection', 'keep-alive')
                 self.send_header('X-Accel-Buffering', 'no')
                 self.send_header('X-Content-Type-Options', 'nosniff')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Origin', resolve_cors_origin(self.headers.get('Origin')))
                 self.end_headers()
 
                 # 1. إرسال حدث البدء اللحظي
