@@ -36,3 +36,6 @@
 ## تحديث مسجل (2026-11-24)
 - **الحالة:** اكتملت بوابة `/api/v1/studio/generate` و`/api/v1/tasks` وضبط CORS لـ `https://fefeana.github.io`، وتوثيق النشر المجاني ومتغيرات البيئة (`DEPLOYMENT_NO_CARD.md`, `ENVIRONMENT_VARIABLES.md`)، واختبارات `tests/test_fmstar_studio.py` (5/5 ناجحة)، وربط `fmstarGenerateAndPreview` بـ `fmstarStudioEngine` (المرجع: `dd16e59`).
 - **الواجهة والربط البعيد:** تم ربط أزرار التوليد والمعاينة والتنزيل في `index.html` عبر `fmstarWireStudioUI`، وتحديث `.github/workflows/fmstar-remote.yml` لـ `fefeana/FMStar-` (بتمرير آمن عبر `env` و`jq`)، وإضافة أداة الفحص الحي `scripts/check_omniroute_live.py`.
+
+## تحديث مسجل (2026-11-24)
+- **الحالة:** تم تفعيل القضية `#3` (`FMStar Remote Control`) في `fefeana/FMStar-` وربطها بـ `.github/workflows/fmstar-remote.yml` (المرجع: `e3eb3b4`)، واكتمل تشغيل `/fmstar` عبر GitHub Actions بنجاح (`conclusion: success`، رقم التشغيل `45532803950`).
