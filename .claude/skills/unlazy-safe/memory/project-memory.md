@@ -42,3 +42,6 @@
 
 ## تحديث ختامي (2026-11-24)
 - **الحالة:** تم توحيد نشر GitHub Pages عبر `.github/workflows/pages.yml` (مع إزالة `deploy.yml` المكرر)، وربط أزرار التوليد الإضافية في `index.html` بـ `fmstarGenerateAndPreview` عبر `fmstarBindAllStudioButtons`، والتحقق الحي عبر `scripts/check_omniroute_live.py` واختبارات الوحدة.
+
+## تحديث مسجل (2026-11-24)
+- **الحالة:** تمت إضافة إعدادات خدمة `MCP` وربط النسر / `AI Superstars` صراحة في `render.yaml` (`MCP_ENABLED`, `MCP_EAGLE_SUPERSTARS`, `MCP_SERVER_URL`) مع الحفاظ على `sync: false` للقيم الحساسة.
