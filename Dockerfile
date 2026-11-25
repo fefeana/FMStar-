@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 8080
+ENV PORT=3000
+EXPOSE 3000
 
-CMD ["sh", "-c", "uvicorn ai_service:app --host 0.0.0.0 --port ${PORT:-8080}"]
+CMD ["python", "server_3000.py"]
