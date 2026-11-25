@@ -20,9 +20,11 @@ app.add_middleware(
 
 API_KEY_NAME = "X-FMStar-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=True)
-SECRET_KEY = os.getenv("SECRET_KEY", "samurai_secret_2026")
+SECRET_KEY = os.getenv("SECRET_KEY", "")
 
 def get_api_key(api_key_header: str = Security(api_key_header)):
+    if not SECRET_KEY:
+        raise HTTPException(status_code=500, detail="Missing environment key: SECRET_KEY")
     if api_key_header == SECRET_KEY:
         return api_key_header
     raise HTTPException(status_code=403, detail="Invalid Key: Unauthorized Access")

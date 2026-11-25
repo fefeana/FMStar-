@@ -18,7 +18,7 @@ PORT = int(os.getenv("PORT", 8000))
 API_PREFIX = "/api/v1"
 
 # Security
-SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
+SECRET_KEY = os.getenv("SECRET_KEY", "")
 
 # CORS
 ALLOWED_ORIGINS = [

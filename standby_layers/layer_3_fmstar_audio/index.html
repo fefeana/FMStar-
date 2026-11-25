@@ -1510,8 +1510,7 @@
               response = await fetch('/internal/generate', {
                 method: 'POST',
                 headers: {
-                  'Content-Type': 'application/json',
-                  'X-FMStar-Key': 'samurai_secret_2026'
+                  'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ prompt, ratio, dsp_profile: profile })
               });

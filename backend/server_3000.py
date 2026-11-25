@@ -124,7 +124,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                     data=post_data,
                     headers={
                         "Content-Type": self.headers.get("Content-Type", "application/json"),
-                        "X-FMStar-Key": self.headers.get("X-FMStar-Key", "samurai_secret_2026")
+                        "X-FMStar-Key": self.headers.get("X-FMStar-Key", os.getenv("FMSTAR_SECRET_KEY", ""))
                     },
                     method="POST"
                 )
@@ -702,7 +702,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                     target_path = "/" if path_only == "/api/ai_service/status" else path_only
                     req = urllib.request.Request(
                         f"http://127.0.0.1:8001{target_path}",
-                        headers={"X-FMStar-Key": self.headers.get("X-FMStar-Key", "samurai_secret_2026")},
+                        headers={"X-FMStar-Key": self.headers.get("X-FMStar-Key", os.getenv("FMSTAR_SECRET_KEY", ""))},
                         method="GET"
                     )
                     with urllib.request.urlopen(req, timeout=5) as resp:
