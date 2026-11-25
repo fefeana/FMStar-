@@ -1,4 +1,5 @@
 # gemini_mira_backend.py - FastAPI Service for Gemini & Mira Studio
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
