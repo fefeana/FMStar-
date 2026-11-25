@@ -418,5 +418,78 @@
         // Alias for backward compatibility
         const generateAI = generateContent;
     </script>
+<script>
+(function() {
+  if (window.fmstarGenerateAndPreview) return;
+
+  function isSafeMediaUrl(url) {
+    return typeof url === "string" && (/^https?:\/\//i.test(url) || url.startsWith("/") || url.startsWith("blob:"));
+  }
+
+  window.fmstarGenerateAndPreview = async function(payload, options = {}) {
+    const endpoint = options.endpoint || "/api/v1/audio/architect";
+    const fallbackEndpoint = options.fallbackEndpoint || "/api/fmstar/generate";
+    const previewEl = document.getElementById(options.previewId || "fmstar-studio-preview");
+    const downloadBtn = document.getElementById(options.downloadBtnId || "fmstar-download-btn");
+
+    if (downloadBtn) {
+      downloadBtn.disabled = true;
+      downloadBtn.dataset.ready = "false";
+    }
+    if (previewEl) {
+      previewEl.textContent = "⏳ جاري التوليد عبر OmniRoute وتجهيز المعاينة...";
+    }
+
+    const body = Object.assign({ source: "fmstar-studio", preview_first: true }, payload || {});
+    let res = await fetch(window.fmstarApiUrl(endpoint), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok && fallbackEndpoint) {
+      res = await fetch(window.fmstarApiUrl(fallbackEndpoint), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+    }
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (previewEl) {
+        previewEl.textContent = "❌ تعذر التوليد: " + (data.error || data.message || res.status);
+      }
+      return data;
+    }
+
+    const previewText = data.preview || data.poem || data.result || data.structured_script || data.text || data.output || JSON.stringify(data, null, 2);
+    if (previewEl) {
+      previewEl.textContent = "";
+      const textNode = document.createElement("div");
+      textNode.textContent = String(previewText);
+      previewEl.appendChild(textNode);
+
+      const mediaUrl = data.audio_url || data.url;
+      if (isSafeMediaUrl(mediaUrl)) {
+        const audioEl = document.createElement("audio");
+        audioEl.controls = true;
+        audioEl.src = mediaUrl;
+        audioEl.style.marginTop = "8px";
+        audioEl.style.width = "100%";
+        previewEl.appendChild(audioEl);
+      }
+    }
+
+    if (downloadBtn) {
+      downloadBtn.disabled = false;
+      downloadBtn.dataset.ready = "true";
+      downloadBtn.dataset.payload = JSON.stringify(data);
+    }
+
+    return data;
+  };
+})();
+</script>
 </body>
 </html>
