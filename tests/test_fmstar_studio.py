@@ -141,6 +141,93 @@ class FMStarStudioTests(unittest.TestCase):
         self.assertIn("fmstarGenerateAndPreview", html)
         self.assertIn("/api/v1/studio/generate", html)
 
+    def test_omniroute_v1_base_url_does_not_double_v1(self):
+        import http.server
+        import threading
+
+        seen_paths = []
+
+        class MockOmniRoute(http.server.BaseHTTPRequestHandler):
+            def log_message(self, format, *args):
+                pass
+
+            def do_POST(self):
+                seen_paths.append(self.path)
+                length = int(self.headers.get("Content-Length", 0))
+                self.rfile.read(length)
+                if self.path == "/v1/chat/completions":
+                    body = json.dumps({
+                        "model": "mock-omni",
+                        "choices": [{"message": {"content": "معاينة حية من OmniRoute"}}]
+                    }).encode("utf-8")
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+
+        mock_srv = http.server.HTTPServer(("127.0.0.1", 0), MockOmniRoute)
+        mock_port = mock_srv.server_address[1]
+        mock_thread = threading.Thread(target=mock_srv.serve_forever, daemon=True)
+        mock_thread.start()
+
+        env = os.environ.copy()
+        test_port = _get_free_port()
+        env["PORT"] = str(test_port)
+        env["OMNIROUTE_BASE_URL"] = f"http://127.0.0.1:{mock_port}/v1"
+        env["OMNIROUTE_API_KEY"] = "test-omni-key"
+        proc = subprocess.Popen(
+            [sys.executable, "server_3000.py"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
+        )
+        try:
+            deadline = time.time() + 6.0
+            ready = False
+            while time.time() < deadline:
+                try:
+                    c = http.client.HTTPConnection("127.0.0.1", test_port, timeout=1)
+                    c.request("GET", "/api/v1/health")
+                    r = c.getresponse()
+                    r.read()
+                    c.close()
+                    if r.status == 200:
+                        ready = True
+                        break
+                except Exception:
+                    time.sleep(0.1)
+            self.assertTrue(ready)
+
+            conn = http.client.HTTPConnection("127.0.0.1", test_port, timeout=5)
+            conn.request(
+                "POST",
+                "/api/v1/studio/generate",
+                body=json.dumps({"prompt": "اختبار"}),
+                headers={"Content-Type": "application/json"},
+            )
+            resp = conn.getresponse()
+            data = json.loads(resp.read().decode("utf-8"))
+            conn.close()
+            self.assertEqual(resp.status, 200)
+            self.assertTrue(data.get("ok"))
+            self.assertEqual(data.get("provider"), "omniroute")
+            self.assertEqual(data.get("preview"), "معاينة حية من OmniRoute")
+            self.assertEqual(seen_paths, ["/v1/chat/completions"])
+        finally:
+            if proc.poll() is None:
+                proc.terminate()
+                proc.wait(timeout=5)
+            if proc.stdout:
+                proc.stdout.close()
+            if proc.stderr:
+                proc.stderr.close()
+            mock_srv.shutdown()
+            mock_srv.server_close()
+
 
 if __name__ == "__main__":
     unittest.main()

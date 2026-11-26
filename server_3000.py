@@ -99,14 +99,35 @@ def _store_task(task_id: str, task_data: dict):
             oldest_key = next(iter(FMSTAR_TASKS))
             FMSTAR_TASKS.pop(oldest_key, None)
 
+def _build_omniroute_candidates(base_url: str):
+    cleaned = (base_url or "").strip().rstrip("/")
+    if not cleaned:
+        return []
+    if cleaned.endswith("/chat/completions") or "/chat/completions" in cleaned or cleaned.endswith("/responses"):
+        return [cleaned]
+    candidates = []
+    if cleaned.endswith("/v1") or cleaned.endswith("/api/v1"):
+        candidates.append(f"{cleaned}/chat/completions")
+        root_part = cleaned.rsplit("/v1", 1)[0]
+        if root_part:
+            candidates.append(f"{root_part}/v1/chat/completions")
+    else:
+        candidates.append(f"{cleaned}/v1/chat/completions")
+        candidates.append(f"{cleaned}/chat/completions")
+    seen = []
+    for c in candidates:
+        if c not in seen:
+            seen.append(c)
+    return seen
+
 def _omniroute_chat(prompt_text, system_text="You are FMStar AI Studio creative assistant."):
     base_url = (os.getenv("OMNIROUTE_BASE_URL") or os.getenv("OMNIROUTE_CLOUD_URL") or "").strip().rstrip("/")
     omni_key = (os.getenv("OMNIROUTE_API_KEY") or "").strip()
     gemini_key = (os.getenv("GEMINI_API_KEY") or "").strip()
     model_name = (os.getenv("OMNIROUTE_MODEL") or "gemini-2.5-flash").strip()
 
+    omniroute_error = ""
     if base_url and omni_key:
-        endpoint = base_url if "/chat/completions" in base_url else f"{base_url}/v1/chat/completions"
         payload = json.dumps({
             "model": model_name,
             "messages": [
@@ -114,26 +135,46 @@ def _omniroute_chat(prompt_text, system_text="You are FMStar AI Studio creative 
                 {"role": "user", "content": prompt_text}
             ]
         }).encode("utf-8")
-        req = urllib.request.Request(
-            endpoint,
-            data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {omni_key}"
-            },
-            method="POST"
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=25) as resp:
-                raw = json.loads(resp.read().decode("utf-8", errors="ignore"))
-                choices = raw.get("choices") or []
-                if choices and isinstance(choices[0], dict):
-                    msg = choices[0].get("message") or {}
-                    text = msg.get("content") or raw.get("output") or ""
+        candidates = _build_omniroute_candidates(base_url)
+        for idx, endpoint in enumerate(candidates):
+            req = urllib.request.Request(
+                endpoint,
+                data=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "User-Agent": "FMStar-Studio/2.0",
+                    "Authorization": f"Bearer {omni_key}"
+                },
+                method="POST"
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=25) as resp:
+                    raw = json.loads(resp.read().decode("utf-8", errors="ignore"))
+                    choices = raw.get("choices") or []
+                    text = ""
+                    if choices and isinstance(choices[0], dict):
+                        msg = choices[0].get("message") or {}
+                        text = msg.get("content") or choices[0].get("text") or ""
+                    if not text:
+                        text = raw.get("output") or raw.get("optimized_prompt") or raw.get("text") or ""
                     if text:
                         return {"ok": True, "provider": "omniroute", "model": raw.get("model", model_name), "preview": text}
-        except Exception as exc:
-            return {"ok": False, "provider": "omniroute", "error": f"OmniRoute request failed: {exc}"}
+                    omniroute_error = "OmniRoute returned empty response content"
+                    break
+            except urllib.error.HTTPError as he:
+                parsed_ep = urllib.parse.urlparse(endpoint)
+                safe_ep = f"{parsed_ep.scheme}://{parsed_ep.netloc}{parsed_ep.path}"
+                omniroute_error = f"OmniRoute request failed at {safe_ep}: HTTP Error {he.code}: {he.reason}"
+                if he.code == 404 and idx < len(candidates) - 1:
+                    continue
+                break
+            except Exception as exc:
+                omniroute_error = f"OmniRoute request failed: {exc}"
+                break
+
+        if not gemini_key:
+            return {"ok": False, "provider": "omniroute", "error": omniroute_error}
 
     if gemini_key:
         gemini_endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={urllib.parse.quote(gemini_key)}"
