@@ -17,6 +17,7 @@ import secrets
 # --- FMSTAR CORS HELPER ---
 ALLOWED_ORIGINS = {
     "https://fefeana.github.io",
+    "https://fmstar-ai-studio.onrender.com",
     "https://fmstar-backend-v2.onrender.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000",

@@ -5,7 +5,7 @@ import urllib.request
 
 
 def main():
-    server_url = os.environ.get("FMSTAR_LIVE_URL", "https://fmstar-backend-v2.onrender.com").rstrip("/")
+    server_url = os.environ.get("FMSTAR_LIVE_URL", "https://fmstar-ai-studio.onrender.com").rstrip("/")
     payload = json.dumps({"prompt": "فحص اتصال حي مع استوديو FMStar و OmniRoute"}).encode("utf-8")
     req = urllib.request.Request(
         f"{server_url}/api/v1/studio/generate",

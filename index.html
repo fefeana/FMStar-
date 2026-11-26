@@ -5,7 +5,7 @@
 (function() {
   const saved = (window.localStorage && localStorage.getItem("FMSTAR_API_BASE_URL")) || "";
   const isLocalOrSameHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-  window.FMSTAR_API_BASE_URL = window.FMSTAR_API_BASE_URL || saved || (isLocalOrSameHost ? "" : "https://fmstar-backend-v2.onrender.com");
+  window.FMSTAR_API_BASE_URL = window.FMSTAR_API_BASE_URL || saved || (isLocalOrSameHost ? "" : "https://fmstar-ai-studio.onrender.com");
   window.fmstarApiUrl = function(endpointPath) {
     const cleanPath = endpointPath.startsWith("/") ? endpointPath : "/" + endpointPath;
     return (window.FMSTAR_API_BASE_URL || "").replace(/\/+$/, "") + cleanPath;
@@ -482,9 +482,18 @@
   }
 
   window.fmstarStudioEngine = {
+    _referenceImage: null,
+    setReferenceImage(dataUrl) {
+      this._referenceImage = dataUrl || null;
+      recordTelemetry("reference_image_set", { hasImage: Boolean(this._referenceImage) });
+    },
     async run(payload, options = {}) {
       const endpoints = options.endpoints || ["/api/v1/studio/generate", "/api/generate"];
-      const cacheKey = JSON.stringify({ endpoints, payload });
+      const reqPayload = Object.assign({}, payload || {});
+      if (!reqPayload.reference_image && (this._referenceImage || window.fmstarReferenceImageData)) {
+        reqPayload.reference_image = this._referenceImage || window.fmstarReferenceImageData;
+      }
+      const cacheKey = JSON.stringify({ endpoints, payload: reqPayload });
       const cached = getCache(cacheKey);
       if (cached && !options.bypassCache) {
         recordTelemetry("cache_hit", { endpoints: endpoints[0] });
@@ -494,7 +503,7 @@
       for (const ep of endpoints) {
         try {
           const baseUrl = typeof window.fmstarApiUrl === "function" ? window.fmstarApiUrl(ep) : ep;
-          const data = await fetchWithSelfHeal(baseUrl, payload, 1, options.timeoutMs || 20000);
+          const data = await fetchWithSelfHeal(baseUrl, reqPayload, 1, options.timeoutMs || 20000);
           setCache(cacheKey, data);
           recordTelemetry("success", { endpoint: ep });
           return data;
@@ -618,6 +627,11 @@
           style="padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:#1e293b;color:#cbd5e1;cursor:pointer;font-size:13px;">
           تنزيل النتيجة
         </button>
+        <label for="fmstar-ref-image-input" id="fmstar-ref-image-label"
+          style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid rgba(192,132,252,0.45);background:rgba(59,7,100,0.45);color:#f3e8ff;font-size:12px;">
+          <span>إضافة صورة مرجعية</span>
+        </label>
+        <input id="fmstar-ref-image-input" type="file" accept="image/*" style="display:none;" />
       </div>
       <pre id="fmstar-live-preview"
         style="margin:8px 0 0;max-height:130px;overflow:auto;white-space:pre-wrap;background:#07090f;padding:8px 10px;border-radius:10px;font-size:12px;color:#e2e8f0;">جاهز للمعاينة داخل الاستوديو قبل التنزيل.</pre>
@@ -628,6 +642,31 @@
     const inputEl = document.getElementById("fmstar-live-prompt");
     const genBtn = document.getElementById("fmstar-live-gen-btn");
     const dlBtn = document.getElementById("fmstar-live-dl-btn");
+    const refInput = document.getElementById("fmstar-ref-image-input");
+    const refLabel = document.getElementById("fmstar-ref-image-label");
+
+    window.fmstarReferenceImageData = window.fmstarReferenceImageData || null;
+    window.fmstarHandleRefImage = function(input) {
+      const file = input && input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        window.fmstarReferenceImageData = e.target.result;
+        if (window.fmstarStudioEngine && typeof window.fmstarStudioEngine.setReferenceImage === "function") {
+          window.fmstarStudioEngine.setReferenceImage(window.fmstarReferenceImageData);
+        }
+        if (refLabel) {
+          refLabel.textContent = "✅ صورة مرجعية: " + file.name;
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+
+    if (refInput) {
+      refInput.addEventListener("change", function() {
+        window.fmstarHandleRefImage(refInput);
+      });
+    }
 
     if (genBtn) {
       genBtn.addEventListener("click", async () => {

@@ -45,3 +45,6 @@
 
 ## تحديث مسجل (2026-11-24)
 - **الحالة:** تمت إضافة إعدادات خدمة `MCP` وربط النسر / `AI Superstars` صراحة في `render.yaml` (`MCP_ENABLED`, `MCP_EAGLE_SUPERSTARS`, `MCP_SERVER_URL`) مع الحفاظ على `sync: false` للقيم الحساسة.
+
+## تحديث مسجل (2026-11-26)
+- **الحالة:** اعتماد الرابط `https://fmstar-ai-studio.onrender.com` في `index.html` و`scripts/check_omniroute_live.py` و`.github/workflows/fmstar-remote.yml` و`ALLOWED_ORIGINS`، ومزامنة `backend/server_3000.py` مع `server_3000.py` الجذري لتفعيل `/api/v1/studio/generate`، وإضافة زر الصورة المرجعية (`#fmstar-ref-image-input`) في `index.html`.

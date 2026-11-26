@@ -18,6 +18,6 @@ jobs:
             --arg repo "fefeana/FMStar-" \
             --argjson issue 3 \
             '{prompt:$prompt,repo:$repo,issue:$issue}')
-          curl -sS -m 20 -X POST "https://fmstar-backend-v2.onrender.com/api/v1/studio/generate" \
+          curl -sS -m 20 -X POST "https://fmstar-ai-studio.onrender.com/api/v1/studio/generate" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" || true
