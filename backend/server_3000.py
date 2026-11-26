@@ -206,6 +206,13 @@ def handle_fmstar_v1_post(handler, parsed_path, body_data):
     return None
 # --- END FMSTAR API V1 GATEWAY ---
 
+def get_mcp_config():
+    return {
+        "mcp_enabled": os.getenv("MCP_ENABLED", "true").strip().lower() == "true",
+        "mcp_eagle_superstars": os.getenv("MCP_EAGLE_SUPERSTARS", "true").strip().lower() == "true",
+        "mcp_server_url": (os.getenv("MCP_SERVER_URL") or "").strip(),
+    }
+
 class ThreadingSimpleServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
     allow_reuse_address = True
@@ -903,6 +910,7 @@ class FMStarHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({
                     "status": "ok",
+                    "mcp": get_mcp_config(),
                     "service": "fmstar-backend-v2",
                     "engine": "FMStar Hybrid Gateway",
                     "omniroute_configured": bool((os.getenv("OMNIROUTE_BASE_URL") or os.getenv("OMNIROUTE_CLOUD_URL") or "").strip() and (os.getenv("OMNIROUTE_API_KEY") or "").strip()),
