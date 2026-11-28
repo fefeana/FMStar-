@@ -5,24 +5,29 @@ AGENT_SERVER_URL = os.environ.get("AGENT_SERVER_URL", "http://localhost:8000").r
 AGENT_API_KEY = os.environ.get("AGENT_API_KEY", "")
 TARGET_DIR = os.environ.get("FMSTAR_TARGET", "/workspace/FMStar-")
 
-AUDIT_PROMPT = """
-أنت Claude Code وتعمل على تطوير مشروع FMStar AI Studio إلى نظام هجين متكامل.
-المستودع: https://github.com/fefeana/FMStar-
-الواجهة المنشورة: https://fefeana.github.io/FMStar-/
+TASK_PROMPT = """
+أنت Claude Code وتعمل على تطوير مشروع FMStar AI Studio في المستودع https://github.com/fefeana/FMStar-
+اقرأ أولاً ملف FMSTAR_AUDIT.md الموجود في جذر المستودع، والتزم بجميع نتائجه.
 
-قواعد إلزامية:
-1. لا تغيّر الهوية البصرية لـ FMStar أو تحذف أي ميزة أو صفحة أو زر أو مسار موجود.
-2. لا تضع أو تطبع أي مفاتيح API أو أسرار في الكود أو السجلات أو الواجهة الأمامية أو ملفات الاختبار.
-3. لا تدّعِ نجاح أي اختبار أو نشر أو اتصال دون دليل فعلي.
+قواعد إلزامية لا تهاون فيها:
+1. لا تغيّر الهوية البصرية لـ index.html أو تحذف أي ميزة أو صفحة أو زر.
+2. لا تضع أي مفاتيح حقيقية أو أسرار افتراضية في الكود أو المستودع أو الاختبارات.
+3. المفاتيح الحقيقية الشغالة حالياً في بيئة الخادم هي مفتاح Gemini (GEMINI_API_KEY) ومفتاح Samurai فقط عبر متغيرات البيئة؛ بينما تبقى طبقة OmniRoute قابلة للتفعيل عند ضبط OMNIROUTE_BASE_URL و OMNIROUTE_API_KEY دون إسقاط النظام.
 
-واقع المفاتيح والمزوّدات:
-- المفاتيح الحقيقية الشغالة حالياً في البيئة هي مفتاح Gemini ومفتاح Samurai فقط (تحقق من أسماء المتغيرات في الكود والبيئة دون طباعة أي قيمة).
-- أي مفاتيح أخرى ليست مفعّلة حالياً؛ أبقِ موصل OmniRoute وبقية الموصلات جاهزة وتُظهر حالتها بوضوح دون تعطيل النظام.
+نفّذ الآن المرحلتين B و C فقط بالترتيب:
 
-نفّذ المرحلة A فقط:
-- افحص جميع ملفات ومجلدات المشروع (الواجهة، server_3000.py، app.py، render.yaml، Docker، إن وجدت).
-- أنشئ تقرير "FMSTAR_AUDIT.md" باللغة العربية مع إبقاء أسماء الملفات والأوامر والمتغيرات بالإنجليزية.
-- حدّد التعارضات (مثل تعدد نقاط التشغيل، مسار 127.0.0.1:8001، تخزين المهام في الذاكرة، وقيم CORS/REMOTE_MODEL_URL).
+[المرحلة B — المخطط المعماري]
+- أنشئ ملف FMSTAR_ARCHITECTURE.md باللغة العربية يوثق المعمارية الهجينة الموحدة (/api/v1/ + التوافق مع /api/generate لـ index.html)، وفصل موصلات OmniRoute و Gemini و Media Adapters، ونظام المهام والتخزين الآمن، وخطة التعديلات خطوة بخطوة.
+
+[المرحلة C — إصلاح الأسرار وتوحيد التشغيل]
+1. أزل تماماً الأسرار الافتراضية المكشوفة ("samurai_secret_2026" و "sk-omniroute-free-key" و "change-me") من جميع ملفات HTML و Python واجعلها تُقرأ حصراً من متغيرات البيئة (بدون قيم افتراضية سرية).
+2. حدّث .gitignore ليشمل .env و debug.keystore وأي ملفات مؤقتة، وحدّث .env.example بقيم وهمية آمنة فقط.
+3. وحّد نقطة الدخول بين Dockerfile و Procfile و render.yaml لتعمل جميعها على خادم واحد مستقر يقرأ PORT، وأزل الـ Cron من render.yaml لمطابقة الخطة المجانية دون بطاقة.
+4. أصلح أخطاء التشغيل الفورية (نقص import os في media-engine/main.py و backend/gemini_mira_backend.py، والكتابة في /public داخل backend/song_engine.py، وثغرة Path Traversal في main.go).
+5. قّيد إعدادات CORS بالنطاقات المطلوبة (https://fefeana.github.io و localhost) وأصلح نشر GitHub Pages حتى لا ينشر ملفات الخادم أو debug.keystore علناً.
+6. أنشئ ملفي SECURITY_AUDIT.md (مع التنبيه الصريح بضرورة تدوير الأسرار التي ظهرت في تاريخ Git) و ENVIRONMENT_VARIABLES.md بجدول كامل لجميع متغيرات البيئة.
+
+بعد الانتهاء، قدّم تقريراً بالملفات التي أُنشئت أو عُدّلت، ونتيجة التحقق من عدم وجود أي سر مكشوف في الملفات.
 """
 
 headers = {"Content-Type": "application/json"}
@@ -31,9 +36,9 @@ if AGENT_API_KEY:
 
 resp = requests.post(
     f"{AGENT_SERVER_URL}/agent/task",
-    json={"prompt": AUDIT_PROMPT, "target": TARGET_DIR},
+    json={"prompt": TASK_PROMPT, "target": TARGET_DIR},
     headers=headers,
-    timeout=120,
+    timeout=300,
 )
 
 print("Status:", resp.status_code)
